@@ -1,0 +1,5 @@
+.vscode
+lib/tsconfig.json
+lib/*.ts
+typings
+tests
