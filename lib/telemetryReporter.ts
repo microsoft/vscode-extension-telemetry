@@ -11,8 +11,8 @@ import * as winreg from 'winreg';
 
 export class TelemetryReporter
 {
-	private appInsightsClient: typeof ApplicationInsights.client;
-	private commonProperties: {[key:string] : string};
+     private appInsightsClient: typeof ApplicationInsights.client;
+     private commonProperties: {[key:string] : string};
     
     private static SQM_KEY: string = '\\SOFTWARE\\Microsoft\\SQMClient';
     private static REGISTRY_USERID_VALUE: string = 'UserId';
