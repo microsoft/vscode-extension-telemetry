@@ -11,8 +11,8 @@ import * as winreg from 'winreg';
 
 export class TelemetryReporter
 {
-    private appInsightsClient: typeof ApplicationInsights.client;
-    private commonProperties: {[key:string] : string};
+	private appInsightsClient: typeof appInsights.client;
+	private commonProperties: {[key:string] : string};
     
     private static SQM_KEY: string = '\\SOFTWARE\\Microsoft\\SQMClient';
     private static REGISTRY_USERID_VALUE: string = 'UserId';
@@ -20,7 +20,7 @@ export class TelemetryReporter
 
 	constructor(private extensionId: string, private extensionVersion: string, key: string) {
 
-		this.appInsightsClient = ApplicationInsights.setup(key)
+		this.appInsightsClient = appInsights.setup(key)
 		    .setAutoCollectRequests(false)
 		    .setAutoCollectPerformance(false)
 		    .setAutoCollectExceptions(false)
