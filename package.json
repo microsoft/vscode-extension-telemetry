@@ -14,7 +14,7 @@
     "winreg": "0.0.13"
   },
   "peerDependencies": {
-    "vscode": "^0.11.0"   
+    "vscode": "^0.10.7"   
   },
   "devDependencies": {
     "gulp": "^3.9.0",
