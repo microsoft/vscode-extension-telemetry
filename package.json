@@ -5,7 +5,6 @@
   "author": "Sofian Hnaide",
   "main": "./lib/telemetryReporter",
   "license": "MIT",
-  "private": true,
   "engines": {
 	"vscode": "^0.10.7"
   },
