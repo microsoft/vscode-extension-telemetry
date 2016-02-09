@@ -36,6 +36,8 @@ export class TelemetryReporter
 			this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
 		}
         
+        this.loadCommonProperties();
+        
         if (vscode && vscode.env) {
             this.loadVSCodeCommonProperties(vscode.env.machineId, vscode.env.sessionId)
         }
