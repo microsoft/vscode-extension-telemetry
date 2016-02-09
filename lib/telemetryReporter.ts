@@ -52,7 +52,7 @@ export class TelemetryReporter
 	}
 
 	private loadVSCodeCommonProperties(machineId: string, sessionId: string): void {
-		this.commonProperties = Object.create(null);
+		this.commonProperties = this.commonProperties || Object.create(null);
 		this.commonProperties['vscodemachineid'] = machineId;
 		this.commonProperties['vscodesessionid'] = sessionId;
 	}
