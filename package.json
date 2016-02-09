@@ -6,10 +6,6 @@
   "main": "./lib/telemetryReporter",
   "license": "MIT",
   "private": true,
-  "scripts": {
-    "test": "mocha ./tests/test.js",
-    "postinstall": "node ./node_modules/vscode/bin/install"
-  },
   "engines": {
 	"vscode": "^0.10.7"
   },
