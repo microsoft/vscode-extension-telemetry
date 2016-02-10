@@ -1,5 +1,5 @@
 {
-  "name": "vscode-extenion-telemetry",
+  "name": "vscode-extension-telemetry",
   "description": "a module for first party microsoft extensions to report consistent telemetry",
   "version": "0.0.2",
   "author": "Sofian Hnaide",
