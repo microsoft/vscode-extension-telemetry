@@ -1,29 +1,36 @@
 {
-  "name": "vscode-extension-telemetry",
-  "description": "a module for first party microsoft extensions to report consistent telemetry",
-  "version": "0.0.2",
-  "author": "Sofian Hnaide",
-  "main": "./lib/telemetryReporter",
-  "license": "MIT",
-  "engines": {
-	"vscode": "^0.10.7"
-  },
-  "scripts": {
-    "prepublish": "gulp"
-  },
-  "dependencies": {
-    "applicationinsights": "0.15.6",
-    "winreg": "0.0.13"
-  },
-  "peerDependencies": {
-    "vscode": "0.11.1"
-  },
-  "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-tsb": "^1.4.4",
-    "mocha": "^2.2.5",
-	"typescript": "^1.7.5",
-	"vscode": "^0.11.1",
-    "gulp-mocha":"^2.2.0"
-  }
+    "name": "vscode-extension-telemetry",
+    "description": "a module for first party microsoft extensions to report consistent telemetry",
+    "version": "0.0.2",
+    "author": "Sofian Hnaide",
+    "main": "./lib/telemetryReporter",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^0.10.7"
+    },
+    "scripts": {
+        "prepublish": "gulp"
+    },
+    "dependencies": {
+        "applicationinsights": "0.15.6",
+        "winreg": "0.0.13"
+    },
+    "peerDependencies": {
+        "vscode": "^0.11.1"
+    },
+    "devDependencies": {
+        "gulp": "^3.9.0",
+        "gulp-tsb": "^1.4.4",
+        "mocha": "^2.2.5",
+        "typescript": "^1.7.5",
+        "vscode": "^0.11.1",
+        "gulp-mocha": "^2.2.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/vscode-extension-telemetry.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Microsoft/vscode-extension-telemetry/issues"
+    }
 }
