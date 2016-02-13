@@ -20,13 +20,21 @@ export class TelemetryReporter
 
 	constructor(private extensionId: string, private extensionVersion: string, key: string) {
 
-		this.appInsightsClient = appInsights.setup(key)
-		    .setAutoCollectRequests(false)
-		    .setAutoCollectPerformance(false)
-		    .setAutoCollectExceptions(false)
-			.setOfflineMode(true)
-		    .start()
-			.client;
+        //check if another instance is already initialized
+        if (appInsights.client) {
+            this.appInsightsClient = appInsights.getClient(key);
+            // no other way to enable offline mode
+            this.appInsightsClient.channel.setOfflineMode(true);
+
+        } else {
+            this.appInsightsClient = appInsights.setup(key)
+                .setAutoCollectRequests(false)
+                .setAutoCollectPerformance(false)
+                .setAutoCollectExceptions(false)
+                .setOfflineMode(true)
+                .start()
+                .client;
+        }
 
 		//prevent AI from reporting PII
 		this.setupAIClient(this.appInsightsClient);
