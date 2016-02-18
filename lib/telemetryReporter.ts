@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 import * as winreg from 'winreg';
 
-export class TelemetryReporter
+export default class TelemetryReporter
 {
 	private appInsightsClient: typeof appInsights.client;
 	private commonProperties: {[key:string] : string};
@@ -124,5 +124,3 @@ export class TelemetryReporter
 		}
 	}
 }
-
-export default TelemetryReporter;
