@@ -15,9 +15,6 @@
         "applicationinsights": "0.15.6",
         "winreg": "0.0.13"
     },
-    "peerDependencies": {
-        "vscode": "^0.11.1"
-    },
     "devDependencies": {
         "gulp": "^3.9.0",
         "gulp-tsb": "^1.4.4",
