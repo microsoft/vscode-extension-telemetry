@@ -46,7 +46,7 @@ export default class TelemetryReporter {
         this.loadCommonProperties();
 
         if (vscode && vscode.env) {
-            this.loadVSCodeCommonProperties(vscode.env.machineId, vscode.env.sessionId)
+            this.loadVSCodeCommonProperties(vscode.env.machineId, vscode.env.sessionId, vscode.version);
         }
     }
 
@@ -58,22 +58,25 @@ export default class TelemetryReporter {
         }
     }
 
-    private loadVSCodeCommonProperties(machineId: string, sessionId: string): void {
+    private loadVSCodeCommonProperties(machineId: string, sessionId: string, version: string): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['vscodemachineid'] = machineId;
         this.commonProperties['vscodesessionid'] = sessionId;
+        this.commonProperties['vscodeversion'] = version;
     }
 
     private loadCommonProperties(): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['os'] = os.platform();
         this.commonProperties['osversion'] = os.release();
+        this.commonProperties['extname'] = this.extensionId; 
+        this.commonProperties['extversion'] = this.extensionVersion; 
         
         // add SQM data for windows machines
         if (process.platform === 'win32') {
             this.getWinRegKeyData(TelemetryReporter.SQM_KEY, TelemetryReporter.REGISTRY_USERID_VALUE, winreg.HKCU, (error, result: string) => {
                 if (!error && result) {
-                    this.commonProperties['sqmuserid'] = result;
+                    this.commonProperties['sqmid'] = result;
                 }
             });
 

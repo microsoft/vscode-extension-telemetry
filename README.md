@@ -23,11 +23,14 @@ This module provides a consistent way for first-party extensions to report telem
  
  ```
 # common properties
+- `common.extname`
+- `common.extversion`
 - `common.vscodemachineid` 
 - `common.vscodesessionid`
+- `common.vscodeversion` 
 - `common.os`
 - `common.osversion`
-- `common.sqmuserid` 
+- `common.sqmid`  
 - `common.sqmmachineid`
 
 # License
