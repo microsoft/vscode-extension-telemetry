@@ -1,7 +1,7 @@
 {
     "name": "vscode-extension-telemetry",
     "description": "a module for first party microsoft extensions to report consistent telemetry",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "author": "Sofian Hnaide",
     "main": "./lib/telemetryReporter",
     "license": "MIT",
@@ -12,7 +12,7 @@
         "prepublish": "gulp"
     },
     "dependencies": {
-        "applicationinsights": "0.15.6",
+        "applicationinsights": "0.17.0",
         "winreg": "0.0.13"
     },
     "devDependencies": {
