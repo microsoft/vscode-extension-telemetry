@@ -1,4 +1,6 @@
 .vscode
+lib/*.js.map
+node_modules
 src
 typings_patches
 .gitignore
