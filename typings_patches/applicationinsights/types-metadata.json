@@ -1,0 +1,25 @@
+{
+    "authors": "Scott Southwood <https://github.com/scsouthw/>",
+    "definitionFilename": "index.d.ts",
+    "libraryDependencies": [],
+    "moduleDependencies": [],
+    "libraryMajorVersion": "0",
+    "libraryMinorVersion": "15",
+    "libraryName": "Application Insights v0.15.12",
+    "typingsPackageName": "applicationinsights",
+    "projectName": "https://github.com/Microsoft/ApplicationInsights-node.js",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "sourceBranch": "types-2.0",
+    "kind": "Mixed",
+    "globals": [
+        "ContractsModule"
+    ],
+    "declaredModules": [
+        "applicationinsights"
+    ],
+    "files": [
+        "index.d.ts"
+    ],
+    "hasPackageJson": false,
+    "contentHash": "58d1a9a01a904828bf6fc5a474af2922b221ef4a2baa893a17c220c0217cdbc5"
+}

@@ -1,27 +1,30 @@
 {
     "name": "vscode-extension-telemetry",
-    "description": "a module for first party microsoft extensions to report consistent telemetry",
-    "version": "0.0.5",
-    "author": "Sofian Hnaide",
-    "main": "./lib/telemetryReporter",
+    "description": "A module for first party microsoft extensions to report consistent telemetry.",
+    "version": "0.0.6",
+    "author": {
+        "name": "Microsoft Corporation"
+    },
+    "main": "./lib/telemetryReporter.js",
+    "types": "./lib/telemetryReporter.d.ts",
     "license": "MIT",
     "engines": {
-        "vscode": "^0.10.7"
+        "vscode": "^1.5.0"
     },
-    "scripts": {
-        "prepublish": "gulp"
-    },
+	"scripts": {
+		"compile": "tsc -p .",
+		"watch": "tsc -w -p .",
+        "dev-postinstall": "node ./node_modules/vscode/bin/install"
+	},
     "dependencies": {
-        "applicationinsights": "0.15.6",
-        "winreg": "0.0.13"
+        "applicationinsights": "0.18.0",
+        "winreg": "1.2.3"
     },
     "devDependencies": {
-        "gulp": "^3.9.0",
-        "gulp-tsb": "^1.4.4",
-        "mocha": "^2.2.5",
-        "typescript": "^1.7.5",
-        "vscode": "^0.11.1",
-        "gulp-mocha": "^2.2.0"
+        "typescript": "^2.1.6",
+        "vscode": "^1.0.0",
+        "@types/node": "^6.0.42",
+        "@types/winreg": "^1.2.30"
     },
     "repository": {
         "type": "git",

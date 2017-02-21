@@ -1,0 +1,8 @@
+{
+  "description": "Patched version of TypeScript definitions for Application Insights v0.15.12",
+  "license": "MIT",
+  "main": "",
+  "name": "@types/applicationinsights",
+  "typings": "index.d.ts",
+  "version": "0.15.33.patched"
+}

@@ -9,22 +9,26 @@ import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 import * as winreg from 'winreg';
 
-export default class TelemetryReporter {
+export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient: typeof appInsights.client;
     private commonProperties: { [key: string]: string };
+    private userOptIn: boolean = true;
+    private toDispose: vscode.Disposable[] = [];
 
-    private static SQM_KEY: string = '\\SOFTWARE\\Microsoft\\SQMClient';
-    private static REGISTRY_USERID_VALUE: string = 'UserId';
-    private static REGISTRY_MACHINEID_VALUE: string = 'MachineId';
+    private static SQM_KEY = '\\SOFTWARE\\Microsoft\\SQMClient';
+    private static REGISTRY_USERID_VALUE = 'UserId';
+    private static REGISTRY_MACHINEID_VALUE = 'MachineId';
+    private static TELEMETRY_CONFIG_ID = 'telemetry';
+    private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
 
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
+        super(() => this.toDispose.forEach((d) => d && d.dispose()))
 
         //check if another instance is already initialized
         if (appInsights.client) {
             this.appInsightsClient = appInsights.getClient(key);
             // no other way to enable offline mode
             this.appInsightsClient.channel.setOfflineMode(true);
-
         } else {
             this.appInsightsClient = appInsights.setup(key)
                 .setAutoCollectRequests(false)
@@ -48,11 +52,18 @@ export default class TelemetryReporter {
         if (vscode && vscode.env) {
             this.loadVSCodeCommonProperties(vscode.env.machineId, vscode.env.sessionId, vscode.version);
         }
+
+        this.updateUserOptIn();
+        this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn()));
     }
 
-    private setupAIClient(client: typeof ApplicationInsights.client): void {
-        if (client && client.context &&
-            client.context.keys && client.context.tags) {
+    private updateUserOptIn(): void {
+        const config = vscode.workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID);
+        this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true);
+    }
+
+    private setupAIClient(client: typeof appInsights.client): void {
+        if (client && client.context && client.context.keys && client.context.tags) {
             var machineNameKey = client.context.keys.deviceMachineName;
             client.context.tags[machineNameKey] = '';
         }
@@ -69,9 +80,9 @@ export default class TelemetryReporter {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['os'] = os.platform();
         this.commonProperties['osversion'] = os.release();
-        this.commonProperties['extname'] = this.extensionId; 
-        this.commonProperties['extversion'] = this.extensionVersion; 
-        
+        this.commonProperties['extname'] = this.extensionId;
+        this.commonProperties['extversion'] = this.extensionVersion;
+
         // add SQM data for windows machines
         if (process.platform === 'win32') {
             this.getWinRegKeyData(TelemetryReporter.SQM_KEY, TelemetryReporter.REGISTRY_USERID_VALUE, winreg.HKCU, (error, result: string) => {
@@ -95,13 +106,10 @@ export default class TelemetryReporter {
         return properties;
     }
 
-    private getWinRegKeyData(key: string, name: string, hive: string, callback: (error: Error, userId: string) => void): void {
+    private getWinRegKeyData(key: string, name: string, hive: string, callback: (error: Error | null, userId: string | null) => void): void {
         if (process.platform === 'win32') {
             try {
-                var reg = new winreg({
-                    hive: hive,
-                    key: key
-                });
+                var reg = new winreg({ hive: hive, key: key });
 
                 reg.get(name, (e, result) => {
                     if (e || !result) {
@@ -119,10 +127,10 @@ export default class TelemetryReporter {
     }
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
-        if (eventName) {
-            properties = properties || Object.create(null);
-            properties = this.addCommonProperties(properties);
-            this.appInsightsClient.trackEvent(`${this.extensionId}/${eventName}`, properties, measures);
+        if (this.userOptIn && eventName) {
+            let eventProperties = properties || Object.create(null);
+            eventProperties = this.addCommonProperties(eventProperties);
+            this.appInsightsClient.trackEvent(`${this.extensionId}/${eventName}`, eventProperties, measures);
         }
     }
 }
