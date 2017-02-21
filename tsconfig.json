@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"module": "commonjs",
+		"sourceMap": true,
+		"declaration": true,
+		"stripInternal": true,
+		"outDir": "./lib",
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		 "typeRoots" : ["./typings_patches", "./node_modules/@types"]
+	},
+	 "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

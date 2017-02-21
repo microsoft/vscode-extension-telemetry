@@ -1,29 +1,9 @@
 {
-    "version": "0.1.0",
-    "command": "gulp",
-    "isShellCommand": true,
-    "args": [
-        "--no-color"
-    ],
-    "tasks": [
-        {
-            "taskName": "build",
-            "isBuildCommand": true,
-            "problemMatcher": "$tsc"
-        },
-        {
-            "taskName": "test",
-            "args": [],
-            "isTestCommand": true
-        },
-        {
-            "taskName": "buildTests",
-            "problemMatcher": "$tsc"
-        },
-        {
-            "taskName": "watch",
-            "problemMatcher": "$tsc"
-        }
-        
-    ]
+	"version": "0.1.0",
+	"command": "npm",
+	"isShellCommand": true,
+	"args": ["run", "watch"],
+	"showOutput": "silent",
+    "isBackground": true,
+	"problemMatcher": "$tsc-watch"
 }
