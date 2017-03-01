@@ -18,7 +18,7 @@ not to send telemetry data.
  const extensionVersion = '<your extension version>'; 
  
  // the application insights key
- const key = '<you key>'; 
+ const key = '<your key>'; 
 
 // telemetry reporter 
  let reporter;
