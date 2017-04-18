@@ -470,6 +470,12 @@ interface ApplicationInsights {
      */
     setAutoCollectConsole(value: boolean): ApplicationInsights;
     /**
+     * Sets the state of dependency tracking (enabled by default)
+     * @param value if true dependencies will be sent to Application Insights
+     * @returns {ApplicationInsights} this interface
+     */
+    setAutoCollectDependencies(value: boolean): ApplicationInsights;
+    /**
      * Sets the state of exception tracking (enabled by default)
      * @param value if true uncaught exceptions will be sent to Application Insights
      * @returns {ApplicationInsights} this interface

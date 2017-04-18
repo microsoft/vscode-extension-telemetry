@@ -34,6 +34,7 @@ export default class TelemetryReporter extends vscode.Disposable {
                 .setAutoCollectRequests(false)
                 .setAutoCollectPerformance(false)
                 .setAutoCollectExceptions(false)
+                .setAutoCollectDependencies(false)
                 .setOfflineMode(true)
                 .start()
                 .client;
