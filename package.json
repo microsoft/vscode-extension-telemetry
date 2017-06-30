@@ -1,7 +1,7 @@
 {
     "name": "vscode-extension-telemetry",
     "description": "A module for first party microsoft extensions to report consistent telemetry.",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "author": {
         "name": "Microsoft Corporation"
     },
@@ -11,11 +11,11 @@
     "engines": {
         "vscode": "^1.5.0"
     },
-	"scripts": {
-		"compile": "tsc -p .",
-		"watch": "tsc -w -p .",
+    "scripts": {
+        "compile": "tsc -p .",
+        "watch": "tsc -w -p .",
         "dev-postinstall": "node ./node_modules/vscode/bin/install"
-	},
+    },
     "dependencies": {
         "applicationinsights": "0.18.0",
         "winreg": "1.2.3"
