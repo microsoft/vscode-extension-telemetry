@@ -70,6 +70,9 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
     }
 
+    // __GDPR__COMMON__ "common.vscodemachineid" : { "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     private loadVSCodeCommonProperties(machineId: string, sessionId: string, version: string): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['vscodemachineid'] = machineId;
@@ -77,6 +80,12 @@ export default class TelemetryReporter extends vscode.Disposable {
         this.commonProperties['vscodeversion'] = version;
     }
 
+    // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.osversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.sqmid" : { "endPoint": "SqmUserId", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.sqmmachineid" : { "endPoint": "SqmMachineId", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     private loadCommonProperties(): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['os'] = os.platform();
