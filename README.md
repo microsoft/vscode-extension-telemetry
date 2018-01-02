@@ -32,6 +32,11 @@ not to send telemetry data.
     ...
  }
 
+ function deactivate() {
+   // This will ensure all pending events get flushed
+    reporter.dispose();
+ }
+
  ...
  // send event any time after activation
  reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'numericMeasure': 123});
