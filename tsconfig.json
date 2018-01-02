@@ -12,7 +12,10 @@
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		 "typeRoots" : ["./typings_patches", "./node_modules/@types"]
+		 "typeRoots" : ["./typings_patches", "./node_modules/@types"],
+		 "lib": [
+			"es2015"
+		]
 	},
 	 "include": [
         "src/**/*"

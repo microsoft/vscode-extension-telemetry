@@ -10,7 +10,7 @@ import * as appInsights from 'applicationinsights';
 import * as winreg from 'winreg';
 
 export default class TelemetryReporter extends vscode.Disposable {
-    private appInsightsClient: typeof appInsights.client;
+    private appInsightsClient: typeof appInsights.client | undefined;
     private commonProperties: { [key: string]: string };
     private userOptIn: boolean = true;
     private toDispose: vscode.Disposable[] = [];
@@ -137,10 +137,25 @@ export default class TelemetryReporter extends vscode.Disposable {
     }
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
-        if (this.userOptIn && eventName) {
+        if (this.userOptIn && eventName && this.appInsightsClient) {
             let eventProperties = properties || Object.create(null);
             eventProperties = this.addCommonProperties(eventProperties);
             this.appInsightsClient.trackEvent(`${this.extensionId}/${eventName}`, eventProperties, measures);
         }
+    }
+
+    public dispose(): Promise<any> {
+        return new Promise<any>(resolve => {
+            if (this.appInsightsClient) {
+                this.appInsightsClient.sendPendingData(() => {
+                    // all data flushed
+                    this.appInsightsClient = undefined;
+                    resolve(void 0);
+                });
+            } else {
+                resolve(void 0);
+            }
+        });
+
     }
 }
