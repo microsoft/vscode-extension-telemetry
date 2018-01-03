@@ -23,4 +23,5 @@ export default class TelemetryReporter extends vscode.Disposable {
     }, measures?: {
         [key: string]: number;
     }): void;
+    dispose(): Promise<any>;
 }
