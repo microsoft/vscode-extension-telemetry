@@ -7,7 +7,6 @@
 import * as os from 'os';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
-import * as winreg from 'winreg';
 
 export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient: typeof appInsights.client | undefined;
@@ -15,9 +14,6 @@ export default class TelemetryReporter extends vscode.Disposable {
     private userOptIn: boolean = true;
     private toDispose: vscode.Disposable[] = [];
 
-    private static SQM_KEY = '\\SOFTWARE\\Microsoft\\SQMClient';
-    private static REGISTRY_USERID_VALUE = 'UserId';
-    private static REGISTRY_MACHINEID_VALUE = 'MachineId';
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
 
@@ -84,29 +80,12 @@ export default class TelemetryReporter extends vscode.Disposable {
     // __GDPR__COMMON__ "common.osversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.sqmid" : { "endPoint": "SqmUserId", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.sqmmachineid" : { "endPoint": "SqmMachineId", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     private loadCommonProperties(): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['os'] = os.platform();
         this.commonProperties['osversion'] = os.release();
         this.commonProperties['extname'] = this.extensionId;
         this.commonProperties['extversion'] = this.extensionVersion;
-
-        // add SQM data for windows machines
-        if (process.platform === 'win32') {
-            this.getWinRegKeyData(TelemetryReporter.SQM_KEY, TelemetryReporter.REGISTRY_USERID_VALUE, winreg.HKCU, (error, result: string) => {
-                if (!error && result) {
-                    this.commonProperties['sqmid'] = result;
-                }
-            });
-
-            this.getWinRegKeyData(TelemetryReporter.SQM_KEY, TelemetryReporter.REGISTRY_MACHINEID_VALUE, winreg.HKLM, (error, result) => {
-                if (!error && result) {
-                    this.commonProperties['sqmmachineid'] = result;
-                }
-            });
-        }
     }
 
     private addCommonProperties(properties: { [key: string]: string }): { [key: string]: string } {
@@ -114,26 +93,6 @@ export default class TelemetryReporter extends vscode.Disposable {
             properties['common.' + prop] = this.commonProperties[prop];
         }
         return properties;
-    }
-
-    private getWinRegKeyData(key: string, name: string, hive: string, callback: (error: Error | null, userId: string | null) => void): void {
-        if (process.platform === 'win32') {
-            try {
-                var reg = new winreg({ hive: hive, key: key });
-
-                reg.get(name, (e, result) => {
-                    if (e || !result) {
-                        callback(e, null);
-                    } else {
-                        callback(null, result.value);
-                    }
-                });
-            } catch (err) {
-                callback(err, null);
-            }
-        } else {
-            callback(null, null);
-        }
     }
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
