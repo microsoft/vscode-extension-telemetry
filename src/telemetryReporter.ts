@@ -77,13 +77,14 @@ export default class TelemetryReporter extends vscode.Disposable {
     }
 
     // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.osversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     private loadCommonProperties(): void {
         this.commonProperties = this.commonProperties || Object.create(null);
         this.commonProperties['os'] = os.platform();
-        this.commonProperties['osversion'] = os.release();
+        this.commonProperties['platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
+        this.commonProperties['osversion'] = this.commonProperties['platformversion']; //TODO: Drop this post Nova
         this.commonProperties['extname'] = this.extensionId;
         this.commonProperties['extversion'] = this.extensionVersion;
     }
