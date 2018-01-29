@@ -22,6 +22,8 @@ export default class TelemetryReporter extends vscode.Disposable {
         //check if another instance is already initialized
         if (appInsights.defaultClient) {
             this.appInsightsClient = new appInsights.TelemetryClient(key);
+            // no other way to enable offline mode
+            this.appInsightsClient.channel.setUseDiskRetryCaching(true);
         } else {
             appInsights.setup(key)
                 .setAutoCollectRequests(false)
@@ -34,7 +36,7 @@ export default class TelemetryReporter extends vscode.Disposable {
                 .start();
            this.appInsightsClient = appInsights.defaultClient;
         }
-
+        
         this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
