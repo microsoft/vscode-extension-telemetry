@@ -21,10 +21,9 @@ export default class TelemetryReporter extends vscode.Disposable {
 
         //check if another instance is already initialized
         if (appInsights.defaultClient) {
-            appInsights.dispose();
-        }
-        
-        appInsights.setup(key)
+            this.appInsightsClient = new appInsights.TelemetryClient(key);
+        } else {
+            appInsights.setup(key)
                 .setAutoCollectRequests(false)
                 .setAutoCollectPerformance(false)
                 .setAutoCollectExceptions(false)
@@ -33,8 +32,9 @@ export default class TelemetryReporter extends vscode.Disposable {
                 .setAutoCollectConsole(false)
                 .setUseDiskRetryCaching(true)
                 .start();
+           this.appInsightsClient = appInsights.defaultClient;
+        }
 
-        this.appInsightsClient = appInsights.defaultClient;
         this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
