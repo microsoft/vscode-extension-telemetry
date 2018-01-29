@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
 export default class TelemetryReporter extends vscode.Disposable {
-    private appInsightsClient: appInsights.TelemetryClient;
+    private appInsightsClient: appInsights.TelemetryClient | undefined;
     private userOptIn: boolean = true;
     private toDispose: vscode.Disposable[] = [];
 
@@ -74,7 +74,7 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
         return commonProperties;
     }
-
+    
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
             this.appInsightsClient.trackEvent({
@@ -90,7 +90,8 @@ export default class TelemetryReporter extends vscode.Disposable {
             if (this.appInsightsClient) {
                 this.appInsightsClient.flush({
                     callback: () => {
-                        appInsights.dispose();
+                        // all data flushed
+                        this.appInsightsClient = undefined;
                         resolve(void 0);
                     }
                 });
