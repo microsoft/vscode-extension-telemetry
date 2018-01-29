@@ -9,8 +9,7 @@ import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
 export default class TelemetryReporter extends vscode.Disposable {
-    private appInsightsClient: typeof appInsights.client | undefined;
-    private commonProperties: { [key: string]: string };
+    private appInsightsClient: appInsights.TelemetryClient | undefined;
     private userOptIn: boolean = true;
     private toDispose: vscode.Disposable[] = [];
 
@@ -21,35 +20,30 @@ export default class TelemetryReporter extends vscode.Disposable {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
 
         //check if another instance is already initialized
-        if (appInsights.client) {
-            this.appInsightsClient = appInsights.getClient(key);
+        if (appInsights.defaultClient) {
+            this.appInsightsClient = new appInsights.TelemetryClient(key);
             // no other way to enable offline mode
-            this.appInsightsClient.channel.setOfflineMode(true);
+            this.appInsightsClient.channel.setUseDiskRetryCaching(true);
         } else {
-            this.appInsightsClient = appInsights.setup(key)
+            appInsights.setup(key)
                 .setAutoCollectRequests(false)
                 .setAutoCollectPerformance(false)
                 .setAutoCollectExceptions(false)
                 .setAutoCollectDependencies(false)
-                .setOfflineMode(true)
-                .start()
-                .client;
+                .setAutoDependencyCorrelation(false)
+                .setAutoCollectConsole(false)
+                .setUseDiskRetryCaching(true)
+                .start();
+           this.appInsightsClient = appInsights.defaultClient;
         }
-
-        //prevent AI from reporting PII
-        this.setupAIClient(this.appInsightsClient);
+        
+        this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
             this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
         }
-
-        this.loadCommonProperties();
-
-        if (vscode && vscode.env) {
-            this.loadVSCodeCommonProperties(vscode.env.machineId, vscode.env.sessionId, vscode.version);
-        }
-
+        
         this.updateUserOptIn();
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn()));
     }
@@ -59,58 +53,48 @@ export default class TelemetryReporter extends vscode.Disposable {
         this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true);
     }
 
-    private setupAIClient(client: typeof appInsights.client): void {
-        if (client && client.context && client.context.keys && client.context.tags) {
-            var machineNameKey = client.context.keys.deviceMachineName;
-            client.context.tags[machineNameKey] = '';
-        }
-    }
-
+    // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.osversion" : { "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodemachineid" : { "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    private loadVSCodeCommonProperties(machineId: string, sessionId: string, version: string): void {
-        this.commonProperties = this.commonProperties || Object.create(null);
-        this.commonProperties['vscodemachineid'] = machineId;
-        this.commonProperties['vscodesessionid'] = sessionId;
-        this.commonProperties['vscodeversion'] = version;
-    }
-
-    // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-    private loadCommonProperties(): void {
-        this.commonProperties = this.commonProperties || Object.create(null);
-        this.commonProperties['os'] = os.platform();
-        this.commonProperties['platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
-        this.commonProperties['osversion'] = this.commonProperties['platformversion']; //TODO: Drop this post Nova
-        this.commonProperties['extname'] = this.extensionId;
-        this.commonProperties['extversion'] = this.extensionVersion;
-    }
-
-    private addCommonProperties(properties: { [key: string]: string }): { [key: string]: string } {
-        for (var prop in this.commonProperties) {
-            properties['common.' + prop] = this.commonProperties[prop];
+   private getCommonProperties(): { [key: string]: string } {
+        const commonProperties = Object.create(null);
+        commonProperties['common.os'] = os.platform();
+        commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
+        commonProperties['common.osversion'] = commonProperties['common.platformversion']; //TODO: Drop this post Nova
+        commonProperties['common.extname'] = this.extensionId;
+        commonProperties['common.extversion'] = this.extensionVersion;
+        if (vscode && vscode.env) {
+            commonProperties['common.vscodemachineid'] = vscode.env.machineId;
+            commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
+            commonProperties['common.vscodeversion'] = vscode.env.version;
         }
-        return properties;
+        return commonProperties;
     }
-
+    
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
-            let eventProperties = properties || Object.create(null);
-            eventProperties = this.addCommonProperties(eventProperties);
-            this.appInsightsClient.trackEvent(`${this.extensionId}/${eventName}`, eventProperties, measures);
+            this.appInsightsClient.trackEvent({
+                name: `${this.extensionId}/${eventName}`,
+                properties: properties,
+                measurements: measures
+            })
         }
     }
 
     public dispose(): Promise<any> {
         return new Promise<any>(resolve => {
             if (this.appInsightsClient) {
-                this.appInsightsClient.sendPendingData(() => {
-                    // all data flushed
-                    this.appInsightsClient = undefined;
-                    resolve(void 0);
+                this.appInsightsClient.flush({
+                    callback: () => {
+                        // all data flushed
+                        this.appInsightsClient = undefined;
+                        resolve(void 0);
+                    }
                 });
             } else {
                 resolve(void 0);
