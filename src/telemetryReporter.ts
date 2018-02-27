@@ -4,6 +4,8 @@
 
 'use strict';
 
+process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
+
 import * as os from 'os';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
