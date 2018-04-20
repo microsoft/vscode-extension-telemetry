@@ -50,7 +50,7 @@ not to send telemetry data.
 - `common.vscodesessionid`
 - `common.vscodeversion` 
 - `common.os`
-- `common.osversion`
+- `common.platformversion`
 - `common.sqmid`  
 - `common.sqmmachineid`
 

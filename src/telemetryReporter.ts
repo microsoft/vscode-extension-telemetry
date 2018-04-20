@@ -57,7 +57,6 @@ export default class TelemetryReporter extends vscode.Disposable {
 
     // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.osversion" : { "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
@@ -67,7 +66,6 @@ export default class TelemetryReporter extends vscode.Disposable {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
         commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
-        commonProperties['common.osversion'] = commonProperties['common.platformversion']; //TODO: Drop this post Nova
         commonProperties['common.extname'] = this.extensionId;
         commonProperties['common.extversion'] = this.extensionVersion;
         if (vscode && vscode.env) {
