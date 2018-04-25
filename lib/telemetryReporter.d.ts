@@ -8,7 +8,8 @@ export default class TelemetryReporter extends vscode.Disposable {
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     constructor(extensionId: string, extensionVersion: string, key: string);
-    private updateUserOptIn();
+    private updateUserOptIn(key);
+    private createAppInsightsClient(key);
     private getCommonProperties();
     sendTelemetryEvent(eventName: string, properties?: {
         [key: string]: string;

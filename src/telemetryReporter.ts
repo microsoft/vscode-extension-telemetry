@@ -12,7 +12,7 @@ import * as appInsights from 'applicationinsights';
 
 export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
-    private userOptIn: boolean = true;
+    private userOptIn: boolean = false;
     private toDispose: vscode.Disposable[] = [];
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
@@ -21,6 +21,23 @@ export default class TelemetryReporter extends vscode.Disposable {
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
 
+        this.updateUserOptIn(key);
+        this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
+    }
+
+    private updateUserOptIn(key: string): void {
+        const config = vscode.workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID);
+        if (this.userOptIn !== config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true)) {
+            this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true);
+            if (this.userOptIn) {
+                this.createAppInsightsClient(key);
+            } else {
+                this.dispose();
+            }
+        }
+    }
+
+    private createAppInsightsClient(key: string) {
         //check if another instance is already initialized
         if (appInsights.defaultClient) {
             this.appInsightsClient = new appInsights.TelemetryClient(key);
@@ -36,23 +53,15 @@ export default class TelemetryReporter extends vscode.Disposable {
                 .setAutoCollectConsole(false)
                 .setUseDiskRetryCaching(true)
                 .start();
-           this.appInsightsClient = appInsights.defaultClient;
+            this.appInsightsClient = appInsights.defaultClient;
         }
-        
+
         this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
             this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
         }
-        
-        this.updateUserOptIn();
-        this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn()));
-    }
-
-    private updateUserOptIn(): void {
-        const config = vscode.workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID);
-        this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true);
     }
 
     // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
@@ -62,7 +71,7 @@ export default class TelemetryReporter extends vscode.Disposable {
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-   private getCommonProperties(): { [key: string]: string } {
+    private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
         commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
@@ -75,7 +84,7 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
         return commonProperties;
     }
-    
+
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
             this.appInsightsClient.trackEvent({
