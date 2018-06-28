@@ -51,8 +51,6 @@ not to send telemetry data.
 - `common.vscodeversion` 
 - `common.os`
 - `common.platformversion`
-- `common.sqmid`  
-- `common.sqmmachineid`
 
 # License
 [MIT](LICENSE)
