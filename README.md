@@ -7,6 +7,8 @@ not to send telemetry data.
 `npm install vscode-extension-telemetry`
 
 # usage
+Follow [this guide](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-nodejs-quick-start) to set up application insights in Azure and get your key. Once you have done that install vscode-extension-telemetry and refer to the below useage:
+ 
  ```javascript
  const vscode = require('vscode');
  const TelemetryReporter = require('vscode-extension-telemetry');
@@ -17,7 +19,7 @@ not to send telemetry data.
  // extension version will be reported as a property with each event 
  const extensionVersion = '<your extension version>'; 
  
- // the application insights key
+ // the application insights key (also known as instrumentation key)
  const key = '<your key>'; 
 
 // telemetry reporter 
