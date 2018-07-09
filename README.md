@@ -3,12 +3,12 @@ This module provides a consistent way for first-party extensions to report telem
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data.
 
+Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-nodejs-quick-start) in Azure and get your key.
+
 # install 
 `npm install vscode-extension-telemetry`
 
 # usage
-Follow [this guide](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-nodejs-quick-start) to set up application insights in Azure and get your key. Once you have done that install vscode-extension-telemetry and refer to the below useage:
- 
  ```javascript
  const vscode = require('vscode');
  const TelemetryReporter = require('vscode-extension-telemetry');
