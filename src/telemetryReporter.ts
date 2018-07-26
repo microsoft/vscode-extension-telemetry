@@ -6,7 +6,9 @@
 
 process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
 
+import * as fs from 'fs';
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
@@ -18,9 +20,16 @@ export default class TelemetryReporter extends vscode.Disposable {
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
 
+    private logFilePath: string;
+    private logStream: fs.WriteStream;
+
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
-
+        this.logFilePath = process.env['VSCODE_LOGS'] || '';
+        if (this.logFilePath) {
+            this.logFilePath = path.join(this.logFilePath, `${extensionId}.txt`);
+            this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a', encoding: 'utf8' });
+        }
         this.updateUserOptIn(key);
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
     }
@@ -85,13 +94,18 @@ export default class TelemetryReporter extends vscode.Disposable {
         return commonProperties;
     }
 
-    public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void {
+    public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
             this.appInsightsClient.trackEvent({
                 name: `${this.extensionId}/${eventName}`,
                 properties: properties,
-                measurements: measures
+                measurements: measurements
             })
+
+            if (process.env['VSCODE_LOG_STACK'] === 'true' && this.logStream) {
+                this.logStream.write('\n');
+                this.logStream.write(this.format([`telemetry/${eventName}`, { properties, measurements }]));
+            }
         }
     }
 
@@ -110,5 +124,23 @@ export default class TelemetryReporter extends vscode.Disposable {
             }
         });
 
+    }
+
+    private format(args: any): string {
+        let result = '';
+
+        for (let i = 0; i < args.length; i++) {
+            let a = args[i];
+
+            if (typeof a === 'object') {
+                try {
+                    a = JSON.stringify(a);
+                } catch (e) { }
+            }
+
+            result += (i > 0 ? ' ' : '') + a;
+        }
+
+        return result;
     }
 }
