@@ -103,8 +103,7 @@ export default class TelemetryReporter extends vscode.Disposable {
             })
 
             if (process.env['VSCODE_LOG_STACK'] === 'true' && this.logStream) {
-                this.logStream.write('\n');
-                this.logStream.write(this.format([`telemetry/${eventName}`, { properties, measurements }]));
+                this.logStream.write(this.format([`telemetry/${eventName}`, { properties, measurements }, '\n']));
             }
         }
     }
