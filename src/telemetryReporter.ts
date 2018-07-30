@@ -25,7 +25,7 @@ export default class TelemetryReporter extends vscode.Disposable {
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
         let logFilePath = process.env['VSCODE_LOGS'] || '';
-        if (logFilePath && extensionId && process.env['VSCODE_LOG_STACK'] === 'true') {
+        if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
             logFilePath = path.join(logFilePath, `${extensionId}.txt`);
             this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
