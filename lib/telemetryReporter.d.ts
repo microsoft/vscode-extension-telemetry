@@ -7,7 +7,6 @@ export default class TelemetryReporter extends vscode.Disposable {
     private toDispose;
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
-    private logFilePath;
     private logStream;
     constructor(extensionId: string, extensionVersion: string, key: string);
     private updateUserOptIn;

@@ -20,15 +20,14 @@ export default class TelemetryReporter extends vscode.Disposable {
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
 
-    private logFilePath: string;
-    private logStream: fs.WriteStream;
+    private logStream: fs.WriteStream | undefined;
 
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
-        this.logFilePath = process.env['VSCODE_LOGS'] || '';
-        if (this.logFilePath && extensionId) {
-            this.logFilePath = path.join(this.logFilePath, `${extensionId}.txt`);
-            this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
+        let logFilePath = process.env['VSCODE_LOGS'] || '';
+        if (logFilePath && extensionId && process.env['VSCODE_LOG_STACK'] === 'true') {
+            logFilePath = path.join(logFilePath, `${extensionId}.txt`);
+            this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
         this.updateUserOptIn(key);
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
@@ -102,7 +101,7 @@ export default class TelemetryReporter extends vscode.Disposable {
                 measurements: measurements
             })
 
-            if (process.env['VSCODE_LOG_STACK'] === 'true' && this.logStream) {
+            if (this.logStream) {
                 this.logStream.write(`telemetry/${eventName} ${JSON.stringify({ properties, measurements })}\n`);
             }
         }
@@ -110,6 +109,9 @@ export default class TelemetryReporter extends vscode.Disposable {
 
     public dispose(): Promise<any> {
         const flushEventsToLogger = new Promise<any>(resolve => {
+            if (!this.logStream) {
+                return resolve(void 0);
+            }
             this.logStream.on('finish', resolve);
             this.logStream.end();
         });
