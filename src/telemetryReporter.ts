@@ -26,9 +26,9 @@ export default class TelemetryReporter extends vscode.Disposable {
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
         this.logFilePath = process.env['VSCODE_LOGS'] || '';
-        if (this.logFilePath) {
+        if (this.logFilePath && extensionId) {
             this.logFilePath = path.join(this.logFilePath, `${extensionId}.txt`);
-            this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a', encoding: 'utf8' });
+            this.logStream = fs.createWriteStream(this.logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
         this.updateUserOptIn(key);
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
@@ -103,13 +103,18 @@ export default class TelemetryReporter extends vscode.Disposable {
             })
 
             if (process.env['VSCODE_LOG_STACK'] === 'true' && this.logStream) {
-                this.logStream.write(this.format([`telemetry/${eventName}`, { properties, measurements }, '\n']));
+                this.logStream.write(`telemetry/${eventName} ${JSON.stringify({ properties, measurements })}\n`);
             }
         }
     }
 
     public dispose(): Promise<any> {
-        return new Promise<any>(resolve => {
+        const flushEventsToLogger = new Promise<any>(resolve => {
+            this.logStream.on('finish', resolve);
+            this.logStream.end();
+        });
+
+        const flushEventsToAI = new Promise<any>(resolve => {
             if (this.appInsightsClient) {
                 this.appInsightsClient.flush({
                     callback: () => {
@@ -122,24 +127,6 @@ export default class TelemetryReporter extends vscode.Disposable {
                 resolve(void 0);
             }
         });
-
-    }
-
-    private format(args: any): string {
-        let result = '';
-
-        for (let i = 0; i < args.length; i++) {
-            let a = args[i];
-
-            if (typeof a === 'object') {
-                try {
-                    a = JSON.stringify(a);
-                } catch (e) { }
-            }
-
-            result += (i > 0 ? ' ' : '') + a;
-        }
-
-        return result;
+        return Promise.all([flushEventsToAI, flushEventsToLogger]);
     }
 }
