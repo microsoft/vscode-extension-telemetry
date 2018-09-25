@@ -1,7 +1,7 @@
 {
     "name": "vscode-extension-telemetry",
     "description": "A module for first party microsoft extensions to report consistent telemetry.",
-    "version": "0.0.21",
+    "version": "0.0.22",
     "author": {
         "name": "Microsoft Corporation"
     },
@@ -17,11 +17,8 @@
         "dev-postinstall": "node ./node_modules/vscode/bin/install"
     },
     "dependencies": {
-        "applicationinsights": "git://github.com/Microsoft/ApplicationInsights-node.js#e5160c1c29c00e430d414b381077212d4e5bd8b4"
+        "applicationinsights": "1.0.5"
     },
-    "bundleDependencies": [
-        "applicationinsights"
-    ],
     "devDependencies": {
         "typescript": "^2.1.6",
         "vscode": "^1.0.0",
