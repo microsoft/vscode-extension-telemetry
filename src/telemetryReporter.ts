@@ -65,7 +65,7 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
 
         this.appInsightsClient.context.tags['ai.user.id'] = 'thisIsMyUserID';
-        this.appInsightsClient.commonProperties = this.getCommonProperties();
+        // this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
