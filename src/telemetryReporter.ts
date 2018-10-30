@@ -70,6 +70,7 @@ export default class TelemetryReporter extends vscode.Disposable {
          this.appInsightsClient.commonProperties = this.getCommonProperties();
          if (vscode && vscode.env) {
             this.appInsightsClient.context.tags['ai.user.id'] = vscode.env.machineId;
+            this.appInsightsClient.context.tags['ai.session.id'] = vscode.env.sessionId;
          }
 
         //check if it's an Asimov key to change the endpoint
