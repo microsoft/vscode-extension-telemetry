@@ -68,7 +68,9 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
 
          this.appInsightsClient.commonProperties = this.getCommonProperties();
-         this.appInsightsClient.context.tags['ai.user.id'] = 'thisIsMyUserID';
+         if (vscode && vscode.env) {
+            this.appInsightsClient.context.tags['ai.user.id'] = vscode.env.machineId;
+         }
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
@@ -90,8 +92,8 @@ export default class TelemetryReporter extends vscode.Disposable {
         commonProperties['common.extname'] = this.extensionId;
         commonProperties['common.extversion'] = this.extensionVersion;
         if (vscode && vscode.env) {
-            commonProperties['common.vscodemachineid'] = 'machineIDvaluex3';
-            commonProperties['common.vscodesessionid'] = 'sessionIdValuex3';
+            commonProperties['common.vscodemachineid'] = vscode.env.machineId;
+            commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
             commonProperties['common.vscodeversion'] = vscode.version;
         }
         return commonProperties;
