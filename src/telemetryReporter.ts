@@ -67,8 +67,8 @@ export default class TelemetryReporter extends vscode.Disposable {
             this.appInsightsClient = appInsights.defaultClient;
         }
 
-        this.appInsightsClient.context.tags['ai.user.id'] = 'thisIsMyUserID';
-        // this.appInsightsClient.commonProperties = this.getCommonProperties();
+        // this.appInsightsClient.context.tags['ai.user.id'] = 'thisIsMyUserID';
+         this.appInsightsClient.commonProperties = this.getCommonProperties();
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
@@ -83,7 +83,7 @@ export default class TelemetryReporter extends vscode.Disposable {
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    /* private getCommonProperties(): { [key: string]: string } {
+     private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
         commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
@@ -91,11 +91,11 @@ export default class TelemetryReporter extends vscode.Disposable {
         commonProperties['common.extversion'] = this.extensionVersion;
         if (vscode && vscode.env) {
             commonProperties['common.vscodemachineid'] = 'THEValue.machineId';
-            commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
+            commonProperties['common.vscodesessionid'] = 'THEVALUEOFsessionId';
             commonProperties['common.vscodeversion'] = vscode.version;
         }
         return commonProperties;
-    } */
+    } 
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
