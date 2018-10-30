@@ -4,9 +4,11 @@
 
 'use strict';
 
-process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
+// tslint:disable-next-line
+ process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
 
 import * as fs from 'fs';
+// tslint:disable-next-line
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -22,6 +24,7 @@ export default class TelemetryReporter extends vscode.Disposable {
 
     private logStream: fs.WriteStream | undefined;
 
+    // tslint:disable-next-line
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
         let logFilePath = process.env['VSCODE_LOGS'] || '';
@@ -80,7 +83,7 @@ export default class TelemetryReporter extends vscode.Disposable {
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    private getCommonProperties(): { [key: string]: string } {
+    /* private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
         commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
@@ -92,7 +95,7 @@ export default class TelemetryReporter extends vscode.Disposable {
             commonProperties['common.vscodeversion'] = vscode.version;
         }
         return commonProperties;
-    }
+    } */
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {

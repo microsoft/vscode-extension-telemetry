@@ -11,7 +11,6 @@ export default class TelemetryReporter extends vscode.Disposable {
     constructor(extensionId: string, extensionVersion: string, key: string);
     private updateUserOptIn;
     private createAppInsightsClient;
-    private getCommonProperties;
     sendTelemetryEvent(eventName: string, properties?: {
         [key: string]: string;
     }, measurements?: {
