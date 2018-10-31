@@ -4,11 +4,9 @@
 
 'use strict';
 
-// tslint:disable-next-line
- process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
+ // process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
 
 import * as fs from 'fs';
-// tslint:disable-next-line
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -18,6 +16,7 @@ export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
     private userOptIn: boolean = false;
     private toDispose: vscode.Disposable[] = [];
+    private uniqueUserMetrics: boolean = false;
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
@@ -25,13 +24,16 @@ export default class TelemetryReporter extends vscode.Disposable {
     private logStream: fs.WriteStream | undefined;
 
     // tslint:disable-next-line
-    constructor(private extensionId: string, private extensionVersion: string, key: string) {
+    constructor(private extensionId: string, private extensionVersion: string, key: string, enableUniqueMetrics?: boolean) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
         let logFilePath = process.env['VSCODE_LOGS'] || '';
         if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
             logFilePath = path.join(logFilePath, `${extensionId}.txt`);
             this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
+        if (enableUniqueMetrics) {
+            this.uniqueUserMetrics = true;
+          }
         this.updateUserOptIn(key);
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
     }
@@ -68,7 +70,7 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
 
          this.appInsightsClient.commonProperties = this.getCommonProperties();
-         if (vscode && vscode.env) {
+         if (this.uniqueUserMetrics && vscode && vscode.env) {
             this.appInsightsClient.context.tags['ai.user.id'] = vscode.env.machineId;
             this.appInsightsClient.context.tags['ai.session.id'] = vscode.env.sessionId;
          }
