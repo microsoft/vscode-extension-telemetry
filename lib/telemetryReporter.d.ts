@@ -5,10 +5,11 @@ export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient;
     private userOptIn;
     private toDispose;
+    private uniqueUserMetrics;
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     private logStream;
-    constructor(extensionId: string, extensionVersion: string, key: string);
+    constructor(extensionId: string, extensionVersion: string, key: string, enableUniqueMetrics?: boolean);
     private updateUserOptIn;
     private createAppInsightsClient;
     private getCommonProperties;
