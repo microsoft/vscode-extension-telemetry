@@ -4,7 +4,7 @@
 
 'use strict';
 
- // process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
+process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = 'true';
 
 import * as fs from 'fs';
 import * as os from 'os';
@@ -69,10 +69,10 @@ export default class TelemetryReporter extends vscode.Disposable {
             this.appInsightsClient = appInsights.defaultClient;
         }
 
-         this.appInsightsClient.commonProperties = this.getCommonProperties();
-         if (this.uniqueUserMetrics && vscode && vscode.env) {
-            this.appInsightsClient.context.tags['ai.user.id'] = vscode.env.machineId;
-            this.appInsightsClient.context.tags['ai.session.id'] = vscode.env.sessionId;
+        this.appInsightsClient.commonProperties = this.getCommonProperties();
+        if (this.uniqueUserMetrics && vscode && vscode.env) {
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
          }
 
         //check if it's an Asimov key to change the endpoint
