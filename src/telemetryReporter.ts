@@ -16,7 +16,6 @@ export default class TelemetryReporter extends vscode.Disposable {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
     private userOptIn: boolean = false;
     private toDispose: vscode.Disposable[] = [];
-    private uniqueUserMetrics: boolean = false;
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
@@ -24,16 +23,13 @@ export default class TelemetryReporter extends vscode.Disposable {
     private logStream: fs.WriteStream | undefined;
 
     // tslint:disable-next-line
-    constructor(private extensionId: string, private extensionVersion: string, key: string, enableUniqueMetrics?: boolean) {
+    constructor(private extensionId: string, private extensionVersion: string, key: string) {
         super(() => this.toDispose.forEach((d) => d && d.dispose()))
         let logFilePath = process.env['VSCODE_LOGS'] || '';
         if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
             logFilePath = path.join(logFilePath, `${extensionId}.txt`);
             this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
-        if (enableUniqueMetrics) {
-            this.uniqueUserMetrics = true;
-          }
         this.updateUserOptIn(key);
         this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
     }
@@ -70,10 +66,8 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
 
         this.appInsightsClient.commonProperties = this.getCommonProperties();
-        if (this.uniqueUserMetrics && vscode && vscode.env) {
-            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
-            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
-         }
+        this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
+        this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
 
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
