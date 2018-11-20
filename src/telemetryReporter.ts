@@ -66,9 +66,10 @@ export default class TelemetryReporter extends vscode.Disposable {
         }
 
         this.appInsightsClient.commonProperties = this.getCommonProperties();
-        this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
-        this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
-
+        if (vscode && vscode.env) {
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
+        }
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
             this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
