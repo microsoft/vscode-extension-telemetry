@@ -4,7 +4,7 @@
 
 'use strict';
 
-process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = true;
+(process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] as any) = true;
 
 import * as fs from 'fs';
 import * as os from 'os';
