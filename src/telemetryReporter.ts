@@ -4,7 +4,7 @@
 
 'use strict';
 
-process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] = 'true';
+(process.env['APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL'] as any) = true;
 
 import * as fs from 'fs';
 import * as os from 'os';
@@ -12,10 +12,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
-export default class TelemetryReporter extends vscode.Disposable {
+export default class TelemetryReporter {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
     private userOptIn: boolean = false;
-    private toDispose: vscode.Disposable[] = [];
+    private readonly configListener: vscode.Disposable;
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
@@ -24,14 +24,13 @@ export default class TelemetryReporter extends vscode.Disposable {
 
     // tslint:disable-next-line
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
-        super(() => this.toDispose.forEach((d) => d && d.dispose()))
         let logFilePath = process.env['VSCODE_LOGS'] || '';
         if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
             logFilePath = path.join(logFilePath, `${extensionId}.txt`);
             this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
         this.updateUserOptIn(key);
-        this.toDispose.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key)));
+        this.configListener = vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key));
     }
 
     private updateUserOptIn(key: string): void {
@@ -112,6 +111,9 @@ export default class TelemetryReporter extends vscode.Disposable {
     }
 
     public dispose(): Promise<any> {
+
+        this.configListener.dispose();
+
         const flushEventsToLogger = new Promise<any>(resolve => {
             if (!this.logStream) {
                 return resolve(void 0);

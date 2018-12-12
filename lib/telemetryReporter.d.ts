@@ -1,10 +1,9 @@
-import * as vscode from 'vscode';
-export default class TelemetryReporter extends vscode.Disposable {
+export default class TelemetryReporter {
     private extensionId;
     private extensionVersion;
     private appInsightsClient;
     private userOptIn;
-    private toDispose;
+    private readonly configListener;
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     private logStream;

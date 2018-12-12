@@ -17,11 +17,11 @@
         "dev-postinstall": "node ./node_modules/vscode/bin/install"
     },
     "dependencies": {
-        "applicationinsights": "1.0.6"
+        "applicationinsights": "1.0.8"
     },
     "devDependencies": {
         "typescript": "^2.1.6",
-        "vscode": "^1.0.0",
+        "vscode": "^1.1.22",
         "@types/node": "^6.0.42"
     },
     "repository": {
