@@ -82,7 +82,7 @@ export default class TelemetryReporter {
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-     private getCommonProperties(): { [key: string]: string } {
+    private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
         commonProperties['common.platformversion'] = (os.release() || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
@@ -94,7 +94,7 @@ export default class TelemetryReporter {
             commonProperties['common.vscodeversion'] = vscode.version;
         }
         return commonProperties;
-    } 
+    }
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
