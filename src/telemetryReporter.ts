@@ -22,6 +22,7 @@ export default class TelemetryReporter {
 
     private logStream: fs.WriteStream | undefined;
 
+    // tslint:disable-next-line
     constructor(private extensionId: string, private extensionVersion: string, key: string) {
         let logFilePath = process.env['VSCODE_LOGS'] || '';
         if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
@@ -64,7 +65,10 @@ export default class TelemetryReporter {
         }
 
         this.appInsightsClient.commonProperties = this.getCommonProperties();
-
+        if (vscode && vscode.env) {
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.userId] = vscode.env.machineId;
+            this.appInsightsClient.context.tags[this.appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
+        }
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
             this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
