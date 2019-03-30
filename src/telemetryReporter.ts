@@ -109,6 +109,14 @@ export default class TelemetryReporter {
             }
         }
     }
+    
+    /**
+     * replaces username with anon to respect privacy of user
+     */
+    public anonymizePaths(input:string){
+        if(input == null) return input
+        return input.replace(new RegExp('\\'+sep+userInfo().username, 'g'), sep+'anon')
+    }
 
     public dispose(): Promise<any> {
 
