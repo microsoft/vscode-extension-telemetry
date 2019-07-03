@@ -1,4 +1,4 @@
-# vscode-extension-telemetry
+# [vscode-extension-telemetry](https://www.npmjs.com/package/vscode-extension-telemetry)
 This module provides a consistent way for first-party extensions to report telemetry
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data.
