@@ -20,9 +20,9 @@
         "applicationinsights": "1.0.8"
     },
     "devDependencies": {
-        "typescript": "^2.1.6",
-        "vscode": "^1.1.22",
-        "@types/node": "^6.0.42"
+        "@types/node": "^6.0.42",
+        "@types/vscode": "^1.35.0",
+        "typescript": "^2.1.6"
     },
     "repository": {
         "type": "git",
