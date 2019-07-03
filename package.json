@@ -13,11 +13,10 @@
     },
     "scripts": {
         "compile": "tsc -p .",
-        "watch": "tsc -w -p .",
-        "dev-postinstall": "node ./node_modules/vscode/bin/install"
+        "watch": "tsc -w -p ."
     },
     "dependencies": {
-        "applicationinsights": "1.0.8"
+        "applicationinsights": "1.4.0"
     },
     "devDependencies": {
         "@types/node": "^6.0.42",
