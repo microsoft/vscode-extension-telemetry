@@ -110,6 +110,20 @@ export default class TelemetryReporter {
         }
     }
 
+    public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+        if (this.userOptIn && error && this.appInsightsClient) {
+            this.appInsightsClient.trackException({
+                exception: error,
+                properties: properties,
+                measurements: measurements
+            })
+
+            if (this.logStream) {
+                this.logStream.write(`telemetry/${error.name} ${error.message} ${JSON.stringify({ properties, measurements })}\n`);
+            }
+        }
+    }
+
     public dispose(): Promise<any> {
 
         this.configListener.dispose();
