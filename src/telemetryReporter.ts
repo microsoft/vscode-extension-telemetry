@@ -110,6 +110,32 @@ export default class TelemetryReporter {
         }
     }
 
+    public sendTelemetryMetric(
+        metricName: string,
+        value: number,
+        properties?: { [key: string]: string },
+        count?: number,
+        min?: number,
+        max?: number,
+        stdDev?: number,
+    ): void {
+        if (this.userOptIn && metricName && this.appInsightsClient) {
+            this.appInsightsClient.trackMetric({
+                name: `${this.extensionId}/${metricName}`,
+                value: value,
+                properties: properties,
+                count: count,
+                min: min,
+                max: max,
+                stdDev: stdDev
+            })
+
+            if (this.logStream) {
+                this.logStream.write(`telemetry/${metricName} ${value} ${JSON.stringify({ properties, count, min, max, stdDev })}\n`);
+            }
+        }
+    }
+
     public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && error && this.appInsightsClient) {
             this.appInsightsClient.trackException({
