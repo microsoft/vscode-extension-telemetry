@@ -14,7 +14,9 @@ import * as appInsights from 'applicationinsights';
 
 export default class TelemetryReporter {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
+    private firstParty: boolean = false;
     private userOptIn: boolean = false;
+    private _extension: vscode.Extension<any> | undefined;
     private readonly configListener: vscode.Disposable;
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
@@ -72,6 +74,7 @@ export default class TelemetryReporter {
         //check if it's an Asimov key to change the endpoint
         if (key && key.indexOf('AIF-') === 0) {
             this.appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
+            this.firstParty = true;
         }
     }
 
@@ -82,6 +85,8 @@ export default class TelemetryReporter {
     // __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
@@ -92,15 +97,151 @@ export default class TelemetryReporter {
             commonProperties['common.vscodemachineid'] = vscode.env.machineId;
             commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
             commonProperties['common.vscodeversion'] = vscode.version;
+
+            switch (vscode.env.uiKind) {
+                case vscode.UIKind.Web:
+                    commonProperties['common.uikind'] = 'web';
+                    break;
+                case vscode.UIKind.Desktop:
+                    commonProperties['common.uikind'] = 'desktop';
+                    break;
+                default:
+                    commonProperties['common.uikind'] = 'unknown';
+            }
+
+            commonProperties['common.remotename'] = this.cleanRemoteName(vscode.env.remoteName);
         }
         return commonProperties;
     }
 
+    private cleanRemoteName(remoteName?: string): string {
+        if (!remoteName) {
+            return 'none';
+        }
+
+        let ret = 'other';
+        // Allowed remote authorities
+        ['ssh-remote', 'dev-container', 'attached-container', 'wsl'].forEach((res: string) => {
+            if (remoteName!.indexOf(`${res}+`) === 0) {
+                ret = res;
+            }
+        });
+
+        return ret;
+    }
+
+    private shouldSendErrorTelemetry(): boolean {
+        if (this.firstParty) {
+            if (this.cleanRemoteName(vscode.env.remoteName) !== 'other') {
+                return true;
+            }
+
+            if (this.extension === undefined || this.extension.extensionKind === vscode.ExtensionKind.Workspace) {
+                return false;
+            }
+
+            if (vscode.env.uiKind === vscode.UIKind.Web) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
+    private get extension(): vscode.Extension<any> | undefined {
+        if (this._extension === undefined) {
+            this._extension = vscode.extensions.getExtension(this.extensionId);
+        }
+
+        return this._extension;
+    }
+
+    private cloneAndChange(obj?: { [key: string]: string }, change?: (val: string) => string): { [key: string]: string } | undefined {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (typeof change !== 'function') return obj;
+
+        const ret: { [key: string ]: string } = {};
+        for (const key in obj) {
+            ret[key] = change(obj[key]);
+        }
+
+        return ret;
+    }
+
+    private anonymizeFilePaths(stack: string, anonymizeFilePaths?: boolean): string {
+        const cleanupPatterns = [new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')];
+
+        if (this.extension) {
+            cleanupPatterns.push(new RegExp(this.extension.extensionPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'));
+        }
+
+        let updatedStack = stack;
+
+        if (anonymizeFilePaths) {
+            const cleanUpIndexes: [number, number][] = [];
+            for (let regexp of cleanupPatterns) {
+                while (true) {
+                    const result = regexp.exec(stack);
+                    if (!result) {
+                        break;
+                    }
+                    cleanUpIndexes.push([result.index, regexp.lastIndex]);
+                }
+            }
+
+            const nodeModulesRegex = /^[\\\/]?(node_modules|node_modules\.asar)[\\\/]/;
+            const fileRegex = /(file:\/\/)?([a-zA-Z]:(\\\\|\\|\/)|(\\\\|\\|\/))?([\w-\._]+(\\\\|\\|\/))+[\w-\._]*/g;
+            let lastIndex = 0;
+            updatedStack = '';
+
+            while (true) {
+                const result = fileRegex.exec(stack);
+                if (!result) {
+                    break;
+                }
+                // Anoynimize user file paths that do not need to be retained or cleaned up.
+                if (!nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result.index < x || result.index >= y)) {
+                    updatedStack += stack.substring(lastIndex, result.index) + '<REDACTED: user-file-path>';
+                    lastIndex = fileRegex.lastIndex;
+                }
+            }
+            if (lastIndex < stack.length) {
+                updatedStack += stack.substr(lastIndex);
+            }
+        }
+
+        // sanitize with configured cleanup patterns
+        for (let regexp of cleanupPatterns) {
+            updatedStack = updatedStack.replace(regexp, '');
+        }
+        return updatedStack;
+    }
+
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+
             this.appInsightsClient.trackEvent({
                 name: `${this.extensionId}/${eventName}`,
-                properties: properties,
+                properties: cleanProperties,
+                measurements: measurements
+            })
+
+            if (this.logStream) {
+                this.logStream.write(`telemetry/${eventName} ${JSON.stringify({ properties, measurements })}\n`);
+            }
+        }
+    }
+
+    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+        if (this.shouldSendErrorTelemetry() && this.userOptIn && eventName && this.appInsightsClient) {
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+
+            this.appInsightsClient.trackEvent({
+                name: `${this.extensionId}/${eventName}`,
+                properties: cleanProperties,
                 measurements: measurements
             })
 
@@ -111,10 +252,12 @@ export default class TelemetryReporter {
     }
 
     public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
-        if (this.userOptIn && error && this.appInsightsClient) {
+        if (this.shouldSendErrorTelemetry() && this.userOptIn && error && this.appInsightsClient) {
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+
             this.appInsightsClient.trackException({
                 exception: error,
-                properties: properties,
+                properties: cleanProperties,
                 measurements: measurements
             })
 
