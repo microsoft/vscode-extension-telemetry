@@ -40,13 +40,17 @@ function deactivate() {
 }
 ```
 
+### First-Party
+
+By default, we use the AppInsights key to detect whether or not the telemetry is first-party. The constructor now takes an optional parameter that will force the reporter to treat telemetry as first-party. This parameter will not override in the false direction.
+
 ## Sending Events
 
 Use this method for sending general events to App Insights.
 
 ```javascript
 // send event any time after activation
-reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'numericMeasure': 123});
+reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'numericMeasure': 123 });
 ```
 
 ## Sending Exceptions
@@ -56,17 +60,17 @@ Use this method for diagnostics in App Insights. This method will automatically 
 ```javascript
 // send an error any time after activation
 try { ... } catch (error) {
-   reporter.sendTelemetryException(error, { 'stringProp': 'some string' }, { 'numericMeasure': 123});
+   reporter.sendTelemetryException(error, { 'stringProp': 'some string' }, { 'numericMeasure': 123 });
 }
 ```
 
 ## Sending Errors as Events
 
-Use this method for sending error telemetry as traditional events to App Insights. This method will automatically drop events in certain environments for first party extensions.
+Use this method for sending error telemetry as traditional events to App Insights. This method will automatically drop error properties in certain environments for first party extensions. The last parameter is an optional list of case-sensitive properties that should be dropped. If no array is passed, we will drop all properties but still send the event.
 
 ```javascript
 // send an error event any time after activation
-reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some string' }, { 'numericMeasure': 123});
+reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some string', 'stackProp': 'some user stack trace' }, { 'numericMeasure': 123 }, [ 'stackProp' ]);
 ```
 
 

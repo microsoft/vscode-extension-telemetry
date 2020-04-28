@@ -9,7 +9,7 @@ export default class TelemetryReporter {
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     private logStream;
-    constructor(extensionId: string, extensionVersion: string, key: string);
+    constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean);
     private updateUserOptIn;
     private createAppInsightsClient;
     private getCommonProperties;
@@ -27,7 +27,7 @@ export default class TelemetryReporter {
         [key: string]: string;
     }, measurements?: {
         [key: string]: number;
-    }): void;
+    }, errorProps?: string[]): void;
     sendTelemetryException(error: Error, properties?: {
         [key: string]: string;
     }, measurements?: {

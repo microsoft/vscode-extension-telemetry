@@ -25,7 +25,9 @@ export default class TelemetryReporter {
     private logStream: fs.WriteStream | undefined;
 
     // tslint:disable-next-line
-    constructor(private extensionId: string, private extensionVersion: string, key: string) {
+    constructor(private extensionId: string, private extensionVersion: string, key: string, firstParty?: boolean) {
+        this.firstParty = !!firstParty;
+
         let logFilePath = process.env['VSCODE_LOGS'] || '';
         if (logFilePath && extensionId && process.env['VSCODE_LOG_LEVEL'] === 'trace') {
             logFilePath = path.join(logFilePath, `${extensionId}.txt`);
@@ -235,9 +237,22 @@ export default class TelemetryReporter {
         }
     }
 
-    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
-        if (this.shouldSendErrorTelemetry() && this.userOptIn && eventName && this.appInsightsClient) {
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }, errorProps?: string[]): void {
+        if (this.userOptIn && eventName && this.appInsightsClient) {
+            // always clean the properties if first party
+            // do not send any error properties if we shouldn't send error telemetry
+            // if we have no errorProps, assume all are error props
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => {
+                if (this.shouldSendErrorTelemetry()) {
+                    return this.anonymizeFilePaths(prop, this.firstParty)
+                }
+
+                if (errorProps === undefined || errorProps.indexOf(prop) !== -1) {
+                    return 'REDACTED';
+                }
+
+                return this.anonymizeFilePaths(prop, this.firstParty);
+            });
 
             this.appInsightsClient.trackEvent({
                 name: `${this.extensionId}/${eventName}`,
