@@ -172,7 +172,11 @@ export default class TelemetryReporter {
         return ret;
     }
 
-    private anonymizeFilePaths(stack: string, anonymizeFilePaths?: boolean): string {
+    private anonymizeFilePaths(stack?: string, anonymizeFilePaths?: boolean): string {
+        if (stack === undefined || stack === null) {
+            return '';
+        }
+
         const cleanupPatterns = [new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')];
 
         if (this.extension) {
