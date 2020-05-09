@@ -166,7 +166,7 @@ export default class TelemetryReporter {
 
         const ret: { [key: string ]: string } = {};
         for (const key in obj) {
-            ret[key] = change(obj[key]);
+            ret[key] = change(key);
         }
 
         return ret;
