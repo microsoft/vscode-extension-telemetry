@@ -160,13 +160,13 @@ export default class TelemetryReporter {
         return this._extension;
     }
 
-    private cloneAndChange(obj?: { [key: string]: string }, change?: (val: string) => string): { [key: string]: string } | undefined {
+    private cloneAndChange(obj?: { [key: string]: string }, change?: (key: string, val: string) => string): { [key: string]: string } | undefined {
         if (obj === null || typeof obj !== 'object') return obj;
         if (typeof change !== 'function') return obj;
 
         const ret: { [key: string ]: string } = {};
         for (const key in obj) {
-            ret[key] = change(obj[key]);
+            ret[key] = change(key, obj[key]);
         }
 
         return ret;
@@ -227,7 +227,7 @@ export default class TelemetryReporter {
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+            const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 
             this.appInsightsClient.trackEvent({
                 name: `${this.extensionId}/${eventName}`,
@@ -246,12 +246,12 @@ export default class TelemetryReporter {
             // always clean the properties if first party
             // do not send any error properties if we shouldn't send error telemetry
             // if we have no errorProps, assume all are error props
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => {
+            const cleanProperties = this.cloneAndChange(properties, (key: string, prop: string) => {
                 if (this.shouldSendErrorTelemetry()) {
                     return this.anonymizeFilePaths(prop, this.firstParty)
                 }
 
-                if (errorProps === undefined || errorProps.indexOf(prop) !== -1) {
+                if (errorProps === undefined || errorProps.indexOf(key) !== -1) {
                     return 'REDACTED';
                 }
 
@@ -272,7 +272,7 @@ export default class TelemetryReporter {
 
     public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.shouldSendErrorTelemetry() && this.userOptIn && error && this.appInsightsClient) {
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+            const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 
             this.appInsightsClient.trackException({
                 exception: error,
