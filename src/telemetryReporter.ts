@@ -227,7 +227,7 @@ export default class TelemetryReporter {
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(properties[prop], this.firstParty));
 
             this.appInsightsClient.trackEvent({
                 name: `${this.extensionId}/${eventName}`,
@@ -248,14 +248,14 @@ export default class TelemetryReporter {
             // if we have no errorProps, assume all are error props
             const cleanProperties = this.cloneAndChange(properties, (prop: string) => {
                 if (this.shouldSendErrorTelemetry()) {
-                    return this.anonymizeFilePaths(prop, this.firstParty)
+                    return this.anonymizeFilePaths(properties[prop], this.firstParty)
                 }
 
                 if (errorProps === undefined || errorProps.indexOf(prop) !== -1) {
                     return 'REDACTED';
                 }
 
-                return this.anonymizeFilePaths(prop, this.firstParty);
+                return this.anonymizeFilePaths(properties[prop], this.firstParty);
             });
 
             this.appInsightsClient.trackEvent({
@@ -272,7 +272,7 @@ export default class TelemetryReporter {
 
     public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
         if (this.shouldSendErrorTelemetry() && this.userOptIn && error && this.appInsightsClient) {
-            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+            const cleanProperties = this.cloneAndChange(properties, (prop: string) => this.anonymizeFilePaths(properties[prop], this.firstParty));
 
             this.appInsightsClient.trackException({
                 exception: error,
