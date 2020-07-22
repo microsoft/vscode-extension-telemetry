@@ -12,6 +12,14 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
+export interface TelemetryEventProperties {
+    readonly [key: string]: string;
+}
+
+export interface TelemetryEventMeasurements {
+    readonly [key: string]: number;
+}
+
 export default class TelemetryReporter {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
     private firstParty: boolean = false;
@@ -160,7 +168,7 @@ export default class TelemetryReporter {
         return this._extension;
     }
 
-    private cloneAndChange(obj?: { [key: string]: string }, change?: (key: string, val: string) => string): { [key: string]: string } | undefined {
+    private cloneAndChange(obj?: TelemetryEventProperties, change?: (key: string, val: string) => string): TelemetryEventProperties | undefined {
         if (obj === null || typeof obj !== 'object') return obj;
         if (typeof change !== 'function') return obj;
 
@@ -225,7 +233,7 @@ export default class TelemetryReporter {
         return updatedStack;
     }
 
-    public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+    public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
             const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 
@@ -241,7 +249,7 @@ export default class TelemetryReporter {
         }
     }
 
-    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }, errorProps?: string[]): void {
+    public sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[]): void {
         if (this.userOptIn && eventName && this.appInsightsClient) {
             // always clean the properties if first party
             // do not send any error properties if we shouldn't send error telemetry
@@ -270,7 +278,7 @@ export default class TelemetryReporter {
         }
     }
 
-    public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+    public sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
         if (this.shouldSendErrorTelemetry() && this.userOptIn && error && this.appInsightsClient) {
             const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 

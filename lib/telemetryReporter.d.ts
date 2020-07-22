@@ -1,3 +1,9 @@
+export interface TelemetryEventProperties {
+    readonly [key: string]: string;
+}
+export interface TelemetryEventMeasurements {
+    readonly [key: string]: number;
+}
 export default class TelemetryReporter {
     private extensionId;
     private extensionVersion;
@@ -18,20 +24,8 @@ export default class TelemetryReporter {
     private readonly extension;
     private cloneAndChange;
     private anonymizeFilePaths;
-    sendTelemetryEvent(eventName: string, properties?: {
-        [key: string]: string;
-    }, measurements?: {
-        [key: string]: number;
-    }): void;
-    sendTelemetryErrorEvent(eventName: string, properties?: {
-        [key: string]: string;
-    }, measurements?: {
-        [key: string]: number;
-    }, errorProps?: string[]): void;
-    sendTelemetryException(error: Error, properties?: {
-        [key: string]: string;
-    }, measurements?: {
-        [key: string]: number;
-    }): void;
+    sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
+    sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[]): void;
+    sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
     dispose(): Promise<any>;
 }
