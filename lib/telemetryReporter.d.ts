@@ -2,31 +2,35 @@ export default class TelemetryReporter {
     private extensionId;
     private extensionVersion;
     private appInsightsClient;
+    private firstParty;
     private userOptIn;
+    private _extension;
     private readonly configListener;
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     private logStream;
-    constructor(extensionId: string, extensionVersion: string, key: string);
+    constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean);
     private updateUserOptIn;
     private createAppInsightsClient;
     private getCommonProperties;
+    private cleanRemoteName;
+    private shouldSendErrorTelemetry;
+    private readonly extension;
+    private cloneAndChange;
+    private anonymizeFilePaths;
     sendTelemetryEvent(eventName: string, properties?: {
         [key: string]: string;
     }, measurements?: {
         [key: string]: number;
     }): void;
-    sendTelemetryMetric(
-        eventName: string,
-        value: number,
-        properties?: {
-            [key: string]: string;
-        },
-        count?: number,
-        min?: number,
-        max?: number,
-        stdDev?: number
-    ): void;
+    sendTelemetryMetric(eventName: string, value: number, properties?: {
+        [key: string]: string;
+    }, count?: number, min?: number, max?: number, stdDev?: number): void;
+    sendTelemetryErrorEvent(eventName: string, properties?: {
+        [key: string]: string;
+    }, measurements?: {
+        [key: string]: number;
+    }, errorProps?: string[]): void;
     sendTelemetryException(error: Error, properties?: {
         [key: string]: string;
     }, measurements?: {
