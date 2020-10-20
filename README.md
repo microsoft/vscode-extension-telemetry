@@ -12,8 +12,8 @@ Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/a
 
 ## Setup
 ```javascript
-const vscode = require('vscode');
-const TelemetryReporter = require('vscode-extension-telemetry');
+import * as vscode from 'vscode';
+import TelemetryReporter from 'vscode-extension-telemetry';
 
 // all events will be prefixed with this event name
 const extensionId = '<your extension unique name>';
