@@ -12,6 +12,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as appInsights from 'applicationinsights';
 
+type TelemetryProcessor = (envelope: appInsights.Contracts.Envelope, contextObjects?: {
+    [name: string]: any;
+}) => boolean;
+
 export default class TelemetryReporter {
     private appInsightsClient: appInsights.TelemetryClient | undefined;
     private firstParty: boolean = false;
@@ -284,6 +288,13 @@ export default class TelemetryReporter {
                 this.logStream.write(`telemetry/${error.name} ${error.message} ${JSON.stringify({ properties, measurements })}\n`);
             }
         }
+    }
+
+    public addTelemetryProcessor(processor: TelemetryProcessor) {
+        if (!this.appInsightsClient) {
+            throw new Error('Cannot add a telemetry processor because no appInsightsClient has been created.');
+        }
+        this.appInsightsClient.addTelemetryProcessor(processor);
     }
 
     public dispose(): Promise<any> {
