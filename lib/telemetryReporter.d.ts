@@ -15,7 +15,7 @@ export default class TelemetryReporter {
     private getCommonProperties;
     private cleanRemoteName;
     private shouldSendErrorTelemetry;
-    private readonly extension;
+    private get extension();
     private cloneAndChange;
     private anonymizeFilePaths;
     sendTelemetryEvent(eventName: string, properties?: {

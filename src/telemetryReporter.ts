@@ -17,7 +17,7 @@ export default class TelemetryReporter {
     private firstParty: boolean = false;
     private userOptIn: boolean = false;
     private _extension: vscode.Extension<any> | undefined;
-    private readonly configListener: vscode.Disposable;
+    private readonly optOutListener: vscode.Disposable;
 
     private static TELEMETRY_CONFIG_ID = 'telemetry';
     private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
@@ -34,13 +34,25 @@ export default class TelemetryReporter {
             this.logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8', autoClose: true });
         }
         this.updateUserOptIn(key);
-        this.configListener = vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key));
+
+        if (vscode.env.onDidChangeTelemetryEnabled !== undefined) {
+            this.optOutListener = vscode.env.onDidChangeTelemetryEnabled(() => this.updateUserOptIn(key));
+        } else {
+            this.optOutListener = vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptIn(key));
+        }
+
     }
 
     private updateUserOptIn(key: string): void {
+        // Newer versions of vscode api have telemetry enablement exposed, but fallback to setting for older versions
         const config = vscode.workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID);
-        if (this.userOptIn !== config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true)) {
-            this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true);
+        const newOptInValue = vscode.env.isTelemetryEnabled === undefined ?
+            config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true) :
+            vscode.env.isTelemetryEnabled;
+
+        if (this.userOptIn !== newOptInValue) {
+            this.userOptIn = newOptInValue;
+            console.log(`updating value ${newOptInValue}`);
             if (this.userOptIn) {
                 this.createAppInsightsClient(key);
             } else {
@@ -288,7 +300,7 @@ export default class TelemetryReporter {
 
     public dispose(): Promise<any> {
 
-        this.configListener.dispose();
+        this.optOutListener.dispose();
 
         const flushEventsToLogger = new Promise<any>(resolve => {
             if (!this.logStream) {
