@@ -5,7 +5,7 @@ export default class TelemetryReporter {
     private firstParty;
     private userOptIn;
     private _extension;
-    private readonly configListener;
+    private readonly optOutListener;
     private static TELEMETRY_CONFIG_ID;
     private static TELEMETRY_CONFIG_ENABLED_ID;
     private logStream;

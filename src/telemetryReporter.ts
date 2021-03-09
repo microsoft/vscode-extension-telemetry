@@ -52,7 +52,6 @@ export default class TelemetryReporter {
 
         if (this.userOptIn !== newOptInValue) {
             this.userOptIn = newOptInValue;
-            console.log(`updating value ${newOptInValue}`);
             if (this.userOptIn) {
                 this.createAppInsightsClient(key);
             } else {
@@ -101,6 +100,7 @@ export default class TelemetryReporter {
     // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     // __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     private getCommonProperties(): { [key: string]: string } {
         const commonProperties = Object.create(null);
         commonProperties['common.os'] = os.platform();
@@ -111,6 +111,7 @@ export default class TelemetryReporter {
             commonProperties['common.vscodemachineid'] = vscode.env.machineId;
             commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
             commonProperties['common.vscodeversion'] = vscode.version;
+            commonProperties['common.isnewappinstall'] = vscode.env.isNewAppInstall;
 
             switch (vscode.env.uiKind) {
                 case vscode.UIKind.Web:
