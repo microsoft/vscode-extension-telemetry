@@ -23,6 +23,9 @@ export default class TelemetryReporter {
     }, measurements?: {
         [key: string]: number;
     }): void;
+    sendTelemetryMetric(eventName: string, value: number, properties?: {
+        [key: string]: string;
+    }, count?: number, min?: number, max?: number, stdDev?: number): void;
     sendTelemetryErrorEvent(eventName: string, properties?: {
         [key: string]: string;
     }, measurements?: {
