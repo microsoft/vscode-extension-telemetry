@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface ITelemetryAppender {
 	logEvent(eventName: string, data?: any): void;
@@ -11,12 +11,12 @@ export interface ITelemetryAppender {
 }
 
 export class BaseTelemtryReporter {
-	private firstParty: boolean = false;
-	private userOptIn: boolean = false;
+	private firstParty = false;
+	private userOptIn = false;
 	private _extension: vscode.Extension<any> | undefined;
 	private readonly optOutListener: vscode.Disposable;
-	private static TELEMETRY_CONFIG_ID = 'telemetry';
-	private static TELEMETRY_CONFIG_ENABLED_ID = 'enableTelemetry';
+	private static TELEMETRY_CONFIG_ID = "telemetry";
+	private static TELEMETRY_CONFIG_ENABLED_ID = "enableTelemetry";
 
 	constructor(
 		private extensionId: string,
@@ -58,12 +58,12 @@ export class BaseTelemtryReporter {
 	 */
 	private cleanRemoteName(remoteName?: string): string {
 		if (!remoteName) {
-			return 'none';
+			return "none";
 		}
 
-		let ret = 'other';
+		let ret = "other";
 		// Allowed remote authorities
-		['ssh-remote', 'dev-container', 'attached-container', 'wsl'].forEach((res: string) => {
+		["ssh-remote", "dev-container", "attached-container", "wsl"].forEach((res: string) => {
 			if (remoteName!.indexOf(`${res}+`) === 0) {
 				ret = res;
 			}
@@ -90,8 +90,8 @@ export class BaseTelemtryReporter {
 	 * @returns A new changed object
 	 */
 	private cloneAndChange(obj?: { [key: string]: string }, change?: (key: string, val: string) => string): { [key: string]: string } | undefined {
-		if (obj === null || typeof obj !== 'object') return obj;
-		if (typeof change !== 'function') return obj;
+		if (obj === null || typeof obj !== "object") return obj;
+		if (typeof change !== "function") return obj;
 
 		const ret: { [key: string]: string } = {};
 		for (const key in obj) {
@@ -106,7 +106,7 @@ export class BaseTelemtryReporter {
 	 */
 	private shouldSendErrorTelemetry(): boolean {
 		if (this.firstParty) {
-			if (this.cleanRemoteName(vscode.env.remoteName) !== 'other') {
+			if (this.cleanRemoteName(vscode.env.remoteName) !== "other") {
 				return true;
 			}
 
@@ -135,28 +135,28 @@ export class BaseTelemtryReporter {
 	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	private getCommonProperties(): { [key: string]: string } {
 		const commonProperties = Object.create(null);
-		commonProperties['common.os'] = this.osShim.platform;
-		commonProperties['common.platformversion'] = (this.osShim.release || '').replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, '$1$2$3');
-		commonProperties['common.extname'] = this.extensionId;
-		commonProperties['common.extversion'] = this.extensionVersion;
+		commonProperties["common.os"] = this.osShim.platform;
+		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
+		commonProperties["common.extname"] = this.extensionId;
+		commonProperties["common.extversion"] = this.extensionVersion;
 		if (vscode && vscode.env) {
-			commonProperties['common.vscodemachineid'] = vscode.env.machineId;
-			commonProperties['common.vscodesessionid'] = vscode.env.sessionId;
-			commonProperties['common.vscodeversion'] = vscode.version;
-			commonProperties['common.isnewappinstall'] = vscode.env.isNewAppInstall;
+			commonProperties["common.vscodemachineid"] = vscode.env.machineId;
+			commonProperties["common.vscodesessionid"] = vscode.env.sessionId;
+			commonProperties["common.vscodeversion"] = vscode.version;
+			commonProperties["common.isnewappinstall"] = vscode.env.isNewAppInstall;
 
 			switch (vscode.env.uiKind) {
 				case vscode.UIKind.Web:
-					commonProperties['common.uikind'] = 'web';
+					commonProperties["common.uikind"] = "web";
 					break;
 				case vscode.UIKind.Desktop:
-					commonProperties['common.uikind'] = 'desktop';
+					commonProperties["common.uikind"] = "desktop";
 					break;
 				default:
-					commonProperties['common.uikind'] = 'unknown';
+					commonProperties["common.uikind"] = "unknown";
 			}
 
-			commonProperties['common.remotename'] = this.cleanRemoteName(vscode.env.remoteName);
+			commonProperties["common.remotename"] = this.cleanRemoteName(vscode.env.remoteName);
 		}
 		return commonProperties;
 	}
@@ -169,22 +169,23 @@ export class BaseTelemtryReporter {
 	 */
 	private anonymizeFilePaths(stack?: string, anonymizeFilePaths?: boolean): string {
 		if (stack === undefined || stack === null) {
-			return '';
+			return "";
 		}
 
-		const cleanupPatterns = [new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')];
+		const cleanupPatterns = [new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")];
 
 		if (this.extension) {
-			cleanupPatterns.push(new RegExp(this.extension.extensionPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'));
+			cleanupPatterns.push(new RegExp(this.extension.extensionPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));
 		}
 
 		let updatedStack = stack;
 
 		if (anonymizeFilePaths) {
 			const cleanUpIndexes: [number, number][] = [];
-			for (let regexp of cleanupPatterns) {
-				while (true) {
-					const result = regexp.exec(stack);
+			for (const regexp of cleanupPatterns) {
+				let result;
+				while ((result = regexp.exec(stack)) !== undefined) {
+
 					if (!result) {
 						break;
 					}
@@ -192,19 +193,19 @@ export class BaseTelemtryReporter {
 				}
 			}
 
-			const nodeModulesRegex = /^[\\\/]?(node_modules|node_modules\.asar)[\\\/]/;
-			const fileRegex = /(file:\/\/)?([a-zA-Z]:(\\\\|\\|\/)|(\\\\|\\|\/))?([\w-\._]+(\\\\|\\|\/))+[\w-\._]*/g;
+			const nodeModulesRegex = /^[\\/]?(node_modules|node_modules\.asar)[\\/]/;
+			const fileRegex = /(file:\/\/)?([a-zA-Z]:(\\\\|\\|\/)|(\\\\|\\|\/))?([\w-._]+(\\\\|\\|\/))+[\w-._]*/g;
 			let lastIndex = 0;
-			updatedStack = '';
+			updatedStack = "";
 
-			while (true) {
-				const result = fileRegex.exec(stack);
+			let result: RegExpExecArray | null | undefined;
+			while ((result = fileRegex.exec(stack)) !== undefined) {
 				if (!result) {
 					break;
 				}
 				// Anoynimize user file paths that do not need to be retained or cleaned up.
-				if (result[0] && !nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result.index < x || result.index >= y)) {
-					updatedStack += stack.substring(lastIndex, result.index) + '<REDACTED: user-file-path>';
+				if (result[0] && !nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result!.index < x || result!.index >= y)) {
+					updatedStack += stack.substring(lastIndex, result.index) + "<REDACTED: user-file-path>";
 					lastIndex = fileRegex.lastIndex;
 				}
 			}
@@ -214,8 +215,8 @@ export class BaseTelemtryReporter {
 		}
 
 		// sanitize with configured cleanup patterns
-		for (let regexp of cleanupPatterns) {
-			updatedStack = updatedStack.replace(regexp, '');
+		for (const regexp of cleanupPatterns) {
+			updatedStack = updatedStack.replace(regexp, "");
 		}
 		return updatedStack;
 	}
@@ -227,8 +228,8 @@ export class BaseTelemtryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
-		if (this.userOptIn && eventName !== '') {
-			properties = {...properties, ...this.getCommonProperties()};
+		if (this.userOptIn && eventName !== "") {
+			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: cleanProperties, measurements: measurements });
 		}
@@ -242,18 +243,18 @@ export class BaseTelemtryReporter {
 	 * @param errorProps If not present then we assume all properties belong to the error prop and will be anonymized
 	 */
 	public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }, errorProps?: string[]): void {
-		if (this.userOptIn && eventName !== '') {
+		if (this.userOptIn && eventName !== "") {
 			// always clean the properties if first party
 			// do not send any error properties if we shouldn't send error telemetry
 			// if we have no errorProps, assume all are error props
-			properties = {...properties, ...this.getCommonProperties()};
+			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (key: string, prop: string) => {
 				if (this.shouldSendErrorTelemetry()) {
-					return this.anonymizeFilePaths(prop, this.firstParty)
+					return this.anonymizeFilePaths(prop, this.firstParty);
 				}
 
 				if (errorProps === undefined || errorProps.indexOf(key) !== -1) {
-					return 'REDACTED';
+					return "REDACTED";
 				}
 
 				return this.anonymizeFilePaths(prop, this.firstParty);
@@ -270,7 +271,7 @@ export class BaseTelemtryReporter {
 	 */
 	public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
 		if (this.shouldSendErrorTelemetry() && this.userOptIn && error) {
-			properties = {...properties, ...this.getCommonProperties()};
+			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			this.telemetryAppender.logException(error, { properties: cleanProperties, measurements: measurements });
 		}

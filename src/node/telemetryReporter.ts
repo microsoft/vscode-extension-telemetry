@@ -2,10 +2,10 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as os from 'os';
-import * as vscode from 'vscode';
-import * as appInsights from 'applicationinsights';
-import { BaseTelemtryReporter, ITelemetryAppender } from '../common/baseTelemetryReporter';
+import * as os from "os";
+import * as vscode from "vscode";
+import * as appInsights from "applicationinsights";
+import { BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
 class AppInsightsAppender implements ITelemetryAppender {
 
@@ -33,7 +33,7 @@ class AppInsightsAppender implements ITelemetryAppender {
 			this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
 		}
 		//check if it's an Asimov key to change the endpoint
-		if (key && key.indexOf('AIF-') === 0) {
+		if (key && key.indexOf("AIF-") === 0) {
 			this._appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
 		}
 	}
@@ -73,7 +73,7 @@ class AppInsightsAppender implements ITelemetryAppender {
 export default class TelemetryReporter extends BaseTelemtryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
 		const appender = new AppInsightsAppender(key);
-		if (key && key.indexOf('AIF-') === 0) {
+		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}
 		super(extensionId, extensionVersion, appender, { release: os.release(), platform: os.platform() }, firstParty);

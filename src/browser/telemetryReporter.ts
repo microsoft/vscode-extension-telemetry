@@ -2,8 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { BaseTelemtryReporter, ITelemetryAppender } from '../common/baseTelemetryReporter';
+import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import { BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
 class WebAppInsightsAppender implements ITelemetryAppender {
 	private _aiClient: ApplicationInsights | undefined;
@@ -11,8 +11,8 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 	constructor(key: string) {
 
 		let endpointUrl: undefined | string;
-		if (key && key.indexOf('AIF-') === 0) {
-			endpointUrl = 'https://vortex.data.microsoft.com/collect/v1';
+		if (key && key.indexOf("AIF-") === 0) {
+			endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
 		}
 
 		this._aiClient = new ApplicationInsights({
@@ -41,14 +41,14 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 		if (!this._aiClient) {
 			return;
 		}
-		this._aiClient.trackEvent({name: eventName}, {...data.properties, ...data.measurements});
+		this._aiClient.trackEvent({ name: eventName }, { ...data.properties, ...data.measurements });
 	}
 
 	public logException(exception: Error, data: any): void {
 		if (!this._aiClient) {
 			return;
 		}
-		this._aiClient.trackException({exception, properties: {...data.properties, ...data.measurements}});
+		this._aiClient.trackException({ exception, properties: { ...data.properties, ...data.measurements } });
 	}
 
 	public flush(): Promise<any> {
@@ -63,9 +63,9 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 export default class TelemetryReporter extends BaseTelemtryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
 		const appender = new WebAppInsightsAppender(key);
-		if (key && key.indexOf('AIF-') === 0) {
+		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}
-		super(extensionId, extensionVersion, appender, { release: navigator.appVersion, platform: 'web' }, firstParty);
+		super(extensionId, extensionVersion, appender, { release: navigator.appVersion, platform: "web" }, firstParty);
 	}
 }
