@@ -95,7 +95,7 @@ export class BaseTelemtryReporter {
 
 		const ret: { [key: string]: string } = {};
 		for (const key in obj) {
-			ret[key] = change(key, obj[key]);
+			ret[key] = change(key, obj[key]!);
 		}
 
 		return ret;
@@ -203,7 +203,7 @@ export class BaseTelemtryReporter {
 					break;
 				}
 				// Anoynimize user file paths that do not need to be retained or cleaned up.
-				if (!nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result.index < x || result.index >= y)) {
+				if (result[0] && !nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result.index < x || result.index >= y)) {
 					updatedStack += stack.substring(lastIndex, result.index) + '<REDACTED: user-file-path>';
 					lastIndex = fileRegex.lastIndex;
 				}

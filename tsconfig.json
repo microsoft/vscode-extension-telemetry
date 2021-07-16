@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"noEmitOnError": false,
 		"strict": true,
+		"target": "ES6",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"sourceMap": true,
