@@ -1,25 +1,13 @@
 {
 	"compilerOptions": {
-		"target": "es5",
-		"module": "commonjs",
+		"noEmitOnError": false,
+		"strict": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
 		"sourceMap": true,
-		"declaration": true,
-		"stripInternal": true,
-		"outDir": "./lib",
-		"strictNullChecks": true,
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noImplicitThis": true,
+		"inlineSources": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		 "lib": [
-			"es2015"
-		]
-	},
-	 "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+		"noUncheckedIndexedAccess": true
+	}
 }
