@@ -168,12 +168,15 @@ export class BaseTelemtryReporter {
 	 * @returns The cleaned stack
 	 */
 	private anonymizeFilePaths(stack?: string, anonymizeFilePaths?: boolean): string {
+		let result: RegExpExecArray | null | undefined;
 		if (stack === undefined || stack === null) {
 			return "";
 		}
 
-		const cleanupPatterns = [new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")];
-
+		const cleanupPatterns = [];
+		if (vscode.env.appRoot !== "") {
+			cleanupPatterns.push(new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));
+		}
 		if (this.extension) {
 			cleanupPatterns.push(new RegExp(this.extension.extensionPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));
 		}
@@ -183,9 +186,7 @@ export class BaseTelemtryReporter {
 		if (anonymizeFilePaths) {
 			const cleanUpIndexes: [number, number][] = [];
 			for (const regexp of cleanupPatterns) {
-				let result;
-				while ((result = regexp.exec(stack)) !== undefined) {
-
+				while ((result = regexp.exec(stack))) {
 					if (!result) {
 						break;
 					}
@@ -198,8 +199,7 @@ export class BaseTelemtryReporter {
 			let lastIndex = 0;
 			updatedStack = "";
 
-			let result: RegExpExecArray | null | undefined;
-			while ((result = fileRegex.exec(stack)) !== undefined) {
+			while ((result = fileRegex.exec(stack))) {
 				if (!result) {
 					break;
 				}

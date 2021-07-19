@@ -14,8 +14,7 @@
     },
     "scripts": {
         "build": "node .esbuild.config.js",
-        "compile": "tsc -p .",
-        "watch": "tsc -w -p ."
+        "compile": "npm run build"
     },
     "dependencies": {
         "@microsoft/applicationinsights-web": "^2.6.4",
