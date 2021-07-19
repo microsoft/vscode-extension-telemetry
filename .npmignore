@@ -9,3 +9,7 @@ typings_patches
 .npmignore
 tsconfig.json
 tsfmt.json
+.editorconfig
+.esbuild.config.js
+.eslintrc.json
+.eslintignore
