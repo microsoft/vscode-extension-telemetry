@@ -11,3 +11,6 @@ npm-debug.log
 src/**/*.js.map
 lib/**/*.js.map
 lib/**/*.js
+
+# Packaged node modules
+*.gz
