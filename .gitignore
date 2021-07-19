@@ -10,3 +10,4 @@ npm-debug.log
 # sourcemaps
 src/**/*.js.map
 lib/**/*.js.map
+lib/**/*.js
