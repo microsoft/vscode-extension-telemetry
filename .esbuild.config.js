@@ -37,6 +37,7 @@ esbuild.build({
 esbuild.build({
   entryPoints: ['src/browser/telemetryReporter.ts'],
 	tsconfig: "./src/browser/tsconfig.json",
+	format: "esm",
   bundle: true,
 	sourcemap: false,
 		external: ['vscode', '@microsoft/applicationinsights-web'],

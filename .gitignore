@@ -13,4 +13,4 @@ lib/**/*.js.map
 lib/**/*.js
 
 # Packaged node modules
-*.gz
+*.tgz
