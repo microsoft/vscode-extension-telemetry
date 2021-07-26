@@ -9,6 +9,7 @@
 		"inlineSources": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"moduleResolution": "node"
 	}
 }
