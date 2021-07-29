@@ -10,14 +10,6 @@ export interface ITelemetryAppender {
 	flush(): void | Promise<void>;
 }
 
-function getOrCreateTelemetryOutputChannel(extensionContext: vscode.Extension<any> | undefined): vscode.OutputChannel {
-	if ((globalThis as any).telemetryOutputChannel === undefined && extensionContext !== undefined) {
-		const outputChannelName = vscode.env.remoteName !== undefined && extensionContext.extensionKind === vscode.ExtensionKind.Workspace ? "Remote Extension Telemetry" : "Extension Telemetry";
-		(globalThis as any).telemetryOutputChannel = vscode.window.createOutputChannel(outputChannelName);
-	}
-	return (globalThis as any).telemetryOutputChannel;
-}
-
 export class BaseTelemtryReporter {
 	private firstParty = false;
 	private userOptIn = false;
@@ -240,7 +232,6 @@ export class BaseTelemtryReporter {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: cleanProperties, measurements: measurements });
-			getOrCreateTelemetryOutputChannel(this.extension).appendLine(`${this.extensionId}/${eventName} ${JSON.stringify({ properties: cleanProperties, measurements: measurements })}`);
 		}
 	}
 
@@ -269,7 +260,6 @@ export class BaseTelemtryReporter {
 				return this.anonymizeFilePaths(prop, this.firstParty);
 			});
 			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: cleanProperties, measurements: measurements });
-			getOrCreateTelemetryOutputChannel(this.extension).appendLine(`${this.extensionId}/${eventName} ${JSON.stringify({ properties: cleanProperties, measurements: measurements })}`);
 		}
 	}
 
@@ -284,7 +274,6 @@ export class BaseTelemtryReporter {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			this.telemetryAppender.logException(error, { properties: cleanProperties, measurements: measurements });
-			getOrCreateTelemetryOutputChannel(this.extension).appendLine(`${this.extensionId}/${error.name} ${JSON.stringify({ properties: cleanProperties, measurements: measurements })}`);
 		}
 	}
 
