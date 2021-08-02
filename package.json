@@ -1,12 +1,12 @@
 {
   "name": "vscode-extension-telemetry",
   "description": "A module for first party microsoft extensions to report consistent telemetry.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "author": {
     "name": "Microsoft Corporation"
   },
-  "main": "./lib/telemetryReporter.node.min.js",
-  "browser": "./lib/telemetryReporter.web.min.js",
+  "main": "./lib/telemetryReporter.node.js",
+  "browser": "./lib/telemetryReporter.web.js",
   "types": "./lib/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
