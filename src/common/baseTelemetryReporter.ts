@@ -303,6 +303,10 @@ export class BaseTelemtryReporter {
 		if (this.shouldSendErrorTelemetry() && this.userOptIn && error) {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+			// Also run the error stack through the anonymizer
+			if (error.stack) {
+				error.stack = this.anonymizeFilePaths(error.stack, this.firstParty);
+			}
 			this.telemetryAppender.logException(error, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
 		}
 	}
