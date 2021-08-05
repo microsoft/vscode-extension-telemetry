@@ -221,6 +221,36 @@ export class BaseTelemtryReporter {
 		return updatedStack;
 	}
 
+	private removePropertiesWithPossibleUserInfo(properties: { [key: string]: string } | undefined): { [key: string]: string } | undefined {
+		if (typeof properties !== "object") {
+			return;
+		}
+		const cleanedObject = Object.create(null);
+		// Loop through key and values of the properties object
+		for (const key of Object.keys(properties)) {
+			const value = properties[key];
+			// If for some reason it is undefined we skip it (this shouldn't be possible);
+			if (!value) {
+				continue;
+			}
+
+			// Regex which matches @*.site
+			const emailRegex = /@[a-zA-Z0-9-.]+/;
+
+			// Check for common user data in the telemetry events
+			if (value.indexOf("token=") !== -1) {
+				cleanedObject[key] = "<REDACTED: token>";
+			} else if (value.indexOf("ssword=") !== -1) {
+				cleanedObject[key] = "<REDACTED: password>";
+			} else if (emailRegex.test(value)) {
+				cleanedObject[key] = "<REDACTED: email>";
+			} else {
+				cleanedObject[key] = value;
+			}
+		}
+		return cleanedObject;
+	}
+
 	/**
 	 * Given an event name, some properties, and measurements sends a teleemtry event
 	 * @param eventName The name of the event
@@ -231,7 +261,7 @@ export class BaseTelemtryReporter {
 		if (this.userOptIn && eventName !== "") {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: cleanProperties, measurements: measurements });
+			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
 		}
 	}
 
@@ -259,7 +289,7 @@ export class BaseTelemtryReporter {
 
 				return this.anonymizeFilePaths(prop, this.firstParty);
 			});
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: cleanProperties, measurements: measurements });
+			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
 		}
 	}
 
@@ -273,7 +303,7 @@ export class BaseTelemtryReporter {
 		if (this.shouldSendErrorTelemetry() && this.userOptIn && error) {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
-			this.telemetryAppender.logException(error, { properties: cleanProperties, measurements: measurements });
+			this.telemetryAppender.logException(error, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
 		}
 	}
 
