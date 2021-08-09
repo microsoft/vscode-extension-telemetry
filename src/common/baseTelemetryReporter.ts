@@ -3,10 +3,15 @@
  *--------------------------------------------------------*/
 
 import * as vscode from "vscode";
+import type { TelemetryEventMeasurements, TelemetryEventProperties } from "../../lib/telemetryReporter";
 
+export interface AppenderData {
+	properties?: TelemetryEventProperties,
+	measurements?: TelemetryEventMeasurements
+}
 export interface ITelemetryAppender {
-	logEvent(eventName: string, data?: any): void;
-	logException(exception: Error, data?: any): void;
+	logEvent(eventName: string, data?: AppenderData): void;
+	logException(exception: Error, data?: AppenderData): void;
 	flush(): void | Promise<void>;
 }
 
@@ -133,7 +138,7 @@ export class BaseTelemtryReporter {
 	// __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	private getCommonProperties(): { [key: string]: string } {
+	private getCommonProperties(): TelemetryEventProperties {
 		const commonProperties = Object.create(null);
 		commonProperties["common.os"] = this.osShim.platform;
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
@@ -221,7 +226,7 @@ export class BaseTelemtryReporter {
 		return updatedStack;
 	}
 
-	private removePropertiesWithPossibleUserInfo(properties: { [key: string]: string } | undefined): { [key: string]: string } | undefined {
+	private removePropertiesWithPossibleUserInfo(properties: TelemetryEventProperties | undefined): TelemetryEventProperties | undefined {
 		if (typeof properties !== "object") {
 			return;
 		}
@@ -257,7 +262,7 @@ export class BaseTelemtryReporter {
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
-	public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+	public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
 		if (this.userOptIn && eventName !== "") {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
@@ -299,7 +304,7 @@ export class BaseTelemtryReporter {
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
-	public sendTelemetryException(error: Error, properties?: { [key: string]: string }, measurements?: { [key: string]: number }): void {
+	public sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
 		if (this.shouldSendErrorTelemetry() && this.userOptIn && error) {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));

@@ -5,7 +5,7 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import * as appInsights from "applicationinsights";
-import { BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
+import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
 class AppInsightsAppender implements ITelemetryAppender {
 
@@ -39,25 +39,25 @@ class AppInsightsAppender implements ITelemetryAppender {
 		}
 	}
 
-	logEvent(eventName: string, data?: any): void {
+	logEvent(eventName: string, data?: AppenderData): void {
 		if (!this._appInsightsClient) {
 			return;
 		}
 		this._appInsightsClient.trackEvent({
 			name: eventName,
-			properties: data.properties,
-			measurements: data.measurements
+			properties: data?.properties,
+			measurements: data?.measurements
 		});
 	}
 
-	logException(exception: Error, data?: any): void {
+	logException(exception: Error, data?: AppenderData): void {
 		if (!this._appInsightsClient) {
 			return;
 		}
 		this._appInsightsClient.trackException({
 			exception,
-			properties: data.properties,
-			measurements: data.measurements
+			properties: data?.properties,
+			measurements: data?.measurements
 		});
 	}
 

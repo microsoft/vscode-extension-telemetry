@@ -4,7 +4,7 @@
 
 import * as vscode from "vscode";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
-import { BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
+import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
 class WebAppInsightsAppender implements ITelemetryAppender {
 	private _aiClient: ApplicationInsights | undefined;
@@ -43,14 +43,14 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 		}
 	}
 
-	public logEvent(eventName: string, data: any): void {
+	public logEvent(eventName: string, data: AppenderData): void {
 		if (!this._aiClient) {
 			return;
 		}
 		this._aiClient.trackEvent({ name: eventName }, { ...data.properties, ...data.measurements });
 	}
 
-	public logException(exception: Error, data: any): void {
+	public logException(exception: Error, data: AppenderData): void {
 		if (!this._aiClient) {
 			return;
 		}
