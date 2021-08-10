@@ -2,7 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as vscode from "vscode";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
@@ -30,11 +29,6 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 			},
 		});
 		this._aiClient.loadAppInsights();
-
-		if (vscode && vscode.env) {
-			this._aiClient.context.user.id = vscode.env.machineId;
-			this._aiClient.context.session.id = vscode.env.sessionId;
-		}
 
 		// If we cannot access the endpoint this most likely means it's being blocked
 		// and we should not attempt to send any telemetry.
