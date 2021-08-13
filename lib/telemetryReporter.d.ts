@@ -11,7 +11,7 @@ export interface TelemetryEventMeasurements {
 export default class TelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean);
 	sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
-	sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
+	sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[]): void;
 	sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 	dispose(): Promise<any>;
 }
