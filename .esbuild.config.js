@@ -19,6 +19,7 @@ esbuild.build({
 	external: ['vscode'],
 	sourcemap: true,
 	platform: 'node',
+	target: ['node12'],
 	outfile: 'lib/telemetryReporter.node.js',
 }).catch(() => process.exit(1))
 
@@ -30,6 +31,7 @@ esbuild.build({
 	external: ['vscode'],
 	minify: true,
 	platform: 'node',
+	target: ['node12'],
 	outfile: 'lib/telemetryReporter.node.min.js',
 }).catch(() => process.exit(1))
 
