@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import * as vscode from "vscode";
 import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 
 class WebAppInsightsAppender implements ITelemetryAppender {
@@ -32,7 +33,7 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 
 		// If we cannot access the endpoint this most likely means it's being blocked
 		// and we should not attempt to send any telemetry.
-		if (endpointUrl) {
+		if (endpointUrl && vscode.env.isTelemetryEnabled) {
 			fetch(endpointUrl).catch(() => (this._aiClient = undefined));
 		}
 	}

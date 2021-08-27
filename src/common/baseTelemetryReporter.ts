@@ -245,7 +245,7 @@ export class BaseTelemtryReporter {
 			// Check for common user data in the telemetry events
 			if (value.indexOf("token=") !== -1) {
 				cleanedObject[key] = "<REDACTED: token>";
-			} else if (value.indexOf("ssword=") !== -1) {
+			} else if (value.indexOf("ssword=") !== -1 || value.indexOf("sswd=") !== -1) {
 				cleanedObject[key] = "<REDACTED: password>";
 			} else if (emailRegex.test(value)) {
 				cleanedObject[key] = "<REDACTED: email>";
