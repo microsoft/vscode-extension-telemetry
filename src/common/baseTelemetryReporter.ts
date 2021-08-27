@@ -243,9 +243,9 @@ export class BaseTelemtryReporter {
 			const emailRegex = /@[a-zA-Z0-9-.]+/;
 
 			// Check for common user data in the telemetry events
-			if (value.indexOf("token=") !== -1) {
+			if (value.toLowerCase().indexOf("token=") !== -1) {
 				cleanedObject[key] = "<REDACTED: token>";
-			} else if (value.indexOf("ssword=") !== -1 || value.indexOf("sswd=") !== -1) {
+			} else if (value.toLowerCase().indexOf("ssword=") !== -1 || value.toLowerCase().indexOf("sswd=") !== -1) {
 				cleanedObject[key] = "<REDACTED: password>";
 			} else if (emailRegex.test(value)) {
 				cleanedObject[key] = "<REDACTED: email>";
