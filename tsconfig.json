@@ -1,12 +1,11 @@
 {
 	"compilerOptions": {
-		"noEmitOnError": false,
+		"noEmitOnError": true,
 		"strict": true,
 		"target": "ES6",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"sourceMap": true,
-		"inlineSources": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noUncheckedIndexedAccess": true,

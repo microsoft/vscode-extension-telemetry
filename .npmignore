@@ -1,7 +1,5 @@
 .vscode
-lib/*.js.map
-lib/*.js
-!lib/*.min.js
+,github
 node_modules
 src
 typings_patches
@@ -10,6 +8,5 @@ typings_patches
 tsconfig.json
 tsfmt.json
 .editorconfig
-.esbuild.config.js
 .eslintrc.json
 .eslintignore

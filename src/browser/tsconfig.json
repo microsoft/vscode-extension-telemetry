@@ -1,10 +1,10 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"lib": ["ES2015","DOM"],
+		"lib": ["ES2019","DOM"],
 		"module": "ES6",
 		"moduleResolution": "node",
-		"outDir": "./lib",
+		"outDir": "../../lib",
 		"typeRoots": []
 	},
 	"include": [".", "../common"]

@@ -1,31 +1,33 @@
 {
   "name": "vscode-extension-telemetry",
   "description": "A module for first party microsoft extensions to report consistent telemetry.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": {
     "name": "Microsoft Corporation"
   },
-  "main": "./lib/telemetryReporter.node.min.js",
-  "browser": "./lib/telemetryReporter.web.min.js",
+  "main": "./lib/node/telemetryReporter.js",
+  "browser": "./lib/browser/telemetryReporter.js",
   "types": "./lib/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
     "vscode": "^1.5.0"
   },
   "scripts": {
-    "build": "node .esbuild.config.js",
-    "compile": "tsc -noEmit && npm run build"
+    "compile-node": "tsc -p ./src/node",
+    "compile-web": "tsc -p ./src/browser",
+    "compile": "npm run compile-node && npm run compile-web"
   },
   "devDependencies": {
-    "@microsoft/applicationinsights-web": "^2.6.4",
-    "@types/node": "^12.15.0",
+    "@types/node": "^12.20.21",
     "@types/vscode": "^1.50.0",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
-    "applicationinsights": "2.1.4",
-    "esbuild": "^0.12.15",
     "eslint": "^7.30.0",
     "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@microsoft/applicationinsights-web": "^2.6.4",
+    "applicationinsights": "2.1.4"
   },
   "repository": {
     "type": "git",
