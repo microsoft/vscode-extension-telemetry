@@ -1,7 +1,7 @@
 .vscode
 lib/*.js.map
-!lib/*.js
-lib/*.min.js
+lib/*.js
+!lib/*.min.js
 node_modules
 src
 typings_patches

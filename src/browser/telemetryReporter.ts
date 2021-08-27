@@ -27,6 +27,7 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 				disableCookiesUsage: true,
 				autoTrackPageVisitTime: false,
 				emitLineDelimitedJson: true,
+				disableInstrumentationKeyValidation: true
 			},
 		});
 		this._aiClient.loadAppInsights();
