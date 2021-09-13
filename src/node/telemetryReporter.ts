@@ -32,6 +32,7 @@ class AppInsightsAppender implements ITelemetryAppender {
 			this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.userId] = vscode.env.machineId;
 			this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
 			this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.cloudRole] = vscode.env.appName;
+			this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.cloudRoleInstance] = vscode.env.appName;
 		}
 		//check if it's an Asimov key to change the endpoint
 		if (key && key.indexOf("AIF-") === 0) {
