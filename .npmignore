@@ -1,4 +1,6 @@
 .vscode
+build
+.github
 lib/*.js.map
 lib/*.js
 !lib/*.min.js
