@@ -4,6 +4,7 @@
 
 import * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties } from "../../lib/telemetryReporter";
+import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface AppenderData {
 	properties?: TelemetryEventProperties,
@@ -18,10 +19,9 @@ export interface ITelemetryAppender {
 export class BaseTelemtryReporter {
 	private firstParty = false;
 	private userOptIn = false;
+	private errorOptIn = false;
 	private _extension: vscode.Extension<any> | undefined;
-	private readonly optOutListener: vscode.Disposable;
-	private static TELEMETRY_CONFIG_ID = "telemetry";
-	private static TELEMETRY_CONFIG_ENABLED_ID = "enableTelemetry";
+	private readonly disposables: vscode.Disposable[] = [];
 
 	constructor(
 		private extensionId: string,
@@ -35,9 +35,10 @@ export class BaseTelemtryReporter {
 		this.updateUserOptStatus();
 
 		if (vscode.env.onDidChangeTelemetryEnabled !== undefined) {
-			this.optOutListener = vscode.env.onDidChangeTelemetryEnabled(() => this.updateUserOptStatus());
+			this.disposables.push(vscode.env.onDidChangeTelemetryEnabled(() => this.updateUserOptStatus()));
+			this.disposables.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
 		} else {
-			this.optOutListener = vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus());
+			this.disposables.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
 		}
 	}
 
@@ -45,15 +46,9 @@ export class BaseTelemtryReporter {
 	 * Updates whether the user has opted in to having telemetry collected
 	 */
 	private updateUserOptStatus(): void {
-		// Newer versions of vscode api have telemetry enablement exposed, but fallback to setting for older versions
-		const config = vscode.workspace.getConfiguration(BaseTelemtryReporter.TELEMETRY_CONFIG_ID);
-		const newOptInValue = vscode.env.isTelemetryEnabled === undefined ?
-			config.get<boolean>(BaseTelemtryReporter.TELEMETRY_CONFIG_ENABLED_ID, true) :
-			vscode.env.isTelemetryEnabled;
-
-		if (this.userOptIn !== newOptInValue) {
-			this.userOptIn = newOptInValue;
-		}
+		const telemetryLevel = getTelemetryLevel();
+		this.userOptIn = telemetryLevel === TelemetryLevel.ON;
+		this.errorOptIn = telemetryLevel === TelemetryLevel.ERROR || telemetryLevel === TelemetryLevel.ON;
 	}
 
 	/**
@@ -110,6 +105,10 @@ export class BaseTelemtryReporter {
 	 * Whether or not it is safe to send error telemetry
 	 */
 	private shouldSendErrorTelemetry(): boolean {
+		if (this.errorOptIn === false) {
+			return false;
+		}
+
 		if (this.firstParty) {
 			if (this.cleanRemoteName(vscode.env.remoteName) !== "other") {
 				return true;
@@ -279,7 +278,7 @@ export class BaseTelemtryReporter {
 	 * @param errorProps If not present then we assume all properties belong to the error prop and will be anonymized
 	 */
 	public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }, errorProps?: string[]): void {
-		if (this.userOptIn && eventName !== "") {
+		if (this.errorOptIn && eventName !== "") {
 			// always clean the properties if first party
 			// do not send any error properties if we shouldn't send error telemetry
 			// if we have no errorProps, assume all are error props
@@ -306,7 +305,7 @@ export class BaseTelemtryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		if (this.shouldSendErrorTelemetry() && this.userOptIn && error) {
+		if (this.shouldSendErrorTelemetry() && this.errorOptIn && error) {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			// Also run the error stack through the anonymizer
@@ -322,6 +321,6 @@ export class BaseTelemtryReporter {
 	 */
 	public dispose(): Promise<any> {
 		this.telemetryAppender.flush();
-		return this.optOutListener.dispose();
+		return Promise.all(this.disposables.map(d => d.dispose()));
 	}
 }
