@@ -77,6 +77,7 @@ reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some strin
 - **VS Code Version** `common.vscodeversion` - The version of VS Code running the extension
 - **OS** `common.os` - The OS running VS Code
 - **Platform Version** `common.platformversion` - The version of the OS/Platform
+- **Product** `common.product` - What Vs code is hosted in, i.e. desktop, github.dev, codespaces.
 - **UI Kind** `common.uikind` - Web or Desktop indicating where VS Code is running
 - **Remote Name** `common.remotename` - A name to identify the type of remote connection. `other` indicates a remote connection not from the 3 main extensions (ssh, docker, wsl).
 
