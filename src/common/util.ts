@@ -18,5 +18,5 @@ export function getTelemetryLevel(): TelemetryLevel {
 	const config = vscode.workspace.getConfiguration(TELEMETRY_CONFIG_ID);
 	const level = config.get<TelemetryLevel>(TELEMETRY_CONFIG_LEVEL_ID);
 	const enabled = config.get<boolean>(TELEMETRY_CONFIG_ENABLED_ID);
-	return enabled ? TelemetryLevel.ON : level ?? TelemetryLevel.OFF;
+	return level ?  level : enabled ? TelemetryLevel.ON : TelemetryLevel.OFF;
 }
