@@ -10,7 +10,7 @@
   "types": "./lib/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.5.0"
+    "vscode": "^1.60.0"
   },
   "scripts": {
     "build": "node .esbuild.config.js",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@microsoft/applicationinsights-web": "^2.6.4",
     "@types/node": "^12.15.0",
-    "@types/vscode": "^1.50.0",
+    "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
     "applicationinsights": "2.1.4",

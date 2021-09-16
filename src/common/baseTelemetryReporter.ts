@@ -138,6 +138,7 @@ export class BaseTelemtryReporter {
 	// __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.product" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	private getCommonProperties(): TelemetryEventProperties {
 		const commonProperties = Object.create(null);
 		commonProperties["common.os"] = this.osShim.platform;
@@ -149,6 +150,7 @@ export class BaseTelemtryReporter {
 			commonProperties["common.vscodesessionid"] = vscode.env.sessionId;
 			commonProperties["common.vscodeversion"] = vscode.version;
 			commonProperties["common.isnewappinstall"] = vscode.env.isNewAppInstall.toString();
+			commonProperties["common.product"] = vscode.env.appHost;
 
 			switch (vscode.env.uiKind) {
 				case vscode.UIKind.Web:
