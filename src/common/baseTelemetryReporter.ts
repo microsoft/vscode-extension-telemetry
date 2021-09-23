@@ -14,6 +14,7 @@ export interface ITelemetryAppender {
 	logEvent(eventName: string, data?: AppenderData): void;
 	logException(exception: Error, data?: AppenderData): void;
 	flush(): void | Promise<void>;
+	instantiateAppender(): void;
 }
 
 export class BaseTelemtryReporter {

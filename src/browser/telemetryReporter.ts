@@ -2,41 +2,17 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "../common/util";
 
 class WebAppInsightsAppender implements ITelemetryAppender {
 	private _aiClient: ApplicationInsights | undefined;
+	private _isInstantiated = false;
 
-	constructor(key: string) {
-
-		let endpointUrl: undefined | string;
-		if (key && key.indexOf("AIF-") === 0) {
-			endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
-		}
-
-		this._aiClient = new ApplicationInsights({
-			config: {
-				instrumentationKey: key,
-				endpointUrl,
-				disableAjaxTracking: true,
-				disableExceptionTracking: true,
-				disableFetchTracking: true,
-				disableCorrelationHeaders: true,
-				disableCookiesUsage: true,
-				autoTrackPageVisitTime: false,
-				emitLineDelimitedJson: true,
-				disableInstrumentationKeyValidation: true
-			},
-		});
-		this._aiClient.loadAppInsights();
-
-		// If we cannot access the endpoint this most likely means it's being blocked
-		// and we should not attempt to send any telemetry.
-		const telemetryLevel = getTelemetryLevel();
-		if (endpointUrl && (telemetryLevel === TelemetryLevel.ON || telemetryLevel === TelemetryLevel.ERROR)) {
-			fetch(endpointUrl).catch(() => (this._aiClient = undefined));
+	constructor(private _key: string) {
+		if (getTelemetryLevel() !== TelemetryLevel.OFF) {
+			this.instantiateAppender();
 		}
 	}
 
@@ -60,6 +36,42 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 			this._aiClient = undefined;
 		}
 		return Promise.resolve(undefined);
+	}
+
+	public instantiateAppender(): void {
+		if (this._isInstantiated) {
+			return;
+		}
+		import("@microsoft/applicationinsights-web").then((web) => {
+			let endpointUrl: undefined | string;
+			if (this._key && this._key.indexOf("AIF-") === 0) {
+				endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
+			}
+
+			this._aiClient = new web.ApplicationInsights({
+				config: {
+					instrumentationKey: this._key,
+					endpointUrl,
+					disableAjaxTracking: true,
+					disableExceptionTracking: true,
+					disableFetchTracking: true,
+					disableCorrelationHeaders: true,
+					disableCookiesUsage: true,
+					autoTrackPageVisitTime: false,
+					emitLineDelimitedJson: true,
+					disableInstrumentationKeyValidation: true
+				},
+			});
+			this._aiClient.loadAppInsights();
+
+			// If we cannot access the endpoint this most likely means it's being blocked
+			// and we should not attempt to send any telemetry.
+			const telemetryLevel = getTelemetryLevel();
+			if (endpointUrl && (telemetryLevel === TelemetryLevel.ON || telemetryLevel === TelemetryLevel.ERROR)) {
+				fetch(endpointUrl).catch(() => (this._aiClient = undefined));
+			}
+			this._isInstantiated = true;
+	});
 	}
 }
 
