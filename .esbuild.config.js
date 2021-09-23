@@ -5,7 +5,7 @@ const path = require('path');
 // Removes the warning from the app insights module since we don't want it to spam the console
 function patchAppInsightsModules() {
 	const nodeAppInsightsModule = fs.readFileSync(path.join(__dirname, 'node_modules/applicationinsights/out/Library/Config.js'), 'utf8');
-	const fileWithRemovedWarning = nodeAppInsightsModule.replace(/Logging.warn\([^)]*invalid instrumentation key[^)]*\)/, '/* $& */');
+	const fileWithRemovedWarning = nodeAppInsightsModule.replace(/Logging.warn\([^)]*invalid instrumentation key[^)]*\)/, '// Warning removed');
 	fs.writeFileSync(path.join(__dirname, 'node_modules/applicationinsights/out/Library/Config.js'), fileWithRemovedWarning, 'utf8');
 }
 
