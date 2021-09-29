@@ -152,7 +152,7 @@ export class BaseTelemtryReporter {
 			commonProperties["common.vscodemachineid"] = vscode.env.machineId;
 			commonProperties["common.vscodesessionid"] = vscode.env.sessionId;
 			commonProperties["common.vscodeversion"] = vscode.version;
-			commonProperties["common.isnewappinstall"] = vscode.env.isNewAppInstall.toString();
+			commonProperties["common.isnewappinstall"] = vscode.env.isNewAppInstall ? vscode.env.isNewAppInstall.toString() : false;
 			commonProperties["common.product"] = vscode.env.appHost;
 
 			switch (vscode.env.uiKind) {
