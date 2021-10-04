@@ -28,7 +28,7 @@ export class BaseTelemetryReporter {
 		private extensionId: string,
 		private extensionVersion: string,
 		private telemetryAppender: ITelemetryAppender,
-		private osShim: { release: string, platform: string },
+		private osShim: { release: string, platform: string, architecture: string },
 		firstParty?: boolean
 	) {
 
@@ -132,6 +132,7 @@ export class BaseTelemetryReporter {
 	}
 
 	// __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.arch" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
@@ -145,6 +146,7 @@ export class BaseTelemetryReporter {
 	private getCommonProperties(): TelemetryEventProperties {
 		const commonProperties = Object.create(null);
 		commonProperties["common.os"] = this.osShim.platform;
+		commonProperties["common.arch"] = this.osShim.architecture;
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
 		commonProperties["common.extname"] = this.extensionId;
 		commonProperties["common.extversion"] = this.extensionVersion;

@@ -76,6 +76,10 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}
-		super(extensionId, extensionVersion, appender, { release: os.release(), platform: os.platform() }, firstParty);
+		super(extensionId, extensionVersion, appender, {
+			release: os.release(),
+			platform: os.platform(),
+			architecture: os.arch(),
+		}, firstParty);
 	}
 }
