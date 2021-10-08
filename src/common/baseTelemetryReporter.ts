@@ -3,11 +3,11 @@
  *--------------------------------------------------------*/
 
 import * as vscode from "vscode";
-import type { TelemetryEventMeasurements, TelemetryEventProperties } from "../../lib/telemetryReporter";
+import type { TelemetryEventMeasurements, TelemetryEventProperties, TelemetryRawEventProperties } from "../../lib/telemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface AppenderData {
-	properties?: TelemetryEventProperties,
+	properties?: TelemetryRawEventProperties,
 	measurements?: TelemetryEventMeasurements
 }
 export interface ITelemetryAppender {
@@ -261,7 +261,8 @@ export class BaseTelemtryReporter {
 	}
 
 	/**
-	 * Given an event name, some properties, and measurements sends a teleemtry event
+	 * Given an event name, some properties, and measurements sends a telemetry event.
+	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
@@ -271,6 +272,19 @@ export class BaseTelemtryReporter {
 			properties = { ...properties, ...this.getCommonProperties() };
 			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
+		}
+	}
+
+	/**
+	 * Given an event name, some properties, and measurements sends a raw (unsanitized) telemetry event
+	 * @param eventName The name of the event
+	 * @param properties The properties to send with the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 */
+	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryRawEventProperties, measurements?: TelemetryEventMeasurements): void {
+		if (this.userOptIn && eventName !== "") {
+			properties = { ...properties, ...this.getCommonProperties() };
+			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: properties, measurements: measurements });
 		}
 	}
 

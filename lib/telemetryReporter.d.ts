@@ -5,6 +5,11 @@
 export interface TelemetryEventProperties {
 	readonly [key: string]: string;
 }
+
+export interface TelemetryRawEventProperties {
+	readonly [key: string]: any;
+}
+
 export interface TelemetryEventMeasurements {
 	readonly [key: string]: number;
 }
@@ -19,11 +24,20 @@ export default class TelemetryReporter {
 
 	/**
 	 * Sends a telemetry event with the given properties and measurements
+	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.
 	 * @param eventName The name of the event
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
 	 */
 	sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
+
+	/**
+	 * Sends a raw (unsanitized) telemetry event with the given properties and measurements
+	 * @param eventName The name of the event
+	 * @param properties The set of properties to add to the event in the form of a string key value pair
+	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
+	 */
+	sendRawTelemetryEvent(eventName: string, properties?: TelemetryRawEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * Sends a telemetry error event with the given properties, measurements, and errorProps
