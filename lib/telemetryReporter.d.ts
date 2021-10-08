@@ -6,7 +6,7 @@ export interface TelemetryEventProperties {
 	readonly [key: string]: string;
 }
 
-export interface TelemetryRawEventProperties {
+export interface RawTelemetryEventProperties {
 	readonly [key: string]: any;
 }
 
@@ -37,7 +37,7 @@ export default class TelemetryReporter {
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
 	 */
-	sendRawTelemetryEvent(eventName: string, properties?: TelemetryRawEventProperties, measurements?: TelemetryEventMeasurements): void;
+	sendRawTelemetryEvent(eventName: string, properties?: RawTelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * Sends a telemetry error event with the given properties, measurements, and errorProps

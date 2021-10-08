@@ -3,11 +3,11 @@
  *--------------------------------------------------------*/
 
 import * as vscode from "vscode";
-import type { TelemetryEventMeasurements, TelemetryEventProperties, TelemetryRawEventProperties } from "../../lib/telemetryReporter";
+import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../lib/telemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface AppenderData {
-	properties?: TelemetryRawEventProperties,
+	properties?: RawTelemetryEventProperties,
 	measurements?: TelemetryEventMeasurements
 }
 export interface ITelemetryAppender {
@@ -281,7 +281,7 @@ export class BaseTelemetryReporter {
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
-	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryRawEventProperties, measurements?: TelemetryEventMeasurements): void {
+	public sendRawTelemetryEvent(eventName: string, properties?: RawTelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
 		if (this.userOptIn && eventName !== "") {
 			properties = { ...properties, ...this.getCommonProperties() };
 			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties, measurements });
