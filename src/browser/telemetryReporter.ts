@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
-import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
+import { AppenderData, BaseTelemetryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "../common/util";
 
 class WebAppInsightsAppender implements ITelemetryAppender {
@@ -75,7 +75,7 @@ class WebAppInsightsAppender implements ITelemetryAppender {
 	}
 }
 
-export default class TelemetryReporter extends BaseTelemtryReporter {
+export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
 		const appender = new WebAppInsightsAppender(key);
 		if (key && key.indexOf("AIF-") === 0) {
