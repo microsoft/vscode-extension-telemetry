@@ -5,7 +5,7 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import type { TelemetryClient } from "applicationinsights";
-import { AppenderData, BaseTelemtryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
+import { AppenderData, BaseTelemetryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "../common/util";
 
 class AppInsightsAppender implements ITelemetryAppender {
@@ -88,7 +88,7 @@ class AppInsightsAppender implements ITelemetryAppender {
 }
 
 
-export default class TelemetryReporter extends BaseTelemtryReporter {
+export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
 		const appender = new AppInsightsAppender(key);
 		if (key && key.indexOf("AIF-") === 0) {

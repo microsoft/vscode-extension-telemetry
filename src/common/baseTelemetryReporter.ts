@@ -17,7 +17,7 @@ export interface ITelemetryAppender {
 	instantiateAppender(): void;
 }
 
-export class BaseTelemtryReporter {
+export class BaseTelemetryReporter {
 	private firstParty = false;
 	private userOptIn = false;
 	private errorOptIn = false;
