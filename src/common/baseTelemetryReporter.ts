@@ -284,7 +284,7 @@ export class BaseTelemetryReporter {
 	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryRawEventProperties, measurements?: TelemetryEventMeasurements): void {
 		if (this.userOptIn && eventName !== "") {
 			properties = { ...properties, ...this.getCommonProperties() };
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: properties, measurements: measurements });
+			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties, measurements });
 		}
 	}
 
