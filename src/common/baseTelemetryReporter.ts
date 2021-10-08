@@ -67,7 +67,7 @@ export class BaseTelemtryReporter {
 
 		let ret = "other";
 		// Allowed remote authorities
-		["ssh-remote", "dev-container", "attached-container", "wsl"].forEach((res: string) => {
+		["ssh-remote", "dev-container", "attached-container", "wsl", "codespaces"].forEach((res: string) => {
 			if (remoteName!.indexOf(`${res}+`) === 0) {
 				ret = res;
 			}
