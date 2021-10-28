@@ -5,92 +5,74 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import type { TelemetryClient } from "applicationinsights";
-import { AppenderData, BaseTelemetryReporter, ITelemetryAppender } from "../common/baseTelemetryReporter";
-import { getTelemetryLevel, TelemetryLevel } from "../common/util";
+import { AppenderData, BaseTelemetryReporter } from "../common/baseTelemetryReporter";
+import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 
-class AppInsightsAppender implements ITelemetryAppender {
-
-	private _appInsightsClient: TelemetryClient | undefined;
-	private _isInstantiated = false;
-
-	constructor(private _key: string) {
-		// If the user has telemetry enabled load the module
-		if (getTelemetryLevel() !== TelemetryLevel.OFF) {
-			this.instantiateAppender();
+/**
+ * A factory function which creates a telemetry client to be used by an appender to send telemetry
+ * @param key The app insights key
+ * @returns A promise which resolves to the telemetry client or rejects upon error
+ */
+const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClient> => {
+	let appInsightsClient: TelemetryClient | undefined;
+	try {
+		const appInsights = await import("applicationinsights");
+		//check if another instance is already initialized
+		if (appInsights.defaultClient) {
+			appInsightsClient = new appInsights.TelemetryClient(key);
+			// no other way to enable offline mode
+			appInsightsClient.channel.setUseDiskRetryCaching(true);
+		} else {
+			appInsights.setup(key)
+				.setAutoCollectRequests(false)
+				.setAutoCollectPerformance(false)
+				.setAutoCollectExceptions(false)
+				.setAutoCollectDependencies(false)
+				.setAutoDependencyCorrelation(false)
+				.setAutoCollectConsole(false)
+				.setUseDiskRetryCaching(true)
+				.start();
+			appInsightsClient = appInsights.defaultClient;
 		}
-	}
-
-	logEvent(eventName: string, data?: AppenderData): void {
-		if (!this._appInsightsClient) {
-			return;
+		if (vscode && vscode.env) {
+			appInsightsClient.context.tags[appInsightsClient.context.keys.userId] = vscode.env.machineId;
+			appInsightsClient.context.tags[appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
+			appInsightsClient.context.tags[appInsightsClient.context.keys.cloudRole] = vscode.env.appName;
+			appInsightsClient.context.tags[appInsightsClient.context.keys.cloudRoleInstance] = vscode.env.appName;
 		}
-		this._appInsightsClient.trackEvent({
-			name: eventName,
-			properties: data?.properties,
-			measurements: data?.measurements
-		});
-	}
-
-	logException(exception: Error, data?: AppenderData): void {
-		if (!this._appInsightsClient) {
-			return;
+		//check if it's an Asimov key to change the endpoint
+		if (key && key.indexOf("AIF-") === 0) {
+			appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
 		}
-		this._appInsightsClient.trackException({
-			exception,
-			properties: data?.properties,
-			measurements: data?.measurements
-		});
+	} catch (e: any) {
+		return Promise.reject(e);
 	}
-
-	flush(): Promise<void> {
-		if (this._appInsightsClient) {
-			this._appInsightsClient.flush();
-			this._appInsightsClient = undefined;
+	// Sets the appinsights client into a standardized form
+	const telemetryClient: BaseTelemetryClient = {
+		logEvent: (eventName: string, data?: AppenderData) => {
+			appInsightsClient?.trackEvent({
+				name: eventName,
+				properties: data?.properties,
+				measurements: data?.measurements
+			});
+		},
+		logException: (exception: Error, data?: AppenderData) => {
+			appInsightsClient?.trackException({
+				exception,
+				properties: data?.properties,
+				measurements: data?.measurements
+			});
+		},
+		flush: async () => {
+			appInsightsClient?.flush();
 		}
-		return Promise.resolve(undefined);
-	}
-
-	instantiateAppender(): void {
-		if (this._isInstantiated) {
-			return;
-		}
-		import("applicationinsights").then((appInsights) => {
-			//check if another instance is already initialized
-			if (appInsights.defaultClient) {
-				this._appInsightsClient = new appInsights.TelemetryClient(this._key);
-				// no other way to enable offline mode
-				this._appInsightsClient.channel.setUseDiskRetryCaching(true);
-			} else {
-				appInsights.setup(this._key)
-					.setAutoCollectRequests(false)
-					.setAutoCollectPerformance(false)
-					.setAutoCollectExceptions(false)
-					.setAutoCollectDependencies(false)
-					.setAutoDependencyCorrelation(false)
-					.setAutoCollectConsole(false)
-					.setUseDiskRetryCaching(true)
-					.start();
-				this._appInsightsClient = appInsights.defaultClient;
-			}
-			if (vscode && vscode.env) {
-				this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.userId] = vscode.env.machineId;
-				this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.sessionId] = vscode.env.sessionId;
-				this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.cloudRole] = vscode.env.appName;
-				this._appInsightsClient.context.tags[this._appInsightsClient.context.keys.cloudRoleInstance] = vscode.env.appName;
-			}
-			//check if it's an Asimov key to change the endpoint
-			if (this._key && this._key.indexOf("AIF-") === 0) {
-				this._appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
-			}
-			this._isInstantiated = true;
-		});
-	}
-}
-
+	};
+	return telemetryClient;
+};
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
-		const appender = new AppInsightsAppender(key);
+		const appender = new BaseTelemetryAppender(key, appInsightsClientFactory);
 		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}
