@@ -49,7 +49,7 @@ export class BaseTelemetryReporter {
 	private updateUserOptStatus(): void {
 		const telemetryLevel = getTelemetryLevel();
 		this.userOptIn = telemetryLevel === TelemetryLevel.ON;
-		this.errorOptIn = telemetryLevel === TelemetryLevel.ERROR || telemetryLevel === TelemetryLevel.ON;
+		this.errorOptIn = telemetryLevel === TelemetryLevel.ON;
 		if (this.userOptIn || this.errorOptIn) {
 			this.telemetryAppender.instantiateAppender();
 		}
