@@ -6,7 +6,6 @@ import * as vscode from "vscode";
 
 export const enum TelemetryLevel {
 	ON = "on",
-	ERROR = "error",
 	OFF = "off"
 }
 

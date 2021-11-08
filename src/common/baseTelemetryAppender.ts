@@ -39,7 +39,7 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	 */
 	logEvent(eventName: string, data?: AppenderData): void {
 		if (!this._telemetryClient) {
-			if (!this._isInstantiated && getTelemetryLevel() !== TelemetryLevel.OFF) {
+			if (!this._isInstantiated && getTelemetryLevel() === TelemetryLevel.ON) {
 				this._eventQueue.push({ eventName, data });
 			}
 			return;
