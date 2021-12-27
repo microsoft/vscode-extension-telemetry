@@ -248,7 +248,7 @@ export class BaseTelemetryReporter {
 
 			// Regex which matches @*.site
 			const emailRegex = /@[a-zA-Z0-9-.]+/;
-			const secretRegex = /\S*(key|token|sig|password|passwd|pwd)[="':\s]+\S*/;
+			const secretRegex = /(key|token|sig|signature|password|passwd|pwd)[="':\s]/;
 
 			// Check for common user data in the telemetry events
 			if (secretRegex.test(value.toLowerCase())) {
