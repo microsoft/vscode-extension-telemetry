@@ -16,6 +16,7 @@ import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTeleme
 const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: TelemetryClient | undefined;
 	try {
+		process.env["APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL"] = "1";
 		const appInsights = await import("applicationinsights");
 		//check if another instance is already initialized
 		if (appInsights.defaultClient) {
@@ -30,6 +31,7 @@ const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClien
 				.setAutoCollectDependencies(false)
 				.setAutoDependencyCorrelation(false)
 				.setAutoCollectConsole(false)
+				.setAutoCollectHeartbeat(false)
 				.setUseDiskRetryCaching(true)
 				.start();
 			appInsightsClient = appInsights.defaultClient;
