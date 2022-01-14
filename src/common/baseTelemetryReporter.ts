@@ -249,12 +249,16 @@ export class BaseTelemetryReporter {
 			// Regex which matches @*.site
 			const emailRegex = /@[a-zA-Z0-9-.]+/;
 			const secretRegex = /(key|token|sig|signature|password|passwd|pwd)[="':\s]/;
+			// last +? is lazy as a microoptimization since we don't care about the full value
+			const tokenRegex = /xox[pbaors]-[a-zA-Z0-9]+-[a-zA-Z0-9-]+?/;
 
 			// Check for common user data in the telemetry events
 			if (secretRegex.test(value.toLowerCase())) {
 				cleanedObject[key] = "<REDACTED: secret>";
 			} else if (emailRegex.test(value)) {
 				cleanedObject[key] = "<REDACTED: email>";
+			} else if (tokenRegex.test(value)) {
+				cleanedObject[key] = "<REDACTED: token>";
 			} else {
 				cleanedObject[key] = value;
 			}
