@@ -248,7 +248,7 @@ export class BaseTelemetryReporter {
 
 			// Regex which matches @*.site
 			const emailRegex = /@[a-zA-Z0-9-.]+/;
-			const secretRegex = /(key|token|sig|signature|password|passwd|pwd)[="':\s]/;
+			const secretRegex = /(key|token|sig|signature|password|passwd|pwd|android:value)[^a-zA-Z0-9]/;
 			// last +? is lazy as a microoptimization since we don't care about the full value
 			const tokenRegex = /xox[pbaors]-[a-zA-Z0-9]+-[a-zA-Z0-9-]+?/;
 
