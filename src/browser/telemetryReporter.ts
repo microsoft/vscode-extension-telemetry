@@ -34,7 +34,7 @@ const webAppInsightsClientFactory = async (key: string): Promise<BaseTelemetryCl
 		// If we cannot access the endpoint this most likely means it's being blocked
 		// and we should not attempt to send any telemetry.
 		const telemetryLevel = getTelemetryLevel();
-		if (endpointUrl && telemetryLevel === TelemetryLevel.ON) {
+		if (endpointUrl && telemetryLevel !== TelemetryLevel.OFF) {
 			fetch(endpointUrl).catch(() => (appInsightsClient = undefined));
 		}
 	} catch (e) {
