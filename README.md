@@ -1,4 +1,4 @@
-# [vscode-extension-telemetry](https://www.npmjs.com/package/vscode-extension-telemetry)
+# [vscode-extension-telemetry](https://www.npmjs.com/package/@vscode/extension-telemetry)
 This module provides a consistent way for extensions to report telemetry
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data.
@@ -6,14 +6,14 @@ not to send telemetry data.
 Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-nodejs-quick-start) in Azure and get your key.
 
 # Install
-`npm install vscode-extension-telemetry`
+`npm install @vscode/extension-telemetry`
 
 # Usage
 
 ## Setup
 ```javascript
 import * as vscode from 'vscode';
-import TelemetryReporter from 'vscode-extension-telemetry';
+import TelemetryReporter from '@vscode/extension-telemetry';
 
 // all events will be prefixed with this event name
 const extensionId = '<your extension unique name>';
