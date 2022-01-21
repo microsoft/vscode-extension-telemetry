@@ -80,6 +80,7 @@ reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some strin
 - **Product** `common.product` - What Vs code is hosted in, i.e. desktop, github.dev, codespaces.
 - **UI Kind** `common.uikind` - Web or Desktop indicating where VS Code is running
 - **Remote Name** `common.remotename` - A name to identify the type of remote connection. `other` indicates a remote connection not from the 3 main extensions (ssh, docker, wsl).
+- **Architecture** `common.nodeArch` - What architecture of node is running. i.e. arm or x86. On the web it will just say `web`.
 
 # License
 [MIT](LICENSE)
