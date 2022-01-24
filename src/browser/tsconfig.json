@@ -7,5 +7,5 @@
 		"outDir": "./lib",
 		"typeRoots": []
 	},
-	"include": [".", "../common"]
+	"include": [".", "../common", "../../vscode.proposed.telemetry.d.ts"]
 }
