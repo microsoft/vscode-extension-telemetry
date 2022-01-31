@@ -266,6 +266,18 @@ export class BaseTelemetryReporter {
 		return cleanedObject;
 	}
 
+	public get telemetryLevel(): "all" | "error" | "crash" | "off" {
+		const telemetryLevel = getTelemetryLevel();
+		switch (telemetryLevel) {
+			case TelemetryLevel.ON:
+				return "all";
+			case TelemetryLevel.ERROR:
+				return "error";
+			case TelemetryLevel.OFF:
+				return "off";
+		}
+	}
+
 	/**
 	 * Given an event name, some properties, and measurements sends a telemetry event.
 	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.

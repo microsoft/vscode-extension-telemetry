@@ -23,6 +23,11 @@ export default class TelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean);
 
 	/**
+	 * A string representation of the current level of telemetry being collected
+	 */
+	telemetryLevel: 'all' | 'error' | 'crash' | 'off';
+
+	/**
 	 * Sends a telemetry event with the given properties and measurements
 	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.
 	 * @param eventName The name of the event
@@ -55,5 +60,9 @@ export default class TelemetryReporter {
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
 	 */
 	sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
+
+	/**
+	 * Disposes of the telemetry reporter. This flushes the remaining events and disposes of the telemetry client.
+	 */
 	dispose(): Promise<any>;
 }

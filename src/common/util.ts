@@ -16,9 +16,9 @@ export function getTelemetryLevel(): TelemetryLevel {
 
 	try {
 		const telemetryConfiguration = vscode.env.telemetryConfiguration;
-		if (telemetryConfiguration.isUsageEnabled) {
+		if (telemetryConfiguration.isUsageEnabled && telemetryConfiguration.isErrorsEnabled && telemetryConfiguration.isCrashEnabled) {
 			return TelemetryLevel.ON;
-		} else if (telemetryConfiguration.isErrorsEnabled) {
+		} else if (telemetryConfiguration.isErrorsEnabled && telemetryConfiguration.isCrashEnabled) {
 			return TelemetryLevel.ERROR;
 		} else {
 			return TelemetryLevel.OFF;
