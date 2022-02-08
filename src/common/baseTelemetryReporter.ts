@@ -114,11 +114,8 @@ export class BaseTelemetryReporter {
 		}
 
 		if (this.firstParty) {
-			if (this.cleanRemoteName(vscode.env.remoteName) !== "other") {
-				return true;
-			}
-
-			if (this.extension === undefined || this.extension.extensionKind === vscode.ExtensionKind.Workspace) {
+			// Don't collect errors from unknown remotes
+			if (vscode.env.remoteName && this.cleanRemoteName(vscode.env.remoteName) === "other") {
 				return false;
 			}
 
