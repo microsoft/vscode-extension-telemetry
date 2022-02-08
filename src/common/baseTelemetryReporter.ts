@@ -122,10 +122,6 @@ export class BaseTelemetryReporter {
 				return false;
 			}
 
-			if (vscode.env.uiKind === vscode.UIKind.Web) {
-				return false;
-			}
-
 			return true;
 		}
 		return true;
