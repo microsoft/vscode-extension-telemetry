@@ -47,26 +47,38 @@ const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClien
 			appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
 		}
 	} catch (e: any) {
-		return Promise.reject(e);
+		return Promise.reject("Failed to initialize app insights!\n" + e.message);
 	}
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: AppenderData) => {
-			appInsightsClient?.trackEvent({
-				name: eventName,
-				properties: data?.properties,
-				measurements: data?.measurements
-			});
+			try {
+				appInsightsClient?.trackEvent({
+					name: eventName,
+					properties: data?.properties,
+					measurements: data?.measurements
+				});
+			} catch (e: any) {
+				throw new Error("Failed to log event to app insights!\n" + e.message);
+			}
 		},
 		logException: (exception: Error, data?: AppenderData) => {
-			appInsightsClient?.trackException({
-				exception,
-				properties: data?.properties,
-				measurements: data?.measurements
-			});
+			try {
+				appInsightsClient?.trackException({
+					exception,
+					properties: data?.properties,
+					measurements: data?.measurements
+				});
+			} catch(e: any) {
+				throw new Error("Failed to log exception to app insights!\n" + e.message);
+			}
 		},
 		flush: async () => {
-			appInsightsClient?.flush();
+			try {
+				appInsightsClient?.flush();
+			} catch(e: any) {
+				throw new Error("Failed to flush app insights!\n" + e.message);
+			}
 		}
 	};
 	return telemetryClient;
