@@ -9,11 +9,32 @@ import { AppenderData, BaseTelemetryReporter } from "../common/baseTelemetryRepo
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 
 /**
- * A factory function which creates a telemetry client to be used by an appender to send telemetry
+ * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ *
+ */
+ export interface ReplacementOption {
+
+	/**
+	 * A regular expression matching any property to be removed or replaced from the telemetry server.
+	 */
+	lookup: RegExp;
+
+	/**
+	 * The replacement value for the property. If not present or undefined, the property will be removed.
+	 */
+	replacementString?: string;
+}
+
+/**
+ * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
+ *
  * @param key The app insights key
+ * @param replacementOptions Optional list of {@link ReplacementOption replacements} to apply to the telemetry client. This allows
+ * the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ *
  * @returns A promise which resolves to the telemetry client or rejects upon error
  */
-const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClient> => {
+const appInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: TelemetryClient | undefined;
 	try {
 		process.env["APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL"] = "1";
@@ -49,6 +70,11 @@ const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClien
 	} catch (e: any) {
 		return Promise.reject("Failed to initialize app insights!\n" + e.message);
 	}
+
+	if (replacementOptions?.length) {
+		addReplacementOptions(appInsightsClient, replacementOptions);
+	}
+
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: AppenderData) => {
@@ -84,9 +110,48 @@ const appInsightsClientFactory = async (key: string): Promise<BaseTelemetryClien
 	return telemetryClient;
 };
 
+/**
+ * Adds replacement options to this {@link TelemetryClient}.
+ *
+ * If any replacement options are specified, this function will search through any event about to be
+ * sent to the telemetry server and replace any matches with the specified replacement string. Both
+ * the envelope and the base data will be searched.
+ *
+ * @param appInsightsClient The {@link TelemetryClient} to add the filters to.
+ * @param replacementOptions The replacement options to add.
+ */
+ function addReplacementOptions(appInsightsClient: TelemetryClient, replacementOptions: ReplacementOption[]) {
+	appInsightsClient.addTelemetryProcessor((event) => {
+		if (Array.isArray(event.tags)) {
+			event.tags.forEach(tag => applyReplacements(tag, replacementOptions));
+		} else if (event.tags) {
+			applyReplacements(event.tags, replacementOptions);
+		}
+
+		if (event.data.baseData) {
+			applyReplacements(event.data.baseData, replacementOptions);
+		}
+		return true;
+	});
+}
+
+function applyReplacements(tag: Record<string, any>, replacementOptions: ReplacementOption[]) {
+	for (const key of Object.keys(tag)) {
+		for (const option of replacementOptions) {
+			if (option.lookup.test(key)) {
+				if (option.replacementString !== undefined) {
+					tag[key] = option.replacementString;
+				} else {
+					delete tag[key];
+				}
+			}
+		}
+	}
+}
+
 export default class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
-		const appender = new BaseTelemetryAppender(key, appInsightsClientFactory);
+	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]) {
+		const appender = new BaseTelemetryAppender(key, (key) => appInsightsClientFactory(key, replacementOptions));
 		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}
