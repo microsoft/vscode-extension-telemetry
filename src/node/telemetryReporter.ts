@@ -5,25 +5,9 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import type { TelemetryClient } from "applicationinsights";
-import { AppenderData, BaseTelemetryReporter } from "../common/baseTelemetryReporter";
+import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
-
-/**
- * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
- *
- */
- export interface ReplacementOption {
-
-	/**
-	 * A regular expression matching any property to be removed or replaced from the telemetry server.
-	 */
-	lookup: RegExp;
-
-	/**
-	 * The replacement value for the property. If not present or undefined, the property will be removed.
-	 */
-	replacementString?: string;
-}
+import { applyReplacements } from "../common/util";
 
 /**
  * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
@@ -120,7 +104,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
  * @param appInsightsClient The {@link TelemetryClient} to add the filters to.
  * @param replacementOptions The replacement options to add.
  */
- function addReplacementOptions(appInsightsClient: TelemetryClient, replacementOptions: ReplacementOption[]) {
+function addReplacementOptions(appInsightsClient: TelemetryClient, replacementOptions: ReplacementOption[]) {
 	appInsightsClient.addTelemetryProcessor((event) => {
 		if (Array.isArray(event.tags)) {
 			event.tags.forEach(tag => applyReplacements(tag, replacementOptions));
@@ -133,20 +117,6 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 		}
 		return true;
 	});
-}
-
-function applyReplacements(tag: Record<string, any>, replacementOptions: ReplacementOption[]) {
-	for (const key of Object.keys(tag)) {
-		for (const option of replacementOptions) {
-			if (option.lookup.test(key)) {
-				if (option.replacementString !== undefined) {
-					tag[key] = option.replacementString;
-				} else {
-					delete tag[key];
-				}
-			}
-		}
-	}
 }
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
