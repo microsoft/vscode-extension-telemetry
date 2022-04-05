@@ -17,6 +17,22 @@ export interface ITelemetryAppender {
 	instantiateAppender(): void;
 }
 
+/**
+ * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ */
+ export interface ReplacementOption {
+
+	/**
+	 * A regular expression matching any property to be removed or replaced from the telemetry server.
+	 */
+	lookup: RegExp;
+
+	/**
+	 * The replacement value for the property. If not present or undefined, the property will be removed.
+	 */
+	replacementString?: string;
+}
+
 export class BaseTelemetryReporter {
 	private firstParty = false;
 	private userOptIn = false;

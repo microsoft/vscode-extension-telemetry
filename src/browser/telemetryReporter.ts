@@ -4,11 +4,11 @@
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
-import { AppenderData, BaseTelemetryReporter } from "../common/baseTelemetryReporter";
-import { getTelemetryLevel, TelemetryLevel } from "../common/util";
+import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
+import { applyReplacements, getTelemetryLevel, TelemetryLevel } from "../common/util";
 
 
-const webAppInsightsClientFactory = async (key: string): Promise<BaseTelemetryClient> => {
+const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const web = await import("@microsoft/applicationinsights-web");
@@ -43,16 +43,24 @@ const webAppInsightsClientFactory = async (key: string): Promise<BaseTelemetryCl
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: AppenderData) => {
+			const properties = { ...data?.properties, ...data?.measurements };
+			if (replacementOptions?.length) {
+				applyReplacements(properties, replacementOptions);
+			}
 			appInsightsClient?.trackEvent(
 				{ name: eventName },
-				{ ...data?.properties, ...data?.measurements }
+				properties
 			);
 		},
 		logException: (exception: Error, data?: AppenderData) => {
+			const properties = { ...data?.properties, ...data?.measurements };
+			if (replacementOptions?.length) {
+				applyReplacements(properties, replacementOptions);
+			}
 			appInsightsClient?.trackException(
 				{
 					exception,
-					properties: { ...data?.properties, ...data?.measurements }
+					properties
 				});
 		},
 		flush: async () => {
@@ -63,8 +71,8 @@ const webAppInsightsClientFactory = async (key: string): Promise<BaseTelemetryCl
 };
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean) {
-		const appender = new BaseTelemetryAppender(key, webAppInsightsClientFactory);
+	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]) {
+		const appender = new BaseTelemetryAppender(key, key => webAppInsightsClientFactory(key, replacementOptions));
 		if (key && key.indexOf("AIF-") === 0) {
 			firstParty = true;
 		}

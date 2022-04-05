@@ -13,14 +13,32 @@ export interface RawTelemetryEventProperties {
 export interface TelemetryEventMeasurements {
 	readonly [key: string]: number;
 }
+
+/**
+ * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ */
+ export interface ReplacementOption {
+
+	/**
+	 * A regular expression matching any property to be removed or replaced from the telemetry server.
+	 */
+	lookup: RegExp;
+
+	/**
+	 * The replacement value for the property. If not present or undefined, the property will be removed.
+	 */
+	replacementString?: string;
+}
+
 export default class TelemetryReporter {
 	/**
 	 * @param extensionId The id of your extension
 	 * @param extensionVersion The version of your extension
 	 * @param key The app insights key
 	 * @param firstParty Whether or not the telemetry is first party (i.e from Microsoft / GitHub)
+	 * @param replacementOptions A list of replacement options for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
 	 */
-	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean);
+	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]);
 
 	/**
 	 * A string representation of the current level of telemetry being collected
