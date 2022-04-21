@@ -2,13 +2,22 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { AppenderData, ITelemetryAppender } from "./baseTelemetryReporter";
+import { AppenderData } from "./baseTelemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: AppenderData): void;
 	logException(exception: Error, data?: AppenderData): void;
 	flush(): void | Promise<void>;
+}
+
+export interface ITelemetryAppender {
+	logEvent(eventName: string, data?: AppenderData): void;
+	logEventDangerously(eventName: string, data?: AppenderData): void;
+	logException(exception: Error, data?: AppenderData): void;
+	logExceptionDangerously(exception: Error, data?: AppenderData): void;
+	flush(): void | Promise<void>;
+	instantiateAppender(): void;
 }
 
 export class BaseTelemetryAppender implements ITelemetryAppender {
@@ -34,7 +43,7 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 
 	/**
 	 * Sends the event to the passed in telemetry client
-	 * @param eventName The named of the event to log
+	 * @param eventName The name of the event to log
 	 * @param data The data contanied in the event
 	 */
 	logEvent(eventName: string, data?: AppenderData): void {
@@ -45,6 +54,40 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 			return;
 		}
 		this._telemetryClient.logEvent(eventName, data);
+	}
+
+	/**
+	 * **DANGEROUS**: Logs an event regardless of telemetry level.
+	 * This should only be used in controlled environments i.e. CI pipelines
+	 * @param eventName The named of the event to log
+	 * @param data The data contained in the event
+	 */
+	logEventDangerously(eventName: string, data?: AppenderData): void {
+		if (!this._telemetryClient) {
+			return;
+		}
+		if (!this._isInstantiated) {
+			this._eventQueue.push({ eventName, data });
+		} else {
+			this._telemetryClient.logEvent(eventName, data);
+		}
+	}
+
+	/**
+	 * **DANGEROUS**: Logs an exception regardless of telemetry level.
+	 * This should only be used in controlled environments i.e. CI pipelines
+	 * @param exception The exception to log
+	 * @param data The data associated with the exception
+	 */
+	logExceptionDangerously(exception: Error, data?: AppenderData): void {
+		if (!this._telemetryClient) {
+			return;
+		}
+		if (!this._isInstantiated) {
+			this._exceptionQueue.push({ exception, data });
+		} else {
+			this._telemetryClient.logException(exception, data);
+		}
 	}
 
 	/**
