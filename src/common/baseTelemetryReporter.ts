@@ -304,7 +304,7 @@ export class BaseTelemetryReporter {
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
 			eventName = `${this.extensionId}/${eventName}`;
-			dangerous ? this.telemetryAppender.logEventDangerously(eventName, { properties, measurements }) : this.telemetryAppender.logEvent(eventName, { properties, measurements });
+			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
 	}
 
@@ -377,7 +377,7 @@ export class BaseTelemetryReporter {
 				});
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
-			dangerous ? this.telemetryAppender.logEventDangerously(eventName, { properties, measurements }) : this.telemetryAppender.logEvent(eventName, { properties, measurements });
+			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
 	}
 
@@ -432,7 +432,7 @@ export class BaseTelemetryReporter {
 				}
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
-			dangerous ? this.telemetryAppender.logExceptionDangerously(error, { properties, measurements }) : this.telemetryAppender.logException(error, { properties, measurements });
+			this.telemetryAppender.logException(error, { properties, measurements });
 		}
 	}
 

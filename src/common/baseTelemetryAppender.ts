@@ -13,16 +13,20 @@ export interface BaseTelemetryClient {
 
 export interface ITelemetryAppender {
 	logEvent(eventName: string, data?: AppenderData): void;
-	logEventDangerously(eventName: string, data?: AppenderData): void;
 	logException(exception: Error, data?: AppenderData): void;
-	logExceptionDangerously(exception: Error, data?: AppenderData): void;
 	flush(): void | Promise<void>;
 	instantiateAppender(): void;
 }
 
+enum InstantiationStatus {
+	NOT_INSTANTIATED,
+	INSTANTIATING,
+	INSTANTIATED,
+}
+
 export class BaseTelemetryAppender implements ITelemetryAppender {
 	// Whether or not the client has been instantiated
-	private _isInstantiated = false;
+	private _instantiationStatus: InstantiationStatus = InstantiationStatus.NOT_INSTANTIATED;
 	private _telemetryClient: BaseTelemetryClient | undefined;
 
 	// Queues used to store events until the appender is ready
@@ -43,12 +47,13 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 
 	/**
 	 * Sends the event to the passed in telemetry client
+	 * The appender does no telemetry level checks as those are done by the reporter.
 	 * @param eventName The name of the event to log
 	 * @param data The data contanied in the event
 	 */
 	logEvent(eventName: string, data?: AppenderData): void {
 		if (!this._telemetryClient) {
-			if (!this._isInstantiated && getTelemetryLevel() === TelemetryLevel.ON) {
+			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._eventQueue.push({ eventName, data });
 			}
 			return;
@@ -57,47 +62,14 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	}
 
 	/**
-	 * **DANGEROUS**: Logs an event regardless of telemetry level.
-	 * This should only be used in controlled environments i.e. CI pipelines
-	 * @param eventName The named of the event to log
-	 * @param data The data contained in the event
-	 */
-	logEventDangerously(eventName: string, data?: AppenderData): void {
-		if (!this._telemetryClient) {
-			return;
-		}
-		if (!this._isInstantiated) {
-			this._eventQueue.push({ eventName, data });
-		} else {
-			this._telemetryClient.logEvent(eventName, data);
-		}
-	}
-
-	/**
-	 * **DANGEROUS**: Logs an exception regardless of telemetry level.
-	 * This should only be used in controlled environments i.e. CI pipelines
-	 * @param exception The exception to log
-	 * @param data The data associated with the exception
-	 */
-	logExceptionDangerously(exception: Error, data?: AppenderData): void {
-		if (!this._telemetryClient) {
-			return;
-		}
-		if (!this._isInstantiated) {
-			this._exceptionQueue.push({ exception, data });
-		} else {
-			this._telemetryClient.logException(exception, data);
-		}
-	}
-
-	/**
 	 * Sends an exception to the passed in telemetry client
+	 * The appender does no telemetry level checks as those are done by the reporter.
 	 * @param exception The exception to collect
 	 * @param data Data associated with the exception
 	 */
 	logException(exception: Error, data?: AppenderData): void {
 		if (!this._telemetryClient) {
-			if (!this._isInstantiated && getTelemetryLevel() !== TelemetryLevel.OFF) {
+			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._exceptionQueue.push({ exception, data });
 			}
 			return;
@@ -130,16 +102,20 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	 * Instantiates the telemetry client to make the appender "active"
 	 */
 	instantiateAppender(): void {
-		if (this._isInstantiated) {
+		if (this._instantiationStatus !== InstantiationStatus.NOT_INSTANTIATED) {
 			return;
 		}
+		this._instantiationStatus = InstantiationStatus.INSTANTIATING;
 		// Call the client factory to get the client and then let it know it's instatntiated
 		this._clientFactory(this._key).then(client => {
 			this._telemetryClient = client;
-			this._isInstantiated = true;
+			this._instantiationStatus = InstantiationStatus.INSTANTIATED;
 			this._flushQueues();
 		}).catch(err => {
 			console.error(err);
+			// If it failed to instntiate, then we don't want to try again.
+			// So we mark it as instantiated. See #94
+			this._instantiationStatus = InstantiationStatus.INSTANTIATED;
 		});
 	}
 }
