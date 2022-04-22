@@ -5,7 +5,7 @@
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
-import { applyReplacements, getTelemetryLevel, TelemetryLevel } from "../common/util";
+import { applyReplacements } from "../common/util";
 
 
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
@@ -33,8 +33,7 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 		appInsightsClient.loadAppInsights();
 		// If we cannot access the endpoint this most likely means it's being blocked
 		// and we should not attempt to send any telemetry.
-		const telemetryLevel = getTelemetryLevel();
-		if (endpointUrl && telemetryLevel !== TelemetryLevel.OFF) {
+		if (endpointUrl) {
 			fetch(endpointUrl).catch(() => (appInsightsClient = undefined));
 		}
 	} catch (e) {

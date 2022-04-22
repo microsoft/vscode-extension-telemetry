@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { AppenderData, ITelemetryAppender } from "./baseTelemetryReporter";
+import { AppenderData } from "./baseTelemetryReporter";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface BaseTelemetryClient {
@@ -11,9 +11,22 @@ export interface BaseTelemetryClient {
 	flush(): void | Promise<void>;
 }
 
+export interface ITelemetryAppender {
+	logEvent(eventName: string, data?: AppenderData): void;
+	logException(exception: Error, data?: AppenderData): void;
+	flush(): void | Promise<void>;
+	instantiateAppender(): void;
+}
+
+enum InstantiationStatus {
+	NOT_INSTANTIATED,
+	INSTANTIATING,
+	INSTANTIATED,
+}
+
 export class BaseTelemetryAppender implements ITelemetryAppender {
 	// Whether or not the client has been instantiated
-	private _isInstantiated = false;
+	private _instantiationStatus: InstantiationStatus = InstantiationStatus.NOT_INSTANTIATED;
 	private _telemetryClient: BaseTelemetryClient | undefined;
 
 	// Queues used to store events until the appender is ready
@@ -34,12 +47,13 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 
 	/**
 	 * Sends the event to the passed in telemetry client
-	 * @param eventName The named of the event to log
+	 * The appender does no telemetry level checks as those are done by the reporter.
+	 * @param eventName The name of the event to log
 	 * @param data The data contanied in the event
 	 */
 	logEvent(eventName: string, data?: AppenderData): void {
 		if (!this._telemetryClient) {
-			if (!this._isInstantiated && getTelemetryLevel() === TelemetryLevel.ON) {
+			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._eventQueue.push({ eventName, data });
 			}
 			return;
@@ -49,12 +63,13 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 
 	/**
 	 * Sends an exception to the passed in telemetry client
+	 * The appender does no telemetry level checks as those are done by the reporter.
 	 * @param exception The exception to collect
 	 * @param data Data associated with the exception
 	 */
 	logException(exception: Error, data?: AppenderData): void {
 		if (!this._telemetryClient) {
-			if (!this._isInstantiated && getTelemetryLevel() !== TelemetryLevel.OFF) {
+			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._exceptionQueue.push({ exception, data });
 			}
 			return;
@@ -87,16 +102,20 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	 * Instantiates the telemetry client to make the appender "active"
 	 */
 	instantiateAppender(): void {
-		if (this._isInstantiated) {
+		if (this._instantiationStatus !== InstantiationStatus.NOT_INSTANTIATED) {
 			return;
 		}
+		this._instantiationStatus = InstantiationStatus.INSTANTIATING;
 		// Call the client factory to get the client and then let it know it's instatntiated
 		this._clientFactory(this._key).then(client => {
 			this._telemetryClient = client;
-			this._isInstantiated = true;
+			this._instantiationStatus = InstantiationStatus.INSTANTIATED;
 			this._flushQueues();
 		}).catch(err => {
 			console.error(err);
+			// If it failed to instntiate, then we don't want to try again.
+			// So we mark it as instantiated. See #94
+			this._instantiationStatus = InstantiationStatus.INSTANTIATED;
 		});
 	}
 }

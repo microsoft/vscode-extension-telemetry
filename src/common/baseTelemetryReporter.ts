@@ -4,23 +4,18 @@
 
 import * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../lib/telemetryReporter";
+import { ITelemetryAppender } from "./baseTelemetryAppender";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface AppenderData {
 	properties?: RawTelemetryEventProperties,
 	measurements?: TelemetryEventMeasurements
 }
-export interface ITelemetryAppender {
-	logEvent(eventName: string, data?: AppenderData): void;
-	logException(exception: Error, data?: AppenderData): void;
-	flush(): void | Promise<void>;
-	instantiateAppender(): void;
-}
 
 /**
  * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
  */
- export interface ReplacementOption {
+export interface ReplacementOption {
 
 	/**
 	 * A regular expression matching any property to be removed or replaced from the telemetry server.
@@ -288,6 +283,32 @@ export class BaseTelemetryReporter {
 	}
 
 	/**
+	 * Internal function which logs telemetry events and takes extra options.
+	 * @param eventName The name of the event
+	 * @param properties The properties of the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param sanitize Whether or not to sanitize to the properties and measures
+	 * @param dangerous Whether or not to ignore telemetry level
+	 */
+	private internalSendTelemetryEvent(
+		eventName: string,
+		properties: TelemetryEventProperties | undefined,
+		measurements: TelemetryEventMeasurements | undefined,
+		sanitize: boolean,
+		dangerous: boolean
+	): void {
+		if ((this.userOptIn || dangerous) && eventName !== "") {
+			properties = { ...properties, ...this.getCommonProperties() };
+			if (sanitize) {
+				const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
+			}
+			eventName = `${this.extensionId}/${eventName}`;
+			this.telemetryAppender.logEvent(eventName, { properties, measurements });
+		}
+	}
+
+	/**
 	 * Given an event name, some properties, and measurements sends a telemetry event.
 	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.
 	 * @param eventName The name of the event
@@ -295,11 +316,7 @@ export class BaseTelemetryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		if (this.userOptIn && eventName !== "") {
-			properties = { ...properties, ...this.getCommonProperties() };
-			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
-		}
+		this.internalSendTelemetryEvent(eventName, properties, measurements, true, false);
 	}
 
 	/**
@@ -309,9 +326,58 @@ export class BaseTelemetryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendRawTelemetryEvent(eventName: string, properties?: RawTelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		if (this.userOptIn && eventName !== "") {
+		this.internalSendTelemetryEvent(eventName, properties, measurements, false, false);
+	}
+
+	/**
+	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry event without checking telemetry setting
+	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * @param eventName The name of the event
+	 * @param properties The properties to send with the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
+	 */
+	public sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize = true): void {
+		// Since telemetry is probably off when sending dangerously, we must start the appender
+		this.telemetryAppender.instantiateAppender();
+		this.internalSendTelemetryEvent(eventName, properties, measurements, sanitize, true);
+	}
+
+	/**
+	 * Internal function which logs telemetry error events and takes extra options.
+	 * @param eventName The name of the event
+	 * @param properties The properties of the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param errorProps Properties to readct. If undefined then we assume all properties belong to the error prop and will be anonymized
+	 * @param sanitize Whether or not to sanitize to the properties and measures
+	 * @param dangerous Whether or not to ignore telemetry level
+	 */
+	private internalSendTelemetryErrorEvent(
+		eventName: string,
+		properties: TelemetryEventProperties | undefined,
+		measurements: TelemetryEventMeasurements | undefined,
+		errorProps: string[] | undefined,
+		sanitize: boolean,
+		dangerous: boolean
+	): void {
+		if ((this.shouldSendErrorTelemetry() || dangerous) && eventName !== "") {
+
 			properties = { ...properties, ...this.getCommonProperties() };
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties, measurements });
+			if (sanitize) {
+				// always clean the properties if first party
+				// do not send any error properties if we shouldn't send error telemetry
+				// if we have no errorProps, assume all are error props
+				const cleanProperties = this.cloneAndChange(properties, (key: string, prop: string) => {
+
+					if (errorProps === undefined || errorProps.indexOf(key) !== -1) {
+						return "REDACTED";
+					}
+
+					return this.anonymizeFilePaths(prop, this.firstParty);
+				});
+				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
+			}
+			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
 	}
 
@@ -322,24 +388,51 @@ export class BaseTelemetryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 * @param errorProps If not present then we assume all properties belong to the error prop and will be anonymized
 	 */
-	public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string }, measurements?: { [key: string]: number }, errorProps?: string[]): void {
-		if (this.errorOptIn && eventName !== "") {
-			// always clean the properties if first party
-			// do not send any error properties if we shouldn't send error telemetry
-			// if we have no errorProps, assume all are error props
+	public sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[]): void {
+		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, errorProps, true, false);
+	}
+
+	/**
+	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry error event without checking telemetry setting
+	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * @param eventName The name of the event
+	 * @param properties The properties to send with the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param errorProps If not present then we assume all properties belong to the error prop and will be anonymized
+	 * @param sanitize Whether or not to run the properties and measures through sanitiziation, defaults to true
+	 */
+	public sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[], sanitize = true): void {
+		// Since telemetry is probably off when sending dangerously, we must start the appender
+		this.telemetryAppender.instantiateAppender();
+		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, errorProps, sanitize, true);
+	}
+
+	/**
+	 * Internal function which logs telemetry exceptions and takes extra options
+	 * @param error: The error to send
+	 * @param properties The properties of the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param sanitize Whether or not to sanitize to the properties and measures
+	 * @param dangerous Whether or not to ignore telemetry level
+	 */
+	private internalSendTelemetryException(
+		error: Error,
+		properties: TelemetryEventProperties | undefined,
+		measurements: TelemetryEventMeasurements | undefined,
+		sanitize: boolean,
+		dangerous: boolean
+	): void {
+		if ((this.shouldSendErrorTelemetry() || dangerous) && error) {
 			properties = { ...properties, ...this.getCommonProperties() };
-			const cleanProperties = this.cloneAndChange(properties, (key: string, prop: string) => {
-				if (this.shouldSendErrorTelemetry()) {
-					return this.anonymizeFilePaths(prop, this.firstParty);
+			if (sanitize) {
+				const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
+				// Also run the error stack through the anonymizer
+				if (error.stack) {
+					error.stack = this.anonymizeFilePaths(error.stack, this.firstParty);
 				}
-
-				if (errorProps === undefined || errorProps.indexOf(key) !== -1) {
-					return "REDACTED";
-				}
-
-				return this.anonymizeFilePaths(prop, this.firstParty);
-			});
-			this.telemetryAppender.logEvent(`${this.extensionId}/${eventName}`, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
+				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
+			}
+			this.telemetryAppender.logException(error, { properties, measurements });
 		}
 	}
 
@@ -350,15 +443,21 @@ export class BaseTelemetryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		if (this.shouldSendErrorTelemetry() && this.errorOptIn && error) {
-			properties = { ...properties, ...this.getCommonProperties() };
-			const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
-			// Also run the error stack through the anonymizer
-			if (error.stack) {
-				error.stack = this.anonymizeFilePaths(error.stack, this.firstParty);
-			}
-			this.telemetryAppender.logException(error, { properties: this.removePropertiesWithPossibleUserInfo(cleanProperties), measurements: measurements });
-		}
+		this.internalSendTelemetryException(error, properties, measurements, true, false);
+	}
+
+	/**
+	 * **DANGEROUS** Given an error, properties, and measurements. Sends an exception event without checking the telemetry setting
+	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * @param eventName The name of the event
+	 * @param properties The properties to send with the event
+	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
+	 */
+	public sendDangerousTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize = true): void {
+		// Since telemetry is probably off when sending dangerously, we must start the appender
+		this.telemetryAppender.instantiateAppender();
+		this.internalSendTelemetryException(error, properties, measurements, sanitize, true);
 	}
 
 	/**
