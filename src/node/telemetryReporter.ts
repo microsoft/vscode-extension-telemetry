@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as os from "os";
-import * as vscode from "vscode";
+import vscode from "../common/vscodeAPI";
 import type { TelemetryClient } from "applicationinsights";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";

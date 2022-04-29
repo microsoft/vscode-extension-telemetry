@@ -3,6 +3,7 @@ build
 .github
 lib/*.js.map
 lib/*.js
+lib/test
 !lib/*.min.js
 node_modules
 src
@@ -15,3 +16,4 @@ tsfmt.json
 .esbuild.config.js
 .eslintrc.json
 .eslintignore
+*.test.ts

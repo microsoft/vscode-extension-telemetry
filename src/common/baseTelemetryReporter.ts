@@ -2,7 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as vscode from "vscode";
+import vscodeAPI from "./vscodeAPI";
+import type * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../lib/telemetryReporter";
 import { ITelemetryAppender } from "./baseTelemetryAppender";
 import { getTelemetryLevel, TelemetryLevel } from "./util";
@@ -46,11 +47,11 @@ export class BaseTelemetryReporter {
 		this.firstParty = !!firstParty;
 		this.updateUserOptStatus();
 
-		if (vscode.env.onDidChangeTelemetryEnabled !== undefined) {
-			this.disposables.push(vscode.env.onDidChangeTelemetryEnabled(() => this.updateUserOptStatus()));
-			this.disposables.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
+		if (vscodeAPI.env.onDidChangeTelemetryEnabled !== undefined) {
+			this.disposables.push(vscodeAPI.env.onDidChangeTelemetryEnabled(() => this.updateUserOptStatus()));
+			this.disposables.push(vscodeAPI.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
 		} else {
-			this.disposables.push(vscode.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
+			this.disposables.push(vscodeAPI.workspace.onDidChangeConfiguration(() => this.updateUserOptStatus()));
 		}
 	}
 
@@ -92,7 +93,7 @@ export class BaseTelemetryReporter {
 	 */
 	private get extension(): vscode.Extension<any> | undefined {
 		if (this._extension === undefined) {
-			this._extension = vscode.extensions.getExtension(this.extensionId);
+			this._extension = vscodeAPI.extensions.getExtension(this.extensionId);
 		}
 
 		return this._extension;
@@ -126,7 +127,7 @@ export class BaseTelemetryReporter {
 
 		if (this.firstParty) {
 			// Don't collect errors from unknown remotes
-			if (vscode.env.remoteName && this.cleanRemoteName(vscode.env.remoteName) === "other") {
+			if (vscodeAPI.env.remoteName && this.cleanRemoteName(vscodeAPI.env.remoteName) === "other") {
 				return false;
 			}
 
@@ -154,25 +155,25 @@ export class BaseTelemetryReporter {
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
 		commonProperties["common.extname"] = this.extensionId;
 		commonProperties["common.extversion"] = this.extensionVersion;
-		if (vscode && vscode.env) {
-			commonProperties["common.vscodemachineid"] = vscode.env.machineId;
-			commonProperties["common.vscodesessionid"] = vscode.env.sessionId;
-			commonProperties["common.vscodeversion"] = vscode.version;
-			commonProperties["common.isnewappinstall"] = vscode.env.isNewAppInstall ? vscode.env.isNewAppInstall.toString() : "false";
-			commonProperties["common.product"] = vscode.env.appHost;
+		if (vscodeAPI && vscodeAPI.env) {
+			commonProperties["common.vscodemachineid"] = vscodeAPI.env.machineId;
+			commonProperties["common.vscodesessionid"] = vscodeAPI.env.sessionId;
+			commonProperties["common.vscodeversion"] = vscodeAPI.version;
+			commonProperties["common.isnewappinstall"] = vscodeAPI.env.isNewAppInstall ? vscodeAPI.env.isNewAppInstall.toString() : "false";
+			commonProperties["common.product"] = vscodeAPI.env.appHost;
 
-			switch (vscode.env.uiKind) {
-				case vscode.UIKind.Web:
+			switch (vscodeAPI.env.uiKind) {
+				case vscodeAPI.UIKind.Web:
 					commonProperties["common.uikind"] = "web";
 					break;
-				case vscode.UIKind.Desktop:
+				case vscodeAPI.UIKind.Desktop:
 					commonProperties["common.uikind"] = "desktop";
 					break;
 				default:
 					commonProperties["common.uikind"] = "unknown";
 			}
 
-			commonProperties["common.remotename"] = this.cleanRemoteName(vscode.env.remoteName);
+			commonProperties["common.remotename"] = this.cleanRemoteName(vscodeAPI.env.remoteName);
 		}
 		return commonProperties;
 	}
@@ -190,8 +191,8 @@ export class BaseTelemetryReporter {
 		}
 
 		const cleanupPatterns = [];
-		if (vscode.env.appRoot !== "") {
-			cleanupPatterns.push(new RegExp(vscode.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));
+		if (vscodeAPI.env.appRoot !== "") {
+			cleanupPatterns.push(new RegExp(vscodeAPI.env.appRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));
 		}
 		if (this.extension) {
 			cleanupPatterns.push(new RegExp(this.extension.extensionPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"));

@@ -2,8 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as vscode from "vscode";
-import { ReplacementOption } from "./baseTelemetryReporter";
+import vscode from "./vscodeAPI";
+import type { ReplacementOption } from "./baseTelemetryReporter";
 
 export const enum TelemetryLevel {
 	ON = "on",
