@@ -15,7 +15,6 @@
   "scripts": {
     "build": "node .esbuild.config.js",
     "test": "tsc -p 'test/tsconfig.json' && mocha lib/test/*",
-    "test-compile": "tsc -p 'test/tsconfig.json'",
     "compile": "tsc -noEmit -p 'src/browser/tsconfig.json' && tsc -noEmit -p 'src/node/tsconfig.json' && npm run build"
   },
   "devDependencies": {
