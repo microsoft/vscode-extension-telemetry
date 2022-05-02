@@ -3,7 +3,6 @@
  *--------------------------------------------------------*/
 
 import { AppenderData } from "./baseTelemetryReporter";
-import { getTelemetryLevel, TelemetryLevel } from "./util";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: AppenderData): void;
@@ -37,12 +36,12 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	private _clientFactory: (key: string) => Promise<BaseTelemetryClient>;
 	private _key: string;
 
-	constructor(key: string, clientFactory: (key: string) => Promise<BaseTelemetryClient>) {
+	constructor(
+		key: string,
+		clientFactory: (key: string) => Promise<BaseTelemetryClient>,
+	) {
 		this._clientFactory = clientFactory;
 		this._key = key;
-		if (getTelemetryLevel() !== TelemetryLevel.OFF) {
-			this.instantiateAppender();
-		}
 	}
 
 	/**

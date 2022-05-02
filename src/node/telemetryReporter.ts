@@ -3,12 +3,11 @@
  *--------------------------------------------------------*/
 
 import * as os from "os";
-import vscode from "../common/vscodeAPI";
+import * as vscode from "vscode";
 import type { TelemetryClient } from "applicationinsights";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
-import { applyReplacements } from "../common/util";
-
+import { TelemetryUtil } from "../common/util";
 /**
  * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
  *
@@ -107,13 +106,13 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 function addReplacementOptions(appInsightsClient: TelemetryClient, replacementOptions: ReplacementOption[]) {
 	appInsightsClient.addTelemetryProcessor((event) => {
 		if (Array.isArray(event.tags)) {
-			event.tags.forEach(tag => applyReplacements(tag, replacementOptions));
+			event.tags.forEach(tag => TelemetryUtil.applyReplacements(tag, replacementOptions));
 		} else if (event.tags) {
-			applyReplacements(event.tags, replacementOptions);
+			TelemetryUtil.applyReplacements(event.tags, replacementOptions);
 		}
 
 		if (event.data.baseData) {
-			applyReplacements(event.data.baseData, replacementOptions);
+			TelemetryUtil.applyReplacements(event.data.baseData, replacementOptions);
 		}
 		return true;
 	});
@@ -129,6 +128,6 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			release: os.release(),
 			platform: os.platform(),
 			architecture: os.arch(),
-		}, firstParty);
+		}, vscode, firstParty);
 	}
 }
