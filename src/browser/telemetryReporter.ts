@@ -3,10 +3,10 @@
  *--------------------------------------------------------*/
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import * as vscode from "vscode";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
-import { applyReplacements } from "../common/util";
-
+import { TelemetryUtil } from "../common/util";
 
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
@@ -44,7 +44,7 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 		logEvent: (eventName: string, data?: AppenderData) => {
 			const properties = { ...data?.properties, ...data?.measurements };
 			if (replacementOptions?.length) {
-				applyReplacements(properties, replacementOptions);
+				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
 			appInsightsClient?.trackEvent(
 				{ name: eventName },
@@ -54,7 +54,7 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 		logException: (exception: Error, data?: AppenderData) => {
 			const properties = { ...data?.properties, ...data?.measurements };
 			if (replacementOptions?.length) {
-				applyReplacements(properties, replacementOptions);
+				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
 			appInsightsClient?.trackException(
 				{
@@ -79,6 +79,6 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			release: navigator.appVersion,
 			platform: "web",
 			architecture: "web",
-		}, firstParty);
+		}, vscode, firstParty);
 	}
 }

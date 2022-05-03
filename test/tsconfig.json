@@ -1,0 +1,13 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		// Must include DOM to make the node type "URL" known about
+		"lib": ["ES2015", "DOM"],
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"outDir": "../lib/test",
+		// Not sure why it cannot find them, but alas it must be pointed out where the types are
+		"typeRoots": ["../node_modules/@types"]
+	},
+	"include": [".", "../vscode.proposed.telemetry.d.ts"]
+}
