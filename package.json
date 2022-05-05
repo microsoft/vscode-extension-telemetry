@@ -21,6 +21,7 @@
     "@microsoft/applicationinsights-web": "^2.6.4",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.32",
+    "@types/sinon": "^10.0.11",
     "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
@@ -28,6 +29,7 @@
     "esbuild": "^0.14.32",
     "eslint": "^8.12.0",
     "mocha": "^9.2.2",
+    "sinon": "^13.0.2",
     "typescript": "^4.6.2"
   },
   "repository": {
