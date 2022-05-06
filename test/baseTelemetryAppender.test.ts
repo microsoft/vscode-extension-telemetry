@@ -1,3 +1,7 @@
+/*---------------------------------------------------------
+ * Copyright (C) Microsoft Corporation. All rights reserved.
+ *--------------------------------------------------------*/
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../src/common/baseTelemetryAppender";
 import * as sinon from "sinon";
