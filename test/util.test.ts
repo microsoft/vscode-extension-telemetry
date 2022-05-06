@@ -1,3 +1,7 @@
+/*---------------------------------------------------------
+ * Copyright (C) Microsoft Corporation. All rights reserved.
+ *--------------------------------------------------------*/
+
 import * as assert from "assert";
 import type * as vscode from "vscode";
 import { TelemetryUtil, TelemetryLevel } from "../src/common/util";
