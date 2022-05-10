@@ -3,7 +3,7 @@ This module provides a consistent way for extensions to report telemetry
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data.
 
-Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/nodejs) in Azure and get your key.
+Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) in Azure and get your key.
 
 # Install
 `npm install @vscode/extension-telemetry`
