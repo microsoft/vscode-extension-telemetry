@@ -19,7 +19,7 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 const extensionId = '<your extension unique name>';
 
 // extension version will be reported as a property with each event
-const extensionVersion = '<your extension version>';
+const extensionVersion = vscode.extensions.getExtension(extensionId).packageJSON.version; // '<your extension version>';
 
 // the application insights key (also known as instrumentation key)
 const key = '<your key>';
