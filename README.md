@@ -6,7 +6,10 @@ not to send telemetry data.
 Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) in Azure and get your key.
 
 # Install
+With npm:
 `npm install @vscode/extension-telemetry`
+With yarn:
+`yarn add @vscode/extension-telemetry`
 
 # Usage
 
