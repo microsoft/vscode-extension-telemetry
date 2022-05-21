@@ -3,7 +3,7 @@ This module provides a consistent way for extensions to report telemetry
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data. See [telemetry extension guidelines](https://code.visualstudio.com/api/extension-guides/telemetry) for more information on using telemetry in your extension.
 
-Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) in Azure and get your key.
+Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) in Azure and get your key. Don't worry about hardcoding it, it is not sensitive.
 
 # Install
 `npm install @vscode/extension-telemetry`
