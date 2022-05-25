@@ -378,6 +378,7 @@ export class BaseTelemetryReporter {
 				});
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
+			eventName = `${this.extensionId}/${eventName}`;
 			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
 	}
