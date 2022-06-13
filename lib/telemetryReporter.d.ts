@@ -73,13 +73,12 @@ export default class TelemetryReporter {
 	sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void;
 
 	/**
-	 * Sends a telemetry error event with the given properties, measurements, and errorProps
+	 * Sends a telemetry error event with the given properties, measurements
 	 * @param eventName The name of the event
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
-	 * @param errorProps A list of case sensitive properties to drop, if excluded we drop all properties but still send the event
 	 */
-	sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[]): void;
+	sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry error event without checking telemetry setting
@@ -87,10 +86,9 @@ export default class TelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param errorProps If not present then we assume all properties belong to the error prop and will be anonymized
 	 * @param sanitize Whether or not to run the properties and measures through sanitiziation, defaults to true
 	 */
-	sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, errorProps?: string[], sanitize?: boolean): void;
+	sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void;
 
 	/**
 	 * Sends an exception which includes the error stack, properties, and measurements
