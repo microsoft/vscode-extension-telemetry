@@ -73,7 +73,8 @@ export default class TelemetryReporter {
 	sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void;
 
 	/**
-	 * Sends a telemetry error event with the given properties, measurements
+	 * Sends a telemetry error event with the given properties, measurements.
+	 * **Note**: The errorProps parameter has been removed since v0.6, if you would like to remove a property please use the replacementOptions parameter in the constructor.
 	 * @param eventName The name of the event
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
