@@ -18,6 +18,8 @@
     "compile": "tsc -noEmit -p 'src/browser/tsconfig.json' && tsc -noEmit -p 'src/node/tsconfig.json' && npm run build"
   },
   "devDependencies": {
+    "@microsoft/1ds-core-js": "^3.2.3",
+    "@microsoft/1ds-post-js": "^3.2.3",
     "@microsoft/applicationinsights-web": "^2.6.4",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.32",
