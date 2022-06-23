@@ -163,7 +163,7 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 		let clientFactory = (key: string) => appInsightsClientFactory(key, replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
-			clientFactory = (key: string) => oneDataSystemClientFactory(key, getXHROverride());
+			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, getXHROverride());
 		}
 
 		const appender = new BaseTelemetryAppender(key, clientFactory);

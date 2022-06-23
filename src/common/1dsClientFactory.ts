@@ -5,6 +5,7 @@
 
 import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/1ds-core-js";
 import type { IChannelConfiguration, IXHROverride, PostChannel } from "@microsoft/1ds-post-js";
+import type * as vscode from "vscode";
 import type { BaseTelemetryClient } from "./baseTelemetryAppender";
 import { AppenderData } from "./baseTelemetryReporter";
 
@@ -14,7 +15,7 @@ import { AppenderData } from "./baseTelemetryReporter";
  * @param xhrOverride An optional override to use for requests instead of the XHTMLRequest object. Useful for node environments
  * @returns The AI core object
  */
-const getAICore = async (key: string, xhrOverride?: IXHROverride): Promise<AppInsightsCore> => {
+const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IXHROverride): Promise<AppInsightsCore> => {
 	const oneDs = await import("@microsoft/1ds-core-js");
 	const postPlugin = await import("@microsoft/1ds-post-js");
 	const appInsightsCore = new oneDs.AppInsightsCore();
@@ -46,6 +47,12 @@ const getAICore = async (key: string, xhrOverride?: IXHROverride): Promise<AppIn
 	appInsightsCore.initialize(coreConfig, []);
 
 	appInsightsCore.addTelemetryInitializer((envelope) => {
+		const config = vscodeAPI.workspace.getConfiguration("telemetry");
+		const internalTesting = config.get<boolean>("internalTesting");
+		// Only add this flag when `telemetry.internalTesting` is enabled
+		if (!internalTesting) {
+			return;
+		}
 		envelope["ext"] = envelope["ext"] ?? {};
 		envelope["ext"]["utc"] = envelope["ext"]["utc"] ?? {};
 		// Sets it to be internal only based on Windows UTC flagging
@@ -60,8 +67,8 @@ const getAICore = async (key: string, xhrOverride?: IXHROverride): Promise<AppIn
  * @param key The ingestion key
  * @param xhrOverride An optional override to use for requests instead of the XHTMLRequest object. Useful for node environments
  */
-export const oneDataSystemClientFactory = async (key: string, xhrOverride?: IXHROverride): Promise<BaseTelemetryClient> => {
-	const appInsightsCore = await getAICore(key, xhrOverride);
+export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IXHROverride): Promise<BaseTelemetryClient> => {
+	const appInsightsCore = await getAICore(key, vscodeAPI, xhrOverride);
 	// Shape the app insights core from 1DS into a standard format
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: AppenderData) => {
