@@ -51,7 +51,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 		}
 		//check if it's an Asimov key to change the endpoint
 		if (key && key.indexOf("AIF-") === 0) {
-			appInsightsClient.config.endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
+			appInsightsClient.config.endpointUrl = "https://mobile.events.data.microsoft.com/collect/v1";
 		}
 	} catch (e: any) {
 		return Promise.reject("Failed to initialize app insights!\n" + e.message);

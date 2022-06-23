@@ -15,7 +15,7 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 		const web = await import("@microsoft/applicationinsights-web");
 		let endpointUrl: undefined | string;
 		if (key && key.indexOf("AIF-") === 0) {
-			endpointUrl = "https://vortex.data.microsoft.com/collect/v1";
+			endpointUrl = "https://vscode.vortex.data.microsoft.com/collect/v1";
 		}
 		appInsightsClient = new web.ApplicationInsights({
 			config: {
