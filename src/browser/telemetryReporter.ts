@@ -4,6 +4,7 @@
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import * as vscode from "vscode";
+import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { TelemetryUtil } from "../common/util";
@@ -71,8 +72,15 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]) {
-		const appender = new BaseTelemetryAppender(key, key => webAppInsightsClientFactory(key, replacementOptions));
-		if (key && key.indexOf("AIF-") === 0) {
+		let clientFactory = (key: string) => webAppInsightsClientFactory(key, replacementOptions);
+		// If key is usable by 1DS use the 1DS SDk
+		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
+			clientFactory = (key: string) => oneDataSystemClientFactory(key);
+		}
+
+		const appender = new BaseTelemetryAppender(key, clientFactory);
+		// If it's a specialized AIF app insights key or a 1DS key then it is first party
+		if (key && (key.indexOf("AIF-") === 0 || TelemetryUtil.shouldUseOneDataSystemSDK(key))) {
 			firstParty = true;
 		}
 		super(extensionId, extensionVersion, appender, {

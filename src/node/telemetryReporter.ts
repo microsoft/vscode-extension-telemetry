@@ -4,10 +4,13 @@
 
 import * as os from "os";
 import * as vscode from "vscode";
+import * as https from "https";
 import type { TelemetryClient } from "applicationinsights";
 import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
 import { TelemetryUtil } from "../common/util";
+import type { IXHROverride, IPayloadData } from "@microsoft/1ds-post-js";
+import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
 /**
  * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
  *
@@ -118,10 +121,54 @@ function addReplacementOptions(appInsightsClient: TelemetryClient, replacementOp
 	});
 }
 
+/**
+ * Create a replacement for the XHTMLRequest object utilizing nodes HTTP module.
+ * @returns A XHR override object used to override the XHTMLRequest object in the 1DS SDK
+ */
+function getXHROverride() {
+	// Override the way events get sent since node doesn't have XHTMLRequest
+	const customHttpXHROverride: IXHROverride = {
+		sendPOST: (payload: IPayloadData, oncomplete) => {
+			const options = {
+				method: "POST",
+				headers: {
+					...payload.headers,
+					"Content-Type": "application/json",
+					"Content-Length": Buffer.byteLength(payload.data)
+				}
+			};
+			try {
+				const req = https.request(payload.urlString, options, res => {
+					res.on("data", function (responseData) {
+						oncomplete(res.statusCode ?? 200, res.headers as Record<string, any>, responseData.toString());
+					});
+					// On response with error send status of 0 and a blank response to oncomplete so we can retry events
+					res.on("error", function () {
+						oncomplete(0, {});
+					});
+				});
+				req.write(payload.data);
+				req.end();
+			} catch {
+				// If it errors out, send status of 0 and a blank response to oncomplete so we can retry events
+				oncomplete(0, {});
+			}
+		}
+	};
+	return customHttpXHROverride;
+}
+
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]) {
-		const appender = new BaseTelemetryAppender(key, (key) => appInsightsClientFactory(key, replacementOptions));
-		if (key && key.indexOf("AIF-") === 0) {
+		let clientFactory = (key: string) => appInsightsClientFactory(key, replacementOptions);
+		// If key is usable by 1DS use the 1DS SDk
+		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
+			clientFactory = (key: string) => oneDataSystemClientFactory(key, getXHROverride());
+		}
+
+		const appender = new BaseTelemetryAppender(key, clientFactory);
+		// If it's a specialized AIF app insights key or a 1DS key then it is first party
+		if (key && (key.indexOf("AIF-") === 0 || TelemetryUtil.shouldUseOneDataSystemSDK(key))) {
 			firstParty = true;
 		}
 		super(extensionId, extensionVersion, appender, {

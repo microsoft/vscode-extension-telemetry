@@ -149,7 +149,7 @@ export class BaseTelemetryReporter {
 	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.product" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	private getCommonProperties(): TelemetryEventProperties {
-		const commonProperties = Object.create(null);
+		const commonProperties: Record<string, any> = {};
 		commonProperties["common.os"] = this.osShim.platform;
 		commonProperties["common.nodeArch"] = this.osShim.architecture;
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
@@ -242,7 +242,7 @@ export class BaseTelemetryReporter {
 		if (typeof properties !== "object") {
 			return;
 		}
-		const cleanedObject = Object.create(null);
+		const cleanedObject: Record<string, any> = {};
 		// Loop through key and values of the properties object
 		for (const key of Object.keys(properties)) {
 			const value = properties[key];
