@@ -44,11 +44,12 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
 		coreConfig.extensionConfig[collectorChannelPlugin.identifier] = channelConfig;
 	}
 
+	const config = vscodeAPI.workspace.getConfiguration("telemetry");
+	const internalTesting = config.get<boolean>("internalTesting");
+
 	appInsightsCore.initialize(coreConfig, []);
 
 	appInsightsCore.addTelemetryInitializer((envelope) => {
-		const config = vscodeAPI.workspace.getConfiguration("telemetry");
-		const internalTesting = config.get<boolean>("internalTesting");
 		// Only add this flag when `telemetry.internalTesting` is enabled
 		if (!internalTesting) {
 			return;
