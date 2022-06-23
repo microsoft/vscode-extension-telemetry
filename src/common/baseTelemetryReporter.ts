@@ -304,6 +304,9 @@ export class BaseTelemetryReporter {
 				const cleanProperties = this.cloneAndChange(properties, (_key: string, prop: string) => this.anonymizeFilePaths(prop, this.firstParty));
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
+			// The pipeline doesn't like undefined measurements or properties bag so at least send an empty object
+			properties = properties ?? {};
+			measurements = measurements ?? {};
 			eventName = `${this.extensionId}/${eventName}`;
 			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
@@ -369,6 +372,9 @@ export class BaseTelemetryReporter {
 				});
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
+			// The pipeline doesn't like undefined measurements or properties bag so at least send an empty object
+			properties = properties ?? {};
+			measurements = measurements ?? {};
 			eventName = `${this.extensionId}/${eventName}`;
 			this.telemetryAppender.logEvent(eventName, { properties, measurements });
 		}
@@ -423,6 +429,9 @@ export class BaseTelemetryReporter {
 				}
 				properties = this.removePropertiesWithPossibleUserInfo(cleanProperties);
 			}
+			// The pipeline doesn't like undefined measurements or properties bag so at least send an empty object
+			properties = properties ?? {};
+			measurements = measurements ?? {};
 			this.telemetryAppender.logException(error, { properties, measurements });
 		}
 	}
