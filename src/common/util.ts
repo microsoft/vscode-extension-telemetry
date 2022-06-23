@@ -56,6 +56,23 @@ export class TelemetryUtil {
 		}
 	}
 
+	/**
+	 * Given a key checks if it is a valid 1DS key
+	 * @param key The key to check if it's a valid 1DS key
+	 */
+	public static shouldUseOneDataSystemSDK(key: string): boolean {
+		// Simple to check to ensure the key is the right length and the dashes are in the right spot
+		return (
+			key.length === 74 &&
+			key[32] === "-" &&
+			key[41] === "-" &&
+			key[46]	=== "-" &&
+			key[51] === "-" &&
+			key[56] === "-" &&
+			key[69] === "-"
+		);
+	}
+
 	// Get singleton instance of TelemetryUtil
 	public static getInstance(vscodeAPI: typeof vscode): TelemetryUtil {
 		if (!TelemetryUtil._instance) {
