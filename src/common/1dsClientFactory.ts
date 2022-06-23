@@ -76,7 +76,7 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 			try {
 				appInsightsCore?.track({
 					name: eventName,
-					data,
+					baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
 				});
 			} catch (e: any) {
 				throw new Error("Failed to log event to app insights!\n" + e.message);
