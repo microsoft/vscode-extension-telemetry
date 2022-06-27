@@ -1,7 +1,7 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for first party microsoft extensions to report consistent telemetry.",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "Microsoft Corporation"
   },
@@ -17,9 +17,11 @@
     "test": "tsc -p 'test/tsconfig.json' && mocha lib/test/*",
     "compile": "tsc -noEmit -p 'src/browser/tsconfig.json' && tsc -noEmit -p 'src/node/tsconfig.json' && npm run build"
   },
-  "devDependencies": {
+  "dependencies": {
     "@microsoft/1ds-core-js": "^3.2.3",
-    "@microsoft/1ds-post-js": "^3.2.3",
+    "@microsoft/1ds-post-js": "^3.2.3"
+  },
+  "devDependencies": {
     "@microsoft/applicationinsights-web": "^2.6.4",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.32",
