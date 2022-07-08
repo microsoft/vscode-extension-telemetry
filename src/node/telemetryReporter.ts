@@ -49,10 +49,6 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 			appInsightsClient.context.tags[appInsightsClient.context.keys.cloudRole] = vscode.env.appName;
 			appInsightsClient.context.tags[appInsightsClient.context.keys.cloudRoleInstance] = vscode.env.appName;
 		}
-		//check if it's an Asimov key to change the endpoint
-		if (key && key.indexOf("AIF-") === 0) {
-			appInsightsClient.config.endpointUrl = "https://mobile.events.data.microsoft.com/collect/v1";
-		}
 	} catch (e: any) {
 		return Promise.reject("Failed to initialize app insights!\n" + e.message);
 	}
@@ -167,8 +163,11 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 		}
 
 		const appender = new BaseTelemetryAppender(key, clientFactory);
-		// If it's a specialized AIF app insights key or a 1DS key then it is first party
-		if (key && (key.indexOf("AIF-") === 0 || TelemetryUtil.shouldUseOneDataSystemSDK(key))) {
+		if (key && key.indexOf("AIF-") === 0) {
+			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
+		}
+		// 1DS is always first party
+		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
 			firstParty = true;
 		}
 		super(extensionId, extensionVersion, appender, {

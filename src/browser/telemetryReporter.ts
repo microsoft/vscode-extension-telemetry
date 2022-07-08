@@ -13,14 +13,9 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const web = await import("@microsoft/applicationinsights-web");
-		let endpointUrl: undefined | string;
-		if (key && key.indexOf("AIF-") === 0) {
-			endpointUrl = "https://vscode.vortex.data.microsoft.com/collect/v1";
-		}
 		appInsightsClient = new web.ApplicationInsights({
 			config: {
 				instrumentationKey: key,
-				endpointUrl,
 				disableAjaxTracking: true,
 				disableExceptionTracking: true,
 				disableFetchTracking: true,
@@ -32,11 +27,6 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 			},
 		});
 		appInsightsClient.loadAppInsights();
-		// If we cannot access the endpoint this most likely means it's being blocked
-		// and we should not attempt to send any telemetry.
-		if (endpointUrl) {
-			fetch(endpointUrl).catch(() => (appInsightsClient = undefined));
-		}
 	} catch (e) {
 		return Promise.reject(e);
 	}
@@ -79,8 +69,12 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 		}
 
 		const appender = new BaseTelemetryAppender(key, clientFactory);
-		// If it's a specialized AIF app insights key or a 1DS key then it is first party
-		if (key && (key.indexOf("AIF-") === 0 || TelemetryUtil.shouldUseOneDataSystemSDK(key))) {
+		// AIF is no longer supported
+		if (key && (key.indexOf("AIF") === 0)) {
+			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
+		}
+		// If it's a 1DS key it is first party
+		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
 			firstParty = true;
 		}
 		super(extensionId, extensionVersion, appender, {
