@@ -18,10 +18,10 @@
     "compile": "tsc -noEmit -p 'src/browser/tsconfig.json' && tsc -noEmit -p 'src/node/tsconfig.json' && npm run build"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^3.2.3",
-    "@microsoft/1ds-post-js": "^3.2.3",
-    "@microsoft/applicationinsights-web": "^2.6.4",
-    "applicationinsights": "2.1.4"
+    "@microsoft/1ds-core-js": "^3.2.4",
+    "@microsoft/1ds-post-js": "^3.2.4",
+    "@microsoft/applicationinsights-web": "^2.8.5",
+    "applicationinsights": "2.3.3"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.1",
