@@ -1,22 +1,11 @@
 const esbuild = require('esbuild');
-const fs = require('fs');
-const path = require('path');
-
-// Removes the warning from the app insights module since we don't want it to spam the console
-function patchAppInsightsModules() {
-	const nodeAppInsightsModule = fs.readFileSync(path.join(__dirname, 'node_modules/applicationinsights/out/Library/Config.js'), 'utf8');
-	const fileWithRemovedWarning = nodeAppInsightsModule.replace(/Logging.warn\([^)]*invalid instrumentation key[^)]*\)/, '// Warning removed');
-	fs.writeFileSync(path.join(__dirname, 'node_modules/applicationinsights/out/Library/Config.js'), fileWithRemovedWarning, 'utf8');
-}
-
-patchAppInsightsModules();
 
 // Build node packages and their minifed versions
 esbuild.build({
 	entryPoints: ['src/node/telemetryReporter.ts'],
 	tsconfig: "./src/node/tsconfig.json",
 	bundle: true,
-	external: ['vscode', '@microsoft/1ds-core-js', '@microsoft/1ds-post-js'],
+	external: ['vscode', './node_modules/*'],
 	sourcemap: true,
 	platform: 'node',
 	target: ['node14'],
@@ -28,7 +17,7 @@ esbuild.build({
 	tsconfig: "./src/node/tsconfig.json",
 	bundle: true,
 	sourcemap: false,
-	external: ['vscode', '@microsoft/1ds-core-js', '@microsoft/1ds-post-js'],
+	external: ['vscode', './node_modules/*'],
 	minify: true,
 	platform: 'node',
 	target: ['node14'],
@@ -42,7 +31,7 @@ esbuild.build({
 	tsconfig: "./src/browser/tsconfig.json",
 	bundle: true,
 	sourcemap: true,
-	external: ['vscode', '@microsoft/1ds-core-js', '@microsoft/1ds-post-js'],
+	external: ['vscode', './node_modules/*'],
 	platform: 'browser',
 	target: ['es6'],
 	outfile: 'lib/telemetryReporter.web.js',
@@ -54,7 +43,7 @@ esbuild.build({
 	format: "esm",
 	bundle: true,
 	sourcemap: false,
-	external: ['vscode', '@microsoft/1ds-core-js', '@microsoft/1ds-post-js'],
+	external: ['vscode', './node_modules/*'],
 	minify: true,
 	platform: 'browser',
 	target: ['es6'],
