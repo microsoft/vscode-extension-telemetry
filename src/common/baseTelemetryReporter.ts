@@ -6,7 +6,6 @@ import type * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../dist/telemetryReporter";
 import { ITelemetryAppender } from "./baseTelemetryAppender";
 import { TelemetryLevel, TelemetryUtil } from "./util";
-import { version } from "../../package.json";
 
 export interface AppenderData {
 	properties?: RawTelemetryEventProperties,
@@ -157,8 +156,8 @@ export class BaseTelemetryReporter {
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
 		commonProperties["common.extname"] = this.extensionId;
 		commonProperties["common.extversion"] = this.extensionVersion;
-		// Reads version from package.json
-		commonProperties["common.telemetryclientversion"] = version;
+		// TODO @lramos15, this should be dynamic but loading JSON modules didn't play nicely
+		commonProperties["common.telemetryclientversion"] = "0.6.3";
 		if (this.vscodeAPI && this.vscodeAPI.env) {
 			commonProperties["common.vscodemachineid"] = this.vscodeAPI.env.machineId;
 			commonProperties["common.vscodesessionid"] = this.vscodeAPI.env.sessionId;
