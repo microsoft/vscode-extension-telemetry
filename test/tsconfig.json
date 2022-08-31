@@ -5,7 +5,7 @@
 		"lib": ["ES2015", "DOM"],
 		"module": "CommonJS",
 		"moduleResolution": "node",
-		"outDir": "../lib/test",
+		"outDir": "../dist/test",
 		// Not sure why it cannot find them, but alas it must be pointed out where the types are
 		"typeRoots": ["../node_modules/@types"]
 	},

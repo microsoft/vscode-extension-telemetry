@@ -3,9 +3,10 @@
  *--------------------------------------------------------*/
 
 import type * as vscode from "vscode";
-import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../lib/telemetryReporter";
+import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../dist/telemetryReporter";
 import { ITelemetryAppender } from "./baseTelemetryAppender";
 import { TelemetryLevel, TelemetryUtil } from "./util";
+import { version } from "../../package.json";
 
 export interface AppenderData {
 	properties?: RawTelemetryEventProperties,
@@ -148,6 +149,7 @@ export class BaseTelemetryReporter {
 	// __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	// __GDPR__COMMON__ "common.product" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.telemetryclientversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 	private getCommonProperties(): TelemetryEventProperties {
 		const commonProperties: Record<string, any> = {};
 		commonProperties["common.os"] = this.osShim.platform;
@@ -155,6 +157,8 @@ export class BaseTelemetryReporter {
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
 		commonProperties["common.extname"] = this.extensionId;
 		commonProperties["common.extversion"] = this.extensionVersion;
+		// Reads version from package.json
+		commonProperties["common.telemetryclientversion"] = version;
 		if (this.vscodeAPI && this.vscodeAPI.env) {
 			commonProperties["common.vscodemachineid"] = this.vscodeAPI.env.machineId;
 			commonProperties["common.vscodesessionid"] = this.vscodeAPI.env.sessionId;
