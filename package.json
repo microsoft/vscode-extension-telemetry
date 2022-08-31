@@ -5,8 +5,8 @@
   "author": {
     "name": "Microsoft Corporation"
   },
-  "main": "./dist/node/src/node/telemetryReporter.js",
-  "browser": "./dist/browser/src/browser/telemetryReporter.js",
+  "main": "./dist/node/node/telemetryReporter.js",
+  "browser": "./dist/browser/browser/telemetryReporter.js",
   "types": "./lib/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
