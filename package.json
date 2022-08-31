@@ -7,7 +7,7 @@
   },
   "main": "./dist/node/node/telemetryReporter.js",
   "browser": "./dist/browser/browser/telemetryReporter.js",
-  "types": "./lib/telemetryReporter.d.ts",
+  "types": "./dist/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
     "vscode": "^1.60.0"

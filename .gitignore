@@ -16,3 +16,6 @@ dist/**/*
 
 # Packaged node modules
 *.tgz
+
+# Extracted npm modules
+package
