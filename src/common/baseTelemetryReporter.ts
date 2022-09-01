@@ -156,8 +156,8 @@ export class BaseTelemetryReporter {
 		commonProperties["common.platformversion"] = (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3");
 		commonProperties["common.extname"] = this.extensionId;
 		commonProperties["common.extversion"] = this.extensionVersion;
-		// TODO @lramos15, this should be dynamic but loading JSON modules didn't play nicely
-		commonProperties["common.telemetryclientversion"] = "0.6.3";
+		// Do not change this string as it gets found and replaced upon packaging
+		commonProperties["common.telemetryclientversion"] = "PACKAGE_JSON_VERSION";
 		if (this.vscodeAPI && this.vscodeAPI.env) {
 			commonProperties["common.vscodemachineid"] = this.vscodeAPI.env.machineId;
 			commonProperties["common.vscodesessionid"] = this.vscodeAPI.env.sessionId;
