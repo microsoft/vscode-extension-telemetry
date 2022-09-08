@@ -1,21 +1,22 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for Visual Studio Code extensions to report consistent telemetry.",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "author": {
     "name": "Microsoft Corporation"
   },
-  "main": "./lib/telemetryReporter.node.min.js",
-  "browser": "./lib/telemetryReporter.web.min.js",
-  "types": "./lib/telemetryReporter.d.ts",
+  "main": "./dist/node/node/telemetryReporter.js",
+  "browser": "./dist/browser/browser/telemetryReporter.js",
+  "types": "./dist/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
     "vscode": "^1.60.0"
   },
   "scripts": {
-    "build": "node .esbuild.config.js",
-    "test": "tsc -p 'test/tsconfig.json' && mocha lib/test/*",
-    "compile": "tsc -noEmit -p 'src/browser/tsconfig.json' && tsc -noEmit -p 'src/node/tsconfig.json' && npm run build"
+    "prepack": "node injectVersion.js",
+    "build": "npm run compile",
+    "test": "tsc -p 'test/tsconfig.json' && mocha dist/test/*",
+    "compile": "tsc -p 'src/browser/tsconfig.json' && tsc -p 'src/node/tsconfig.json'"
   },
   "dependencies": {
     "@microsoft/1ds-core-js": "^3.2.4",
@@ -30,7 +31,6 @@
     "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
-    "esbuild": "^0.14.32",
     "eslint": "^8.12.0",
     "mocha": "^9.2.2",
     "sinon": "^13.0.2",

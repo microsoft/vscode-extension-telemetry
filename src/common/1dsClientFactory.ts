@@ -16,8 +16,8 @@ import { AppenderData } from "./baseTelemetryReporter";
  * @returns The AI core object
  */
 const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IXHROverride): Promise<AppInsightsCore> => {
-	const oneDs = await import("@microsoft/1ds-core-js");
-	const postPlugin = await import("@microsoft/1ds-post-js");
+	const oneDs = await import(/* webpackMode: "eager" */ "@microsoft/1ds-core-js");
+	const postPlugin = await import(/* webpackMode: "eager" */ "@microsoft/1ds-post-js");
 	const appInsightsCore = new oneDs.AppInsightsCore();
 	const collectorChannelPlugin: PostChannel = new postPlugin.PostChannel();
 	// Configure the app insights core to send to collector++ and disable logging of debug info

@@ -12,7 +12,7 @@ import { TelemetryUtil } from "../common/util";
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
-		const web = await import("@microsoft/applicationinsights-web");
+		const web = await import/* webpackMode: "eager" */ ("@microsoft/applicationinsights-web");
 		appInsightsClient = new web.ApplicationInsights({
 			config: {
 				instrumentationKey: key,

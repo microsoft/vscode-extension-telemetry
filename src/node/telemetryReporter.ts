@@ -24,7 +24,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 	let appInsightsClient: TelemetryClient | undefined;
 	try {
 		process.env["APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL"] = "1";
-		const appInsights = await import("applicationinsights");
+		const appInsights = await import(/* webpackMode: "eager" */ "applicationinsights");
 		//check if another instance is already initialized
 		if (appInsights.defaultClient) {
 			appInsightsClient = new appInsights.TelemetryClient(key);

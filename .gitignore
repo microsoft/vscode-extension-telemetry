@@ -9,8 +9,13 @@ npm-debug.log
 
 # sourcemaps
 src/**/*.js.map
-lib/**/*.js.map
-lib/**/*.js
+
+# dist
+dist/**/*
+!dist/**/*.d.ts
 
 # Packaged node modules
 *.tgz
+
+# Extracted npm modules
+package
