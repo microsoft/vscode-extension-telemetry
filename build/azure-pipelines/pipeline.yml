@@ -22,3 +22,9 @@ extends:
     buildSteps:
       - script: npm ci
         displayName: Install dependencies
+
+      - script: npm run compile --if-present
+        displayName: Compile
+
+      - script: npm run test
+        displayName: Test
