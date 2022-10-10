@@ -4,8 +4,6 @@ trigger:
   branches:
     include:
       - main
-  tags:
-    include: ["*"]
 pr: none
 
 resources:
@@ -16,16 +14,27 @@ resources:
       ref: main
       endpoint: Monaco
 
+parameters:
+  - name: publishPackage
+    displayName: 🚀 Publish extension-telemetry
+    type: boolean
+    default: false
+
 extends:
   template: azure-pipelines/npm-package/pipeline.yml@templates
   parameters:
-    buildSteps:
-      - script: npm ci
-        displayName: Install dependencies
+    npmPackages:
+      - name: extension-telemetry
 
-      - script: npm run compile --if-present
-        displayName: Compile npm package
+        buildSteps:
+          - script: npm ci
+            displayName: Install dependencies
 
-    testSteps:
-      - script: npm run test
-        displayName: Test npm package
+          - script: npm run compile --if-present
+            displayName: Compile npm package
+
+        testSteps:
+          - script: npm run test
+            displayName: Test npm package
+
+        publishPackage: ${{ parameters.publishPackage }}
