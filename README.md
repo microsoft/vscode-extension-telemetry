@@ -18,12 +18,6 @@ With yarn:
 import * as vscode from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 
-// all events will be prefixed with this event name
-const extensionId = '<your extension unique name>';
-
-// extension version will be reported as a property with each event
-const extensionVersion = '<your extension version>';
-
 // the application insights key (also known as instrumentation key)
 const key = '<your key>';
 
@@ -32,15 +26,11 @@ let reporter;
 
 function activate(context: vscode.ExtensionContext) {
    // create telemetry reporter on extension activation
-   reporter = new TelemetryReporter(extensionId, extensionVersion, key);
+   reporter = new TelemetryReporter(key);
    // ensure it gets properly disposed. Upon disposal the events will be flushed
    context.subscriptions.push(reporter);
 }
 ```
-
-### First-Party
-
-By default, we use the AppInsights key to detect whether or not the telemetry is first-party. The constructor now takes an optional parameter that will force the reporter to treat telemetry as first-party. This parameter will not override in the false direction.
 
 ## Sending Events
 
@@ -70,7 +60,6 @@ Use this method for sending error telemetry as traditional events to App Insight
 // send an error event any time after activation
 reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some string', 'stackProp': 'some user stack trace' }, { 'numericMeasure': 123 }, [ 'stackProp' ]);
 ```
-
 
 # Common Properties
 - **Extension Name** `common.extname` - The extension name
