@@ -34,6 +34,12 @@ extends:
             displayName: Compile npm package
 
         testSteps:
+          - script: npm ci
+            displayName: Install dependencies
+
+          - script: npm run compile --if-present
+            displayName: Compile npm package
+
           - script: npm run test
             displayName: Test npm package
 
