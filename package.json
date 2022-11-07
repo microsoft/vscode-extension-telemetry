@@ -10,7 +10,7 @@
   "types": "./dist/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.73.0"
   },
   "scripts": {
     "prepack": "node injectVersion.js",
