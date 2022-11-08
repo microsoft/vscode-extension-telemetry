@@ -2,6 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import type { TelemetryAppender } from "vscode";
 import { AppenderData } from "./baseTelemetryReporter";
 
 export interface BaseTelemetryClient {
@@ -10,11 +11,8 @@ export interface BaseTelemetryClient {
 	flush(): void | Promise<void>;
 }
 
-export interface ITelemetryAppender {
-	logEvent(eventName: string, data?: AppenderData): void;
-	logException(exception: Error, data?: AppenderData): void;
-	flush(): void | Promise<void>;
-	instantiateAppender(): void;
+export interface ILazyTelemetryAppender extends TelemetryAppender {
+	instantiateAppender(): void
 }
 
 enum InstantiationStatus {
@@ -23,7 +21,7 @@ enum InstantiationStatus {
 	INSTANTIATED,
 }
 
-export class BaseTelemetryAppender implements ITelemetryAppender {
+export class BaseTelemetryAppender implements ILazyTelemetryAppender {
 	// Whether or not the client has been instantiated
 	private _instantiationStatus: InstantiationStatus = InstantiationStatus.NOT_INSTANTIATED;
 	private _telemetryClient: BaseTelemetryClient | undefined;
@@ -36,12 +34,40 @@ export class BaseTelemetryAppender implements ITelemetryAppender {
 	private _clientFactory: (key: string) => Promise<BaseTelemetryClient>;
 	private _key: string;
 
+	// We always want the built-in common properties
+	public readonly ignoreBuiltInCommonProperties: boolean = false;
+
 	constructor(
 		key: string,
 		clientFactory: (key: string) => Promise<BaseTelemetryClient>,
+		private osShim: { release: string, platform: string, architecture: string }
 	) {
 		this._clientFactory = clientFactory;
 		this._key = key;
+	}
+
+	// This also includes the common properties which core mixes in
+	// __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.nodeArch" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.product" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	// __GDPR__COMMON__ "common.telemetryclientversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+	public get additionalCommonProperties() {
+		return {
+			"common.os": this.osShim.platform,
+			"common.nodeArch": this.osShim.architecture,
+			"common.platformversion":  (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3"),
+			// Do not change this string as it gets found and replaced upon packaging
+			"common.telemetryclientversion": "PACKAGE_JSON_VERSION"
+		};
 	}
 
 	/**

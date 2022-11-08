@@ -1,7 +1,7 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for Visual Studio Code extensions to report consistent telemetry.",
-  "version": "0.6.3",
+  "version": "0.7.0-preview",
   "author": {
     "name": "Microsoft Corporation"
   },
@@ -10,7 +10,7 @@
   "types": "./dist/telemetryReporter.d.ts",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.73.0"
   },
   "scripts": {
     "prepack": "node injectVersion.js",
@@ -19,10 +19,10 @@
     "compile": "tsc -p 'src/browser/tsconfig.json' && tsc -p 'src/node/tsconfig.json'"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^3.2.4",
-    "@microsoft/1ds-post-js": "^3.2.4",
-    "@microsoft/applicationinsights-web": "^2.8.5",
-    "applicationinsights": "2.3.3"
+    "@microsoft/1ds-core-js": "^3.2.7",
+    "@microsoft/1ds-post-js": "^3.2.7",
+    "@microsoft/applicationinsights-web": "^2.8.8",
+    "applicationinsights": "2.3.5"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.1",

@@ -8,5 +8,5 @@
 		"outDir": "../../dist/node",
 		"typeRoots": []
 	},
-	"include": [".", "../common", "../../vscode.proposed.telemetry.d.ts"]
+	"include": [".", "../common", "../../vscode.proposed.telemetryLogger.d.ts"]
 }

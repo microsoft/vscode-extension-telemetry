@@ -32,13 +32,10 @@ export interface ReplacementOption {
 
 export default class TelemetryReporter {
 	/**
-	 * @param extensionId The id of your extension
-	 * @param extensionVersion The version of your extension
 	 * @param key The app insights key
-	 * @param firstParty Whether or not the telemetry is first party (i.e from Microsoft / GitHub)
 	 * @param replacementOptions A list of replacement options for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
 	 */
-	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]);
+	constructor(key: string, replacementOptions?: ReplacementOption[]);
 
 	/**
 	 * A string representation of the current level of telemetry being collected
@@ -68,9 +65,8 @@ export default class TelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
 	 */
-	sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void;
+	sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * Sends a telemetry error event with the given properties, measurements.
@@ -87,9 +83,8 @@ export default class TelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to run the properties and measures through sanitiziation, defaults to true
 	 */
-	sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void;
+	sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * Sends an exception which includes the error stack, properties, and measurements
@@ -105,9 +100,8 @@ export default class TelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
 	 */
-	sendDangerousTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, sanitize?: boolean): void
+	sendDangerousTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void
 
 	/**
 	 * Disposes of the telemetry reporter. This flushes the remaining events and disposes of the telemetry client.

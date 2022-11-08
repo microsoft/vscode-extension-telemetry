@@ -2,7 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import type * as vscode from "vscode";
 import type { ReplacementOption } from "./baseTelemetryReporter";
 
 export const enum TelemetryLevel {
@@ -13,34 +12,6 @@ export const enum TelemetryLevel {
 
 export class TelemetryUtil {
 	private static _instance: TelemetryUtil | undefined;
-
-	constructor (private readonly vscodeAPI: typeof vscode) { }
-
-	public getTelemetryLevel(): TelemetryLevel {
-		const TELEMETRY_CONFIG_ID = "telemetry";
-		const TELEMETRY_CONFIG_ENABLED_ID = "enableTelemetry";
-
-		try {
-			const telemetryConfiguration = this.vscodeAPI.env.telemetryConfiguration;
-			if (telemetryConfiguration.isUsageEnabled && telemetryConfiguration.isErrorsEnabled && telemetryConfiguration.isCrashEnabled) {
-				return TelemetryLevel.ON;
-			} else if (telemetryConfiguration.isErrorsEnabled && telemetryConfiguration.isCrashEnabled) {
-				return TelemetryLevel.ERROR;
-			} else {
-				return TelemetryLevel.OFF;
-			}
-		} catch {
-			// Could be undefined in old versions of vs code
-			if (this.vscodeAPI.env.isTelemetryEnabled !== undefined) {
-				return this.vscodeAPI.env.isTelemetryEnabled ? TelemetryLevel.ON : TelemetryLevel.OFF;
-			}
-
-			// We use the old and new setting to determine the telemetry level as we must respect both
-			const config = this.vscodeAPI.workspace.getConfiguration(TELEMETRY_CONFIG_ID);
-			const enabled = config.get<boolean>(TELEMETRY_CONFIG_ENABLED_ID);
-			return enabled ? TelemetryLevel.ON : TelemetryLevel.OFF;
-		}
-	}
 
 	public static applyReplacements(data: Record<string, any>, replacementOptions: ReplacementOption[]) {
 		for (const key of Object.keys(data)) {
@@ -74,9 +45,9 @@ export class TelemetryUtil {
 	}
 
 	// Get singleton instance of TelemetryUtil
-	public static getInstance(vscodeAPI: typeof vscode): TelemetryUtil {
+	public static getInstance(): TelemetryUtil {
 		if (!TelemetryUtil._instance) {
-			TelemetryUtil._instance = new TelemetryUtil(vscodeAPI);
+			TelemetryUtil._instance = new TelemetryUtil();
 		}
 		return TelemetryUtil._instance;
 	}

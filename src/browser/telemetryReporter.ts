@@ -61,26 +61,22 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 };
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(extensionId: string, extensionVersion: string, key: string, firstParty?: boolean, replacementOptions?: ReplacementOption[]) {
+	constructor(key: string, replacementOptions?: ReplacementOption[]) {
 		let clientFactory = (key: string) => webAppInsightsClientFactory(key, replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode);
 		}
 
-		const appender = new BaseTelemetryAppender(key, clientFactory);
+		const appender = new BaseTelemetryAppender(key, clientFactory, {
+			release: navigator.appVersion,
+			platform: "web",
+			architecture: "web",
+		});
 		// AIF is no longer supported
 		if (key && (key.indexOf("AIF") === 0)) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		// If it's a 1DS key it is first party
-		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
-			firstParty = true;
-		}
-		super(extensionId, extensionVersion, appender, {
-			release: navigator.appVersion,
-			platform: "web",
-			architecture: "web",
-		}, vscode, firstParty);
+		super(appender, vscode);
 	}
 }

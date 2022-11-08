@@ -9,5 +9,5 @@
 		// Not sure why it cannot find them, but alas it must be pointed out where the types are
 		"typeRoots": ["../node_modules/@types"]
 	},
-	"include": [".", "../vscode.proposed.telemetry.d.ts"]
+	"include": [".", "../vscode.proposed.telemetryLogger.d.ts"]
 }
