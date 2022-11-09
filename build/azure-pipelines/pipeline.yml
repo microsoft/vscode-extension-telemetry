@@ -43,4 +43,5 @@ extends:
           - script: npm run test
             displayName: Test npm package
 
+        publishRequiresApproval: false
         publishPackage: ${{ parameters.publishPackage }}
