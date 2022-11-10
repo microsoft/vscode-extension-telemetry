@@ -19,10 +19,10 @@
     "compile": "tsc -p 'src/browser/tsconfig.json' && tsc -p 'src/node/tsconfig.json'"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^3.2.7",
-    "@microsoft/1ds-post-js": "^3.2.7",
-    "@microsoft/applicationinsights-web": "^2.8.8",
-    "applicationinsights": "2.3.5"
+    "@microsoft/1ds-core-js": "^3.2.8",
+    "@microsoft/1ds-post-js": "^3.2.8",
+    "@microsoft/applicationinsights-web": "^2.8.9",
+    "applicationinsights": "2.3.6"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.1",
