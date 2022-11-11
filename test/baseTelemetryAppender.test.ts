@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../src/common/baseTelemetryAppender.js";
+import { BaseTelemetryAppender, BaseTelemetryClient } from "../src/common/baseTelemetryAppender";
 import * as sinon from "sinon";
 import assert from "assert";
 

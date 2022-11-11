@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		// Must include DOM to make the node type "URL" known about
 		"lib": ["ES2015", "DOM"],
-		"module": "ES2020",
+		"module": "CommonJS",
 		"moduleResolution": "node",
 		"outDir": "../../dist/node",
 		"typeRoots": []

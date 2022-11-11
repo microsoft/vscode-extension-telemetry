@@ -6,8 +6,8 @@
 import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/1ds-core-js";
 import type { IChannelConfiguration, IXHROverride, PostChannel } from "@microsoft/1ds-post-js";
 import type * as vscode from "vscode";
-import type { BaseTelemetryClient } from "./baseTelemetryAppender.js";
-import { AppenderData } from "./baseTelemetryReporter.js";
+import type { BaseTelemetryClient } from "./baseTelemetryAppender";
+import { AppenderData } from "./baseTelemetryReporter";
 
 /**
  * Configures 1DS properly and returns the core client object

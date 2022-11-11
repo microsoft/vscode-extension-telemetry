@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as assert from "assert";
-import { TelemetryUtil } from "../src/common/util.js";
+import { TelemetryUtil } from "../src/common/util";
 
 describe("Util test suite", () => {
 	// Test that the apply repacements util function works as expected

@@ -5,7 +5,6 @@
   "author": {
     "name": "Microsoft Corporation"
   },
-  "type": "module",
   "main": "./dist/node/node/telemetryReporter.js",
   "browser": "./dist/browser/browser/telemetryReporter.js",
   "types": "./dist/telemetryReporter.d.ts",

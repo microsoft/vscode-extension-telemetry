@@ -6,11 +6,11 @@ import * as os from "os";
 import * as vscode from "vscode";
 import * as https from "https";
 import type { TelemetryClient } from "applicationinsights";
-import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter.js";
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender.js";
-import { TelemetryUtil } from "../common/util.js";
+import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
+import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
+import { TelemetryUtil } from "../common/util";
 import type { IXHROverride, IPayloadData } from "@microsoft/1ds-post-js";
-import { oneDataSystemClientFactory } from "../common/1dsClientFactory.js";
+import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
 /**
  * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
  *

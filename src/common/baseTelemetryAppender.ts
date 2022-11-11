@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import type { TelemetryAppender } from "vscode";
-import { AppenderData } from "./baseTelemetryReporter.js";
+import { AppenderData } from "./baseTelemetryReporter";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: AppenderData): void;
