@@ -4,7 +4,7 @@
 
 import type * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../dist/telemetryReporter";
-import { ILazyTelemetryAppender } from "./baseTelemetryAppender";
+import { ILazyTelemetryAppender } from "./baseTelemetryAppender.js";
 
 export interface AppenderData {
 	properties?: RawTelemetryEventProperties,

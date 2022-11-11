@@ -4,10 +4,10 @@
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import * as vscode from "vscode";
-import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
-import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
-import { TelemetryUtil } from "../common/util";
+import { oneDataSystemClientFactory } from "../common/1dsClientFactory.js";
+import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender.js";
+import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter.js";
+import { TelemetryUtil } from "../common/util.js";
 
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;

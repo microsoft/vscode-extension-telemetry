@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import type { ReplacementOption } from "./baseTelemetryReporter";
+import type { ReplacementOption } from "./baseTelemetryReporter.js";
 
 export const enum TelemetryLevel {
 	ON = "on",
