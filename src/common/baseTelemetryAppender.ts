@@ -7,7 +7,6 @@ import { AppenderData } from "./baseTelemetryReporter";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: AppenderData): void;
-	logException(exception: Error, data?: AppenderData): void;
 	flush(): void | Promise<void>;
 }
 
@@ -99,7 +98,7 @@ export class BaseTelemetryAppender implements ILazyTelemetryAppender {
 			}
 			return;
 		}
-		this._telemetryClient.logException(exception, data);
+		// No-op TODO @lramos15 remove once removed from API surface
 	}
 
 	/**
