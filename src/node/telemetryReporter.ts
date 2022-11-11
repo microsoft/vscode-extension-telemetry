@@ -70,17 +70,6 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 				throw new Error("Failed to log event to app insights!\n" + e.message);
 			}
 		},
-		logException: (exception: Error, data?: AppenderData) => {
-			try {
-				appInsightsClient?.trackException({
-					exception,
-					properties: data?.properties,
-					measurements: data?.measurements
-				});
-			} catch(e: any) {
-				throw new Error("Failed to log exception to app insights!\n" + e.message);
-			}
-		},
 		flush: async () => {
 			try {
 				appInsightsClient?.flush();

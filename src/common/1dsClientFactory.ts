@@ -82,9 +82,6 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 				throw new Error("Failed to log event to app insights!\n" + e.message);
 			}
 		},
-		logException: (_exception: Error, _data?: AppenderData) => {
-			throw new Error("1DS SDK does not support logging exceptions, please use logEvent for exception tracking");
-		},
 		flush: async () => {
 			try {
 				appInsightsCore?.unload();

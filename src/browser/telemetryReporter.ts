@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import type { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
 import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
@@ -12,9 +12,8 @@ import { TelemetryUtil } from "../common/util";
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
-		const web = await import/* webpackMode: "eager" */ ("@microsoft/applicationinsights-web");
+		const web = await import/* webpackMode: "eager" */ ("@microsoft/applicationinsights-web-basic");
 		appInsightsClient = new web.ApplicationInsights({
-			config: {
 				instrumentationKey: key,
 				disableAjaxTracking: true,
 				disableExceptionTracking: true,
@@ -22,11 +21,11 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 				disableCorrelationHeaders: true,
 				disableCookiesUsage: true,
 				autoTrackPageVisitTime: false,
-				emitLineDelimitedJson: true,
+				emitLineDelimitedJson: false,
 				disableInstrumentationKeyValidation: true
 			},
-		});
-		appInsightsClient.loadAppInsights();
+		);
+		appInsightsClient.initialize();
 	} catch (e) {
 		return Promise.reject(e);
 	}
@@ -37,21 +36,9 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 			if (replacementOptions?.length) {
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
-			appInsightsClient?.trackEvent(
-				{ name: eventName },
-				properties
+			appInsightsClient?.track(
+				{ name: eventName, data: properties },
 			);
-		},
-		logException: (exception: Error, data?: AppenderData) => {
-			const properties = { ...data?.properties, ...data?.measurements };
-			if (replacementOptions?.length) {
-				TelemetryUtil.applyReplacements(properties, replacementOptions);
-			}
-			appInsightsClient?.trackException(
-				{
-					exception,
-					properties
-				});
 		},
 		flush: async () => {
 			appInsightsClient?.flush();
