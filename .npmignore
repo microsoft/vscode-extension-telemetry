@@ -16,3 +16,5 @@ tsfmt.json
 *.tgz
 *.test.ts
 dist/test
+injectVersion.js
+*.proposed.*.d.ts
