@@ -55,15 +55,17 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode);
 		}
 
-		const appender = new BaseTelemetryAppender(key, clientFactory, {
+		const osShim = {
 			release: navigator.appVersion,
 			platform: "web",
 			architecture: "web",
-		});
+		};
+
+		const appender = new BaseTelemetryAppender(key, clientFactory);
 		// AIF is no longer supported
 		if (key && (key.indexOf("AIF") === 0)) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		super(appender, vscode);
+		super(appender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
 	}
 }

@@ -73,7 +73,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 		flush: async () => {
 			try {
 				appInsightsClient?.flush();
-			} catch(e: any) {
+			} catch (e: any) {
 				throw new Error("Failed to flush app insights!\n" + e.message);
 			}
 		}
@@ -151,14 +151,16 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, getXHROverride());
 		}
 
-		const appender = new BaseTelemetryAppender(key, clientFactory, {
+		const osShim = {
 			release: os.release(),
 			platform: os.platform(),
 			architecture: os.arch(),
-		});
+		};
+
+		const appender = new BaseTelemetryAppender(key, clientFactory,);
 		if (key && key.indexOf("AIF-") === 0) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		super(appender, vscode);
+		super(appender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
 	}
 }

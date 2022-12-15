@@ -23,11 +23,7 @@ describe("Base telemetry appender test suite", () => {
 	});
 
 	it("Log functions add to queue if not instantiated", () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory, {
-			release: "test",
-			platform: "test",
-			architecture: "test",
-		});
+		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
 		appender.logEvent("eventName", {});
 		//@ts-ignore (needed to spy on private properties)
 		assert.strictEqual(appender._eventQueue.length, 1);
@@ -36,11 +32,7 @@ describe("Base telemetry appender test suite", () => {
 	});
 
 	it("Log functions call client if instantiated", async () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory, {
-			release: "test",
-			platform: "test",
-			architecture: "test",
-		});
+		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
 		appender.instantiateAppender();
 		// Wait 10ms to ensure that the appender has instantiated the client
 		await new Promise((resolve) => setTimeout(resolve, 10));
@@ -53,11 +45,7 @@ describe("Base telemetry appender test suite", () => {
 	});
 
 	it("Queues are flushed upon instantiation", async () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory, {
-			release: "test",
-			architecture: "test",
-			platform: "test",
-		});
+		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
 		appender.logEvent("eventName", {});
 		// Should cause a flush
 		appender.instantiateAppender();
