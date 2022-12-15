@@ -5,13 +5,13 @@
 
 const fs = require('fs');
 
-// Reads dist/node/common/baseTelemetryAppender.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
+// Reads dist/node/common/util.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
 const packageJson = require('./package.json');
-const baseTelemetryAppender = fs.readFileSync('./dist/node/common/baseTelemetryAppender.js', 'utf8');
-const newBaseTelemetryAppender = baseTelemetryAppender.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
-fs.writeFileSync('./dist/node/common/baseTelemetryAppender.js', newBaseTelemetryAppender);
+const baseUtil = fs.readFileSync('./dist/node/common/util.js', 'utf8');
+const newBaseUtil = baseUtil.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
+fs.writeFileSync('./dist/node/common/util.js', newBaseUtil);
 
-// Reads dist/browser/common/baseTelemetryAppender.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
-const baseTelemetryAppenderBrowser = fs.readFileSync('./dist/browser/common/baseTelemetryAppender.js', 'utf8');
-const newBaseTelemetryAppenderBrowser = baseTelemetryAppenderBrowser.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
-fs.writeFileSync('./dist/browser/common/baseTelemetryAppender.js', newBaseTelemetryAppenderBrowser);
+// Reads dist/browser/common/util.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
+const baseUtilBrowser = fs.readFileSync('./dist/browser/common/util.js', 'utf8');
+const newBaseUtilBrowser = baseUtilBrowser.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
+fs.writeFileSync('./dist/browser/common/util.js', newBaseUtilBrowser);

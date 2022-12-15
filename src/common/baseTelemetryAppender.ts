@@ -33,40 +33,12 @@ export class BaseTelemetryAppender implements ILazyTelemetryAppender {
 	private _clientFactory: (key: string) => Promise<BaseTelemetryClient>;
 	private _key: string;
 
-	// We always want the built-in common properties
-	public readonly ignoreBuiltInCommonProperties: boolean = false;
-
 	constructor(
 		key: string,
 		clientFactory: (key: string) => Promise<BaseTelemetryClient>,
-		private osShim: { release: string, platform: string, architecture: string }
 	) {
 		this._clientFactory = clientFactory;
 		this._key = key;
-	}
-
-	// This also includes the common properties which core mixes in
-	// __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.nodeArch" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.platformversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.vscodemachineid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.vscodesessionid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.uikind" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.remotename" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.isnewappinstall" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.product" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	// __GDPR__COMMON__ "common.telemetryclientversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-	public get additionalCommonProperties() {
-		return {
-			"common.os": this.osShim.platform,
-			"common.nodeArch": this.osShim.architecture,
-			"common.platformversion":  (this.osShim.release || "").replace(/^(\d+)(\.\d+)?(\.\d+)?(.*)/, "$1$2$3"),
-			// Do not change this string as it gets found and replaced upon packaging
-			"common.telemetryclientversion": "PACKAGE_JSON_VERSION"
-		};
 	}
 
 	/**
@@ -91,14 +63,14 @@ export class BaseTelemetryAppender implements ILazyTelemetryAppender {
 	 * @param exception The exception to collect
 	 * @param data Data associated with the exception
 	 */
-	logException(exception: Error, data?: AppenderData): void {
+	logError(exception: Error, data?: AppenderData): void {
 		if (!this._telemetryClient) {
 			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._exceptionQueue.push({ exception, data });
 			}
 			return;
 		}
-		// No-op TODO @lramos15 remove once removed from API surface
+		// No-op TODO @lramos15 convert into an unhandled error event
 	}
 
 	/**
@@ -118,7 +90,7 @@ export class BaseTelemetryAppender implements ILazyTelemetryAppender {
 	private _flushQueues(): void {
 		this._eventQueue.forEach(({ eventName, data }) => this.logEvent(eventName, data));
 		this._eventQueue = [];
-		this._exceptionQueue.forEach(({ exception, data }) => this.logException(exception, data));
+		this._exceptionQueue.forEach(({ exception, data }) => this.logError(exception, data));
 		this._exceptionQueue = [];
 	}
 

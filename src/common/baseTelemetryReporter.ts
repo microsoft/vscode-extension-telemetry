@@ -36,8 +36,9 @@ export class BaseTelemetryReporter {
 	constructor(
 		private telemetryAppender: ILazyTelemetryAppender,
 		private readonly vscodeAPI: typeof vscode,
+		initializationOptions?: vscode.TelemetryInitializationOptions
 	) {
-		this.telemetryLogger = this.vscodeAPI.env.createTelemetryLogger(this.telemetryAppender);
+		this.telemetryLogger = this.vscodeAPI.env.createTelemetryLogger(this.telemetryAppender, initializationOptions);
 
 		// Keep track of the user's opt-in status
 		this.updateUserOptIn();
@@ -175,7 +176,7 @@ export class BaseTelemetryReporter {
 		dangerous: boolean
 	): void {
 		if (dangerous) {
-			this.telemetryAppender.logException(error, { properties, measurements });
+			this.telemetryAppender.logError(error, { properties, measurements });
 		} else {
 			this.telemetryLogger.logError(error, { properties, measurements });
 		}
