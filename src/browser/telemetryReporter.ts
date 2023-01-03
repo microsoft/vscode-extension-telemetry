@@ -5,7 +5,7 @@
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { BasetelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
+import { BaseTelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
 import { SenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { TelemetryUtil } from "../common/util";
 
@@ -61,7 +61,7 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			architecture: "web",
 		};
 
-		const sender = new BasetelemetrySender(key, clientFactory);
+		const sender = new BaseTelemetrySender(key, clientFactory);
 		// AIF is no longer supported
 		if (key && (key.indexOf("AIF") === 0)) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
