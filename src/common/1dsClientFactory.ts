@@ -6,8 +6,8 @@
 import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/1ds-core-js";
 import type { IChannelConfiguration, IXHROverride, PostChannel } from "@microsoft/1ds-post-js";
 import type * as vscode from "vscode";
-import type { BaseTelemetryClient } from "./baseTelemetryAppender";
-import { AppenderData } from "./baseTelemetryReporter";
+import type { BaseTelemetryClient } from "./baseTelemetrySender";
+import { SenderData } from "./baseTelemetryReporter";
 
 /**
  * Configures 1DS properly and returns the core client object
@@ -72,7 +72,7 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 	const appInsightsCore = await getAICore(key, vscodeAPI, xhrOverride);
 	// Shape the app insights core from 1DS into a standard format
 	const telemetryClient: BaseTelemetryClient = {
-		logEvent: (eventName: string, data?: AppenderData) => {
+		logEvent: (eventName: string, data?: SenderData) => {
 			try {
 				appInsightsCore?.track({
 					name: eventName,

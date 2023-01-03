@@ -3,11 +3,11 @@
  *--------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../src/common/baseTelemetryAppender";
+import { BaseTelemetrySender, BaseTelemetryClient } from "../src/common/baseTelemetrySender";
 import * as sinon from "sinon";
 import assert from "assert";
 
-describe("Base telemetry appender test suite", () => {
+describe("Base telemetry sender test suite", () => {
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: sinon.spy(),
 		flush: sinon.spy(),
@@ -23,38 +23,38 @@ describe("Base telemetry appender test suite", () => {
 	});
 
 	it("Log functions add to queue if not instantiated", () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
-		appender.logEvent("eventName", {});
+		const sender = new BaseTelemetrySender("key", telemetryClientFactory);
+		sender.sendEventData("eventName", {});
 		//@ts-ignore (needed to spy on private properties)
-		assert.strictEqual(appender._eventQueue.length, 1);
+		assert.strictEqual(sender._eventQueue.length, 1);
 		//@ts-ignore (needed to spy on private properties)
 		assert.strictEqual((telemetryClient.logEvent as sinon.SinonSpy).callCount, 0);
 	});
 
 	it("Log functions call client if instantiated", async () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
-		appender.instantiateAppender();
-		// Wait 10ms to ensure that the appender has instantiated the client
+		const sender = new BaseTelemetrySender("key", telemetryClientFactory);
+		sender.instantiateSender();
+		// Wait 10ms to ensure that the sender has instantiated the client
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		appender.logEvent("eventName", {});
+		sender.sendEventData("eventName", {});
 		//@ts-ignore (needed to spy on private properties)
-		assert.strictEqual(appender._eventQueue.length, 0);
+		assert.strictEqual(sender._eventQueue.length, 0);
 		//@ts-ignore (needed to spy on private properties)
-		assert.strictEqual(appender._exceptionQueue.length, 0);
+		assert.strictEqual(sender._exceptionQueue.length, 0);
 		assert.strictEqual((telemetryClient.logEvent as sinon.SinonSpy).callCount, 1);
 	});
 
 	it("Queues are flushed upon instantiation", async () => {
-		const appender = new BaseTelemetryAppender("key", telemetryClientFactory);
-		appender.logEvent("eventName", {});
+		const sender = new BaseTelemetrySender("key", telemetryClientFactory);
+		sender.sendEventData("eventName", {});
 		// Should cause a flush
-		appender.instantiateAppender();
-		// Wait 10ms to ensure that the appender has instantiated the client
+		sender.instantiateSender();
+		// Wait 10ms to ensure that the sender has instantiated the client
 		await new Promise((resolve) => setTimeout(resolve, 10));
 		//@ts-ignore (needed to spy on private properties)
-		assert.strictEqual(appender._eventQueue.length, 0);
+		assert.strictEqual(sender._eventQueue.length, 0);
 		//@ts-ignore (needed to spy on private properties)
-		assert.strictEqual(appender._exceptionQueue.length, 0);
+		assert.strictEqual(sender._exceptionQueue.length, 0);
 		assert.strictEqual((telemetryClient.logEvent as sinon.SinonSpy).callCount, 1);
 	});
 });

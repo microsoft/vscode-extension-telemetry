@@ -15,7 +15,7 @@ export interface TelemetryEventMeasurements {
 }
 
 /**
- * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ * A replacement option for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
  */
 export interface ReplacementOption {
 
@@ -33,7 +33,7 @@ export interface ReplacementOption {
 export default class TelemetryReporter {
 	/**
 	 * @param key The app insights key
-	 * @param replacementOptions A list of replacement options for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+	 * @param replacementOptions A list of replacement options for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
 	 */
 	constructor(key: string, replacementOptions?: ReplacementOption[]);
 

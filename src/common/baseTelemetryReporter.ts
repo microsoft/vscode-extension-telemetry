@@ -4,15 +4,15 @@
 
 import type * as vscode from "vscode";
 import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../dist/telemetryReporter";
-import { ILazyTelemetryAppender } from "./baseTelemetryAppender";
+import { ILazyTelemetrySender } from "./baseTelemetrySender";
 
-export interface AppenderData {
+export interface SenderData {
 	properties?: RawTelemetryEventProperties,
 	measurements?: TelemetryEventMeasurements
 }
 
 /**
- * A replacement option for the app insights client. This allows the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ * A replacement option for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
  */
 export interface ReplacementOption {
 
@@ -34,11 +34,11 @@ export class BaseTelemetryReporter {
 	private readonly telemetryLogger: vscode.TelemetryLogger;
 
 	constructor(
-		private telemetryAppender: ILazyTelemetryAppender,
+		private telemetrySender: ILazyTelemetrySender,
 		private readonly vscodeAPI: typeof vscode,
-		initializationOptions?: vscode.TelemetryInitializationOptions
+		initializationOptions?: vscode.TelemetryLoggerOptions
 	) {
-		this.telemetryLogger = this.vscodeAPI.env.createTelemetryLogger(this.telemetryAppender, initializationOptions);
+		this.telemetryLogger = this.vscodeAPI.env.createTelemetryLogger(this.telemetrySender, initializationOptions);
 
 		// Keep track of the user's opt-in status
 		this.updateUserOptIn();
@@ -53,9 +53,9 @@ export class BaseTelemetryReporter {
 	private updateUserOptIn(): void {
 		this.errorOptIn = this.telemetryLogger.isErrorsEnabled;
 		this.userOptIn = this.telemetryLogger.isUsageEnabled;
-		// The appender is lazy loaded so if telemetry is off it's not loaded in
+		// The sender is lazy loaded so if telemetry is off it's not loaded in
 		if (this.telemetryLogger.isErrorsEnabled || this.telemetryLogger.isUsageEnabled) {
-			this.telemetryAppender.instantiateAppender();
+			this.telemetrySender.instantiateSender();
 		}
 	}
 
@@ -85,7 +85,7 @@ export class BaseTelemetryReporter {
 	): void {
 		// If it's dangerous we skip going through the logger as the logger checks opt-in status, etc.
 		if (dangerous) {
-			this.telemetryAppender.logEvent(eventName, { properties, measurements });
+			this.telemetrySender.sendEventData(eventName, { properties, measurements });
 		} else {
 			this.telemetryLogger.logUsage(eventName, { properties, measurements });
 		}
@@ -111,8 +111,8 @@ export class BaseTelemetryReporter {
 	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
 	 */
 	public sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Since telemetry is probably off when sending dangerously, we must start the appender
-		this.telemetryAppender.instantiateAppender();
+		// Since telemetry is probably off when sending dangerously, we must start the sender
+		this.telemetrySender.instantiateSender();
 		this.internalSendTelemetryEvent(eventName, properties, measurements, true);
 	}
 
@@ -131,7 +131,7 @@ export class BaseTelemetryReporter {
 		dangerous: boolean
 	): void {
 		if (dangerous) {
-			this.telemetryAppender.logEvent(eventName, { properties, measurements });
+			this.telemetrySender.sendEventData(eventName, { properties, measurements });
 		} else {
 			this.telemetryLogger.logError(eventName, { properties, measurements });
 		}
@@ -156,8 +156,8 @@ export class BaseTelemetryReporter {
 	 * @param sanitize Whether or not to run the properties and measures through sanitiziation, defaults to true
 	 */
 	public sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Since telemetry is probably off when sending dangerously, we must start the appender
-		this.telemetryAppender.instantiateAppender();
+		// Since telemetry is probably off when sending dangerously, we must start the sender
+		this.telemetrySender.instantiateSender();
 		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, true);
 	}
 
@@ -176,7 +176,7 @@ export class BaseTelemetryReporter {
 		dangerous: boolean
 	): void {
 		if (dangerous) {
-			this.telemetryAppender.logError(error, { properties, measurements });
+			this.telemetrySender.sendErrorData(error, { properties, measurements });
 		} else {
 			this.telemetryLogger.logError(error, { properties, measurements });
 		}
@@ -201,8 +201,8 @@ export class BaseTelemetryReporter {
 	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
 	 */
 	public sendDangerousTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Since telemetry is probably off when sending dangerously, we must start the appender
-		this.telemetryAppender.instantiateAppender();
+		// Since telemetry is probably off when sending dangerously, we must start the sender
+		this.telemetrySender.instantiateSender();
 		this.internalSendTelemetryException(error, properties, measurements, true);
 	}
 
