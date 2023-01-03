@@ -6,17 +6,17 @@ import * as os from "os";
 import * as vscode from "vscode";
 import * as https from "https";
 import type { TelemetryClient } from "applicationinsights";
-import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
+import { SenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
+import { BaseTelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
 import { TelemetryUtil } from "../common/util";
 import type { IXHROverride, IPayloadData } from "@microsoft/1ds-post-js";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
 /**
- * A factory function which creates a telemetry client to be used by an appender to send telemetry in a node application.
+ * A factory function which creates a telemetry client to be used by an sender to send telemetry in a node application.
  *
  * @param key The app insights key
  * @param replacementOptions Optional list of {@link ReplacementOption replacements} to apply to the telemetry client. This allows
- * the appender to filter out any sensitive or unnecessary information from the telemetry server.
+ * the sender to filter out any sensitive or unnecessary information from the telemetry server.
  *
  * @returns A promise which resolves to the telemetry client or rejects upon error
  */
@@ -59,7 +59,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
-		logEvent: (eventName: string, data?: AppenderData) => {
+		logEvent: (eventName: string, data?: SenderData) => {
 			try {
 				appInsightsClient?.trackEvent({
 					name: eventName,
@@ -157,10 +157,10 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			architecture: os.arch(),
 		};
 
-		const appender = new BaseTelemetryAppender(key, clientFactory,);
+		const sender = new BaseTelemetrySender(key, clientFactory,);
 		if (key && key.indexOf("AIF-") === 0) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		super(appender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
+		super(sender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
 	}
 }

@@ -5,8 +5,8 @@
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { BaseTelemetryAppender, BaseTelemetryClient } from "../common/baseTelemetryAppender";
-import { AppenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
+import { BasetelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
+import { SenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { TelemetryUtil } from "../common/util";
 
 const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
@@ -31,7 +31,7 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 	}
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
-		logEvent: (eventName: string, data?: AppenderData) => {
+		logEvent: (eventName: string, data?: SenderData) => {
 			const properties = { ...data?.properties, ...data?.measurements };
 			if (replacementOptions?.length) {
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
@@ -61,11 +61,11 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			architecture: "web",
 		};
 
-		const appender = new BaseTelemetryAppender(key, clientFactory);
+		const sender = new BasetelemetrySender(key, clientFactory);
 		// AIF is no longer supported
 		if (key && (key.indexOf("AIF") === 0)) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		super(appender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
+		super(sender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
 	}
 }
