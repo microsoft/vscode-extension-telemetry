@@ -25,7 +25,6 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 				disableInstrumentationKeyValidation: true
 			},
 		);
-		appInsightsClient.initialize();
 	} catch (e) {
 		return Promise.reject(e);
 	}
