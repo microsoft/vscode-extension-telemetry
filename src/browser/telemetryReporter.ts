@@ -46,6 +46,15 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 	return telemetryClient;
 };
 
+function getBrowserRelease(navigator: Navigator): string {
+	if (navigator.userAgentData) {
+		const browser = navigator.userAgentData.brands[navigator.userAgentData.brands.length - 1];
+		return `${navigator.userAgentData.platform} - ${browser?.brand} v${browser?.version}}`;
+	} else {
+		return navigator.appVersion;
+	}
+}
+
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(key: string, replacementOptions?: ReplacementOption[]) {
 		let clientFactory = (key: string) => webAppInsightsClientFactory(key, replacementOptions);
@@ -55,7 +64,7 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 		}
 
 		const osShim = {
-			release: navigator.appVersion,
+			release: getBrowserRelease(navigator),
 			platform: "web",
 			architecture: "web",
 		};
