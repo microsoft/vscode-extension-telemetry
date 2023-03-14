@@ -43,6 +43,11 @@ export default class TelemetryReporter {
 	telemetryLevel: 'all' | 'error' | 'crash' | 'off';
 
 	/**
+	 * An event that is fired when the telemetry level is changed
+	 */
+	onDidChangeTelemetryLevel: import("vscode").Event<'all' | 'error' | 'crash' | 'off'>;
+
+	/**
 	 * Sends a telemetry event with the given properties and measurements
 	 * Properties are sanitized on best-effort basis to remove sensitive data prior to sending.
 	 * @param eventName The name of the event

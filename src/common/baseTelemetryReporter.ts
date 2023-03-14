@@ -31,6 +31,8 @@ export class BaseTelemetryReporter {
 	private userOptIn = false;
 	private errorOptIn = false;
 	private readonly disposables: vscode.Disposable[] = [];
+	private readonly _onDidChangeTelemetryLevel = new this.vscodeAPI.EventEmitter<"all" | "error" | "crash" | "off">();
+	public readonly onDidChangeTelemetryLevel = this._onDidChangeTelemetryLevel.event;
 	private readonly telemetryLogger: vscode.TelemetryLogger;
 
 	constructor(
@@ -57,6 +59,7 @@ export class BaseTelemetryReporter {
 		if (this.telemetryLogger.isErrorsEnabled || this.telemetryLogger.isUsageEnabled) {
 			this.telemetrySender.instantiateSender();
 		}
+		this._onDidChangeTelemetryLevel.fire(this.telemetryLevel);
 	}
 
 	public get telemetryLevel(): "all" | "error" | "crash" | "off" {
