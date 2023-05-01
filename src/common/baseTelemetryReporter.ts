@@ -165,51 +165,6 @@ export class BaseTelemetryReporter {
 	}
 
 	/**
-	 * Internal function which logs telemetry exceptions and takes extra options
-	 * @param error: The error to send
-	 * @param properties The properties of the event
-	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures
-	 * @param dangerous Whether or not to ignore telemetry level
-	 */
-	private internalSendTelemetryException(
-		error: Error,
-		properties: TelemetryEventProperties | undefined,
-		measurements: TelemetryEventMeasurements | undefined,
-		dangerous: boolean
-	): void {
-		if (dangerous) {
-			this.telemetrySender.sendErrorData(error, { properties, measurements });
-		} else {
-			this.telemetryLogger.logError(error, { properties, measurements });
-		}
-	}
-
-	/**
-	 * Given an error, properties, and measurements. Sends an exception event
-	 * @param error The error to send
-	 * @param properties The properties to send with the event
-	 * @param measurements The measurements (numeric values) to send with the event
-	 */
-	public sendTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		this.internalSendTelemetryException(error, properties, measurements, false);
-	}
-
-	/**
-	 * **DANGEROUS** Given an error, properties, and measurements. Sends an exception event without checking the telemetry setting
-	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
-	 * @param eventName The name of the event
-	 * @param properties The properties to send with the event
-	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
-	 */
-	public sendDangerousTelemetryException(error: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Since telemetry is probably off when sending dangerously, we must start the sender
-		this.telemetrySender.instantiateSender();
-		this.internalSendTelemetryException(error, properties, measurements, true);
-	}
-
-	/**
 	 * Disposes of the telemetry reporter
 	 */
 	public dispose(): Promise<any> {
