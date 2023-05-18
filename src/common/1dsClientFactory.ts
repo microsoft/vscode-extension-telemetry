@@ -92,9 +92,11 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 					appInsightsCore.flush(true, (completedFlush) => {
 						if (!completedFlush) {
 							reject("Failed to flush app 1DS!");
+							return;
 						}
 						appInsightsCore.unload(true, () => {
 							resolve();
+							return;
 						});
 					});
 				});
