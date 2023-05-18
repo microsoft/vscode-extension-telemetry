@@ -84,9 +84,24 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 		},
 		flush: async () => {
 			try {
-				appInsightsCore?.unload();
+				// Create a promise
+				const flushPromise = new Promise<void>((resolve, reject) => {
+					if (!appInsightsCore) {
+						resolve();
+						return;
+					}
+					appInsightsCore.flush(true, (completedFlush) => {
+						if (!completedFlush) {
+							reject("Failed to flush app 1DS!");
+						}
+						appInsightsCore.unload(true, () => {
+							resolve();
+						});
+					});
+				});
+				return flushPromise;
 			} catch (e: any) {
-				throw new Error("Failed to flush app insights!\n" + e.message);
+				throw new Error("Failed to flush 1DS!\n" + e.message);
 			}
 		}
 	};
