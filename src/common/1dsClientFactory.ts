@@ -84,7 +84,6 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 		},
 		flush: async () => {
 			try {
-				// Create a promise
 				const flushPromise = new Promise<void>((resolve, reject) => {
 					if (!appInsightsCore) {
 						resolve();
