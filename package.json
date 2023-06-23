@@ -1,7 +1,7 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for Visual Studio Code extensions to report consistent telemetry.",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "author": {
     "name": "Microsoft Corporation"
   },
@@ -23,7 +23,7 @@
     "@microsoft/1ds-core-js": "^3.2.10",
     "@microsoft/1ds-post-js": "^3.2.10",
     "@microsoft/applicationinsights-web-basic": "^3.0.0",
-    "applicationinsights": "2.6.0"
+    "applicationinsights": "^2.7.0"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.1",
