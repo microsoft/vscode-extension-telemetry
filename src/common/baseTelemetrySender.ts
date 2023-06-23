@@ -70,7 +70,13 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 			}
 			return;
 		}
-		throw new Error("Attempted to send error data when the @vscode/extension-telemetry module does not support it.");
+		const errorData = { stack: exception.stack, message: exception.message, name: exception.name };
+		if (data) {
+			data.properties = { ...data.properties, ...errorData };
+		} else {
+			data = { properties: errorData };
+		}
+		this._telemetryClient.logEvent("unhandlederror", data);
 	}
 
 	/**
