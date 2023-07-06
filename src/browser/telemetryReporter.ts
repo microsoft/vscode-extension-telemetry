@@ -40,7 +40,18 @@ const webAppInsightsClientFactory = async (key: string, replacementOptions?: Rep
 			);
 		},
 		flush: async () => {
-			appInsightsClient?.flush();
+			appInsightsClient?.flush(false);
+		},
+		dispose: async () => {
+			appInsightsClient?.flush(true);
+			const unloadPromise = new Promise<void>((resolve) => {
+				appInsightsClient?.unload(true, () => {
+					resolve();
+					appInsightsClient = undefined;
+				});
+			}
+			);
+			return unloadPromise;
 		}
 	};
 	return telemetryClient;

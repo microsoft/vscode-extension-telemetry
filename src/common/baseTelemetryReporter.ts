@@ -167,7 +167,8 @@ export class BaseTelemetryReporter {
 	/**
 	 * Disposes of the telemetry reporter
 	 */
-	public dispose(): Promise<any> {
+	public async dispose(): Promise<any> {
+		await this.telemetrySender.dispose();
 		this.telemetryLogger.dispose();
 		return Promise.all(this.disposables.map(d => d.dispose()));
 	}
