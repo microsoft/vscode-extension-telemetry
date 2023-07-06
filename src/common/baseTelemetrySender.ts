@@ -7,11 +7,13 @@ import { SenderData } from "./baseTelemetryReporter";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: SenderData): void;
-	flush(): void | Promise<void>;
+	flush(): Promise<void>;
+	dispose(): Promise<void>;
 }
 
 export interface ILazyTelemetrySender extends TelemetrySender {
 	instantiateSender(): void
+	dispose(): Promise<void>;
 }
 
 enum InstantiationStatus {
@@ -83,8 +85,13 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 	 * Flushes the buffered telemetry data
 	 */
 	async flush(): Promise<void> {
+		return this._telemetryClient?.flush();
+	}
+
+	async dispose(): Promise<void> {
+		await this.flush();
 		if (this._telemetryClient) {
-			await this._telemetryClient.flush();
+			await this._telemetryClient.dispose();
 			this._telemetryClient = undefined;
 		}
 		return;

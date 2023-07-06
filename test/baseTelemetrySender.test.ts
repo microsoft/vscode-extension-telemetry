@@ -11,6 +11,7 @@ describe("Base telemetry sender test suite", () => {
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: sinon.spy(),
 		flush: sinon.spy(),
+		dispose: sinon.spy(),
 	};
 	const telemetryClientFactory: (key: string) => Promise<BaseTelemetryClient> = async () => {
 		return telemetryClient;

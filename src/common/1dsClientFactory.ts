@@ -69,7 +69,26 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
  * @param xhrOverride An optional override to use for requests instead of the XHTMLRequest object. Useful for node environments
  */
 export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IXHROverride): Promise<BaseTelemetryClient> => {
-	const appInsightsCore = await getAICore(key, vscodeAPI, xhrOverride);
+	let appInsightsCore: AppInsightsCore | undefined = await getAICore(key, vscodeAPI, xhrOverride);
+	const flushOneDS = async () => {
+		try {
+			const flushPromise = new Promise<void>((resolve, reject) => {
+				if (!appInsightsCore) {
+					resolve();
+					return;
+				}
+				appInsightsCore.flush(true, (completedFlush) => {
+					if (!completedFlush) {
+						reject("Failed to flush app 1DS!");
+						return;
+					}
+				});
+			});
+			return flushPromise;
+		} catch (e: any) {
+			throw new Error("Failed to flush 1DS!\n" + e.message);
+		}
+	};
 	// Shape the app insights core from 1DS into a standard format
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: SenderData) => {
@@ -82,28 +101,21 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 				throw new Error("Failed to log event to app insights!\n" + e.message);
 			}
 		},
-		flush: async () => {
-			try {
-				const flushPromise = new Promise<void>((resolve, reject) => {
-					if (!appInsightsCore) {
-						resolve();
-						return;
-					}
-					appInsightsCore.flush(true, (completedFlush) => {
-						if (!completedFlush) {
-							reject("Failed to flush app 1DS!");
-							return;
-						}
-						appInsightsCore.unload(true, () => {
-							resolve();
-							return;
-						});
-					});
+		flush: flushOneDS,
+		dispose: async () => {
+			await flushOneDS();
+			const disposePromise = new Promise<void>((resolve) => {
+				if (!appInsightsCore) {
+					resolve();
+					return;
+				}
+				appInsightsCore.unload(true, () => {
+					resolve();
+					appInsightsCore = undefined;
+					return;
 				});
-				return flushPromise;
-			} catch (e: any) {
-				throw new Error("Failed to flush 1DS!\n" + e.message);
-			}
+			});
+			return disposePromise;
 		}
 	};
 	return telemetryClient;

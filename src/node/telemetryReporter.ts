@@ -5,7 +5,7 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import * as https from "https";
-import type { TelemetryClient } from "applicationinsights";
+import { type TelemetryClient } from "applicationinsights";
 import { SenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
 import { TelemetryUtil } from "../common/util";
@@ -39,6 +39,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 				.setAutoDependencyCorrelation(false)
 				.setAutoCollectConsole(false)
 				.setAutoCollectHeartbeat(false)
+				.setAutoCollectIncomingRequestAzureFunctions(false)
 				.setUseDiskRetryCaching(true)
 				.start();
 			appInsightsClient = appInsights.defaultClient;
@@ -76,6 +77,10 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 			} catch (e: any) {
 				throw new Error("Failed to flush app insights!\n" + e.message);
 			}
+		},
+		dispose: async () => {
+			appInsightsClient?.flush();
+			appInsightsClient = undefined;
 		}
 	};
 	return telemetryClient;
