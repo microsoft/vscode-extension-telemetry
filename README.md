@@ -41,17 +41,6 @@ Use this method for sending general events to App Insights.
 reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'numericMeasure': 123 });
 ```
 
-## Sending Exceptions
-
-Use this method for diagnostics in App Insights. This method will automatically drop events in certain environments for first party extensions.
-
-```javascript
-// send an error any time after activation
-try { ... } catch (error) {
-   reporter.sendTelemetryException(error, { 'stringProp': 'some string' }, { 'numericMeasure': 123 });
-}
-```
-
 ## Sending Errors as Events
 
 Use this method for sending error telemetry as traditional events to App Insights. This method will automatically drop error properties in certain environments for first party extensions. The last parameter is an optional list of case-sensitive properties that should be dropped. If no array is passed, we will drop all properties but still send the event.
