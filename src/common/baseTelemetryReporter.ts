@@ -3,11 +3,11 @@
  *--------------------------------------------------------*/
 
 import type * as vscode from "vscode";
-import type { TelemetryEventMeasurements, TelemetryEventProperties, RawTelemetryEventProperties } from "../../dist/telemetryReporter";
+import type { TelemetryEventMeasurements, TelemetryEventProperties } from "../../dist/telemetryReporter";
 import { ILazyTelemetrySender } from "./baseTelemetrySender";
 
 export interface SenderData {
-	properties?: RawTelemetryEventProperties,
+	properties?: TelemetryEventProperties,
 	measurements?: TelemetryEventMeasurements
 }
 
@@ -103,6 +103,21 @@ export class BaseTelemetryReporter {
 	 */
 	public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
 		this.internalSendTelemetryEvent(eventName, properties, measurements, false);
+	}
+
+
+	/**
+	 * Sends a raw (unsanitized) telemetry event with the given properties and measurements.
+	 * NOTE: This will not be logged to the output channel due to API limitations.
+	 * @param eventName The name of the event
+	 * @param properties The set of properties to add to the event in the form of a string key value pair
+	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
+	 */
+	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
+		// Check level then send off dangerously which skips the API as the API sanitizes everything.
+		if (this.telemetryLevel === "all") {
+			this.internalSendTelemetryEvent(eventName, properties, measurements, true);
+		}
 	}
 
 	/**
