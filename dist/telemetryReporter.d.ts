@@ -3,11 +3,7 @@
  *--------------------------------------------------------*/
 
 export interface TelemetryEventProperties {
-	readonly [key: string]: string;
-}
-
-export interface RawTelemetryEventProperties {
-	readonly [key: string]: any;
+	readonly [key: string]: string | undefined;
 }
 
 export interface TelemetryEventMeasurements {
@@ -58,15 +54,17 @@ export default class TelemetryReporter {
 
 	/**
 	 * Sends a raw (unsanitized) telemetry event with the given properties and measurements
+	 * NOTE: This will not be logged to the output channel due to API limitations.
 	 * @param eventName The name of the event
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
 	 */
-	sendRawTelemetryEvent(eventName: string, properties?: RawTelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
+	sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void;
 
 	/**
 	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry event without checking telemetry setting
 	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * NOTE: This will not be logged to the output channel due to API limitations.
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
@@ -85,6 +83,7 @@ export default class TelemetryReporter {
 	/**
 	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry error event without checking telemetry setting
 	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * NOTE: This will not be logged to the output channel due to API limitations.
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
