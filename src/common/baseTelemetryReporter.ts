@@ -105,21 +105,6 @@ export class BaseTelemetryReporter {
 		this.internalSendTelemetryEvent(eventName, properties, measurements, false);
 	}
 
-
-	/**
-	 * Sends a raw (unsanitized) telemetry event with the given properties and measurements.
-	 * NOTE: This will not be logged to the output channel due to API limitations.
-	 * @param eventName The name of the event
-	 * @param properties The set of properties to add to the event in the form of a string key value pair
-	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
-	 */
-	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Check level then send off dangerously which skips the API as the API sanitizes everything.
-		if (this.telemetryLevel === "all") {
-			this.internalSendTelemetryEvent(eventName, properties, measurements, true);
-		}
-	}
-
 	/**
 	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry event without checking telemetry setting
 	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
