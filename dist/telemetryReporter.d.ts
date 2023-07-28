@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 export interface TelemetryEventProperties {
-	readonly [key: string]: string | undefined;
+	readonly [key: string]: string | import("vscode").TelemetryTrustedValue<string> | undefined;
 }
 
 export interface TelemetryEventMeasurements {
