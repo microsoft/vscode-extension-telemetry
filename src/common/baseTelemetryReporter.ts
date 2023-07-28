@@ -114,10 +114,16 @@ export class BaseTelemetryReporter {
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
 	 */
 	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		// Check level then send off dangerously which skips the API as the API sanitizes everything.
-		if (this.telemetryLevel === "all") {
-			this.internalSendTelemetryEvent(eventName, properties, measurements, true);
+		const modifiedProperties = { ...properties };
+		for (const property of Object.keys(modifiedProperties ?? {})) {
+			if (typeof property === "string") {
+				// Trusted values are not sanitized, which is what we want for raw telemetry
+				modifiedProperties[property] = new this.vscodeAPI.TelemetryTrustedValue<string>(property);
+			}
 		}
+
+		this.sendTelemetryEvent(eventName, modifiedProperties, measurements);
+
 	}
 
 	/**
