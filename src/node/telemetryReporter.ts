@@ -137,7 +137,11 @@ function getXHROverride() {
 						oncomplete(0, {});
 					});
 				});
-				req.write(payload.data);
+				req.write(payload.data, (err) => {
+					if (err) {
+						oncomplete(0, {});
+					}
+				});
 				req.end();
 			} catch {
 				// If it errors out, send status of 0 and a blank response to oncomplete so we can retry events
