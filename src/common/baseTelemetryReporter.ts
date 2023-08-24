@@ -115,10 +115,11 @@ export class BaseTelemetryReporter {
 	 */
 	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
 		const modifiedProperties = { ...properties };
-		for (const property of Object.keys(modifiedProperties ?? {})) {
-			if (typeof property === "string") {
+		for (const propertyKey of Object.keys(modifiedProperties ?? {})) {
+			const propertyValue = modifiedProperties[propertyKey];
+			if (typeof propertyKey === "string" && propertyValue !== undefined) {
 				// Trusted values are not sanitized, which is what we want for raw telemetry
-				modifiedProperties[property] = new this.vscodeAPI.TelemetryTrustedValue<string>(property);
+				modifiedProperties[propertyKey] = new this.vscodeAPI.TelemetryTrustedValue<string>(typeof propertyValue === 'string' ? propertyValue : propertyValue.value);
 			}
 		}
 
