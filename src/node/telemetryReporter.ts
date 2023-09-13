@@ -79,7 +79,7 @@ const appInsightsClientFactory = async (key: string, replacementOptions?: Replac
 			}
 		},
 		dispose: async () => {
-			appInsightsClient?.flush();
+			appInsightsClient?.flush({ isAppCrashing: true });
 			appInsightsClient = undefined;
 		}
 	};

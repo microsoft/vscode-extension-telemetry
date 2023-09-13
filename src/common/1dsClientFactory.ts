@@ -103,17 +103,16 @@ export const oneDataSystemClientFactory = async (key: string, vscodeAPI: typeof 
 		},
 		flush: flushOneDS,
 		dispose: async () => {
-			await flushOneDS();
 			const disposePromise = new Promise<void>((resolve) => {
 				if (!appInsightsCore) {
 					resolve();
 					return;
 				}
-				appInsightsCore.unload(true, () => {
+				appInsightsCore.unload(false, () => {
 					resolve();
 					appInsightsCore = undefined;
 					return;
-				});
+				}, 1000);
 			});
 			return disposePromise;
 		}
