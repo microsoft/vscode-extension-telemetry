@@ -89,7 +89,6 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 	}
 
 	async dispose(): Promise<void> {
-		await this.flush();
 		if (this._telemetryClient) {
 			await this._telemetryClient.dispose();
 			this._telemetryClient = undefined;
