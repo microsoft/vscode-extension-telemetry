@@ -50,6 +50,7 @@ export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROv
 			appInsightsClient?.track({
 				name: eventName,
 				data: properties,
+				baseType: "EventData",
 				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
 			});
 		},
