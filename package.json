@@ -1,7 +1,7 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for Visual Studio Code extensions to report consistent telemetry.",
-  "version": "0.8.5",
+  "version": "0.9.0",
   "author": {
     "name": "Microsoft Corporation"
   },
@@ -20,23 +20,22 @@
     "compile": "tsc -p 'src/browser/tsconfig.json' && tsc -p 'src/node/tsconfig.json'"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^3.2.13",
-    "@microsoft/1ds-post-js": "^3.2.13",
-    "@microsoft/applicationinsights-web-basic": "^3.0.2",
-    "applicationinsights": "^2.7.1"
+    "@microsoft/1ds-core-js": "^4.0.3",
+    "@microsoft/1ds-post-js": "^4.0.3",
+    "@microsoft/applicationinsights-web-basic": "^3.0.4"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^20.4.9",
-    "@types/sinon": "^10.0.16",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "^20.8.9",
+    "@types/sinon": "^10.0.20",
     "@types/vscode": "^1.75.0",
-    "@typescript-eslint/eslint-plugin": "^6.3.0",
-    "@typescript-eslint/parser": "^6.3.0",
-    "eslint": "^8.46.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
+    "eslint": "^8.52.0",
     "mocha": "^10.2.0",
-    "sinon": "^15.2.0",
-    "typescript": "^5.1.6",
-    "user-agent-data-types": "^0.3.1"
+    "sinon": "^17.0.0",
+    "typescript": "^5.2.2",
+    "user-agent-data-types": "^0.4.2"
   },
   "repository": {
     "type": "git",

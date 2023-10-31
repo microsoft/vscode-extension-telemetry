@@ -119,7 +119,7 @@ export class BaseTelemetryReporter {
 			const propertyValue = modifiedProperties[propertyKey];
 			if (typeof propertyKey === "string" && propertyValue !== undefined) {
 				// Trusted values are not sanitized, which is what we want for raw telemetry
-				modifiedProperties[propertyKey] = new this.vscodeAPI.TelemetryTrustedValue<string>(typeof propertyValue === 'string' ? propertyValue : propertyValue.value);
+				modifiedProperties[propertyKey] = new this.vscodeAPI.TelemetryTrustedValue<string>(typeof propertyValue === "string" ? propertyValue : propertyValue.value);
 			}
 		}
 
