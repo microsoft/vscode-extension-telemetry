@@ -2,59 +2,12 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { BaseTelemetrySender, BaseTelemetryClient } from "../common/baseTelemetrySender";
-import { SenderData, BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
+import { BaseTelemetrySender } from "../common/baseTelemetrySender";
+import { BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { TelemetryUtil } from "../common/util";
-
-const webAppInsightsClientFactory = async (key: string, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
-	let appInsightsClient: ApplicationInsights | undefined;
-	try {
-		const web = await import/* webpackMode: "eager" */ ("@microsoft/applicationinsights-web-basic");
-		appInsightsClient = new web.ApplicationInsights({
-				instrumentationKey: key,
-				disableAjaxTracking: true,
-				disableExceptionTracking: true,
-				disableFetchTracking: true,
-				disableCorrelationHeaders: true,
-				disableCookiesUsage: true,
-				autoTrackPageVisitTime: false,
-				emitLineDelimitedJson: false,
-				disableInstrumentationKeyValidation: true
-			},
-		);
-	} catch (e) {
-		return Promise.reject(e);
-	}
-	// Sets the appinsights client into a standardized form
-	const telemetryClient: BaseTelemetryClient = {
-		logEvent: (eventName: string, data?: SenderData) => {
-			const properties = { ...data?.properties, ...data?.measurements };
-			if (replacementOptions?.length) {
-				TelemetryUtil.applyReplacements(properties, replacementOptions);
-			}
-			appInsightsClient?.track(
-				{ name: eventName, data: properties },
-			);
-		},
-		flush: async () => {
-			appInsightsClient?.flush(false);
-		},
-		dispose: async () => {
-			const unloadPromise = new Promise<void>((resolve) => {
-				appInsightsClient?.unload(true, () => {
-					resolve();
-					appInsightsClient = undefined;
-				}, 1000);
-			}
-			);
-			return unloadPromise;
-		}
-	};
-	return telemetryClient;
-};
+import { appInsightsClientFactory } from "../common/appInsightsClientFactory";
 
 function getBrowserRelease(navigator: Navigator): string {
 	if (navigator.userAgentData) {
@@ -67,7 +20,7 @@ function getBrowserRelease(navigator: Navigator): string {
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(key: string, replacementOptions?: ReplacementOption[]) {
-		let clientFactory = (key: string) => webAppInsightsClientFactory(key, replacementOptions);
+		let clientFactory = (key: string) => appInsightsClientFactory(key, undefined, replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode);

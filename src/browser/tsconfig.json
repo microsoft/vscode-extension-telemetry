@@ -5,7 +5,6 @@
 		"module": "ES2020",
 		"moduleResolution": "node",
 		"outDir": "../../dist/browser",
-		"typeRoots": []
 	},
 	"include": [".", "../common", "../../node_modules/user-agent-data-types"]
 }
