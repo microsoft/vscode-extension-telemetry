@@ -65,7 +65,7 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 	 * @param exception The exception to collect
 	 * @param data Data associated with the exception
 	 */
-	sendErrorData(exception: Error, data?: SenderData): void {
+	sendErrorData(exception: Error, data?: SenderData | Record<string, any>): void {
 		if (!this._telemetryClient) {
 			if (this._instantiationStatus !== InstantiationStatus.INSTANTIATED) {
 				this._exceptionQueue.push({ exception, data });
@@ -74,7 +74,8 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 		}
 		const errorData = { stack: exception.stack, message: exception.message, name: exception.name };
 		if (data) {
-			data.properties = { ...data.properties, ...errorData };
+			const errorProperties = data.properties || data;
+			data.properties = { ...errorProperties, ...errorData };
 		} else {
 			data = { properties: errorData };
 		}
