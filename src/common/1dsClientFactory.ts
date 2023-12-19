@@ -49,12 +49,16 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
 
 	appInsightsCore.initialize(coreConfig, []);
 
-	appInsightsCore.addTelemetryInitializer((envelope) => {
-		// Only add this flag when `telemetry.internalTesting` is enabled
+	appInsightsCore.addTelemetryInitializer((envelope: any) => {
+		envelope["ext"] = envelope["ext"] ?? {};
+		envelope["ext"]["web"] = envelope["ext"]["web"] ?? {};
+		envelope["ext"]["web"]["consentDetails"] = '{"GPC_DataSharingOptIn":false}';
+
+		// Only add the remaining flags when `telemetry.internalTesting` is enabled
 		if (!internalTesting) {
 			return;
 		}
-		envelope["ext"] = envelope["ext"] ?? {};
+
 		envelope["ext"]["utc"] = envelope["ext"]["utc"] ?? {};
 		// Sets it to be internal only based on Windows UTC flagging
 		envelope["ext"]["utc"]["flags"] = 0x0000811ECD;
