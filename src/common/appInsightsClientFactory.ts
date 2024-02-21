@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
-import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
+import type { IXHROverride, IConfiguration } from "@microsoft/applicationinsights-core-js";
 import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
@@ -15,6 +15,16 @@ export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROv
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const basicAISDK = await import/* webpackMode: "eager" */("@microsoft/applicationinsights-web-basic");
+		const extensionConfig: IConfiguration["extensionConfig"] = {};
+		if (xhrOverride) {
+			// Configure the channel to use a XHR Request override since it's not available in node
+			const channelConfig: IChannelConfiguration = {
+				alwaysUseXhrOverride: true,
+				httpXHROverride: xhrOverride
+			};
+			extensionConfig[BreezeChannelIdentifier] = channelConfig;
+		}
+
 		appInsightsClient = new basicAISDK.ApplicationInsights({
 			instrumentationKey: key,
 			disableAjaxTracking: true,
@@ -24,19 +34,9 @@ export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROv
 			disableCookiesUsage: true,
 			autoTrackPageVisitTime: false,
 			emitLineDelimitedJson: false,
-			disableInstrumentationKeyValidation: true
-		},
-		);
-
-		if (xhrOverride) {
-			appInsightsClient.config.extensionConfig = {};
-			// Configure the channel to use a XHR Request override since it's not available in node
-			const channelConfig: IChannelConfiguration = {
-				alwaysUseXhrOverride: true,
-				httpXHROverride: xhrOverride
-			};
-			appInsightsClient.config.extensionConfig[BreezeChannelIdentifier] = channelConfig;
-		}
+			disableInstrumentationKeyValidation: true,
+			extensionConfig,
+		});
 	} catch (e) {
 		return Promise.reject(e);
 	}
