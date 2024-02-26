@@ -14,7 +14,9 @@ function getBrowserRelease(navigator: Navigator): string {
 		const browser = navigator.userAgentData.brands[navigator.userAgentData.brands.length - 1];
 		return `${navigator.userAgentData.platform} - ${browser?.brand} v${browser?.version}}`;
 	} else {
-		return navigator.appVersion;
+		// clean the user agent using the logic from here:
+		// https://github.com/microsoft/vscode/blob/main/src/vs/workbench/services/telemetry/browser/workbenchCommonProperties.ts#L14C1-L21C2
+		return navigator.userAgent.replace(/(\d+\.\d+)(\.\d+)+/g, "$1");
 	}
 }
 
