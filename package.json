@@ -16,8 +16,8 @@
   "scripts": {
     "prepack": "node injectVersion.js",
     "build": "npm run compile",
-    "test": "tsc -p 'test/tsconfig.json' && mocha dist/test/*",
-    "compile": "tsc -p 'src/browser/tsconfig.json' && tsc -p 'src/node/tsconfig.json'"
+    "test": "tsc -p test/tsconfig.json && mocha dist/test/*",
+    "compile": "tsc -p src/browser/tsconfig.json && tsc -p src/node/tsconfig.json"
   },
   "dependencies": {
     "@microsoft/1ds-core-js": "^4.0.3",
