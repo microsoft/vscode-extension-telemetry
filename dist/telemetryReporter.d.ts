@@ -7,7 +7,7 @@ export interface TelemetryEventProperties {
 }
 
 export interface TelemetryEventMeasurements {
-	readonly [key: string]: number;
+	readonly [key: string]: number | undefined;
 }
 
 /**

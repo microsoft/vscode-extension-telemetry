@@ -52,7 +52,7 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
 	appInsightsCore.addTelemetryInitializer((envelope: any) => {
 		envelope["ext"] = envelope["ext"] ?? {};
 		envelope["ext"]["web"] = envelope["ext"]["web"] ?? {};
-		envelope["ext"]["web"]["consentDetails"] = '{"GPC_DataSharingOptIn":false}';
+		envelope["ext"]["web"]["consentDetails"] = "{\"GPC_DataSharingOptIn\":false}";
 
 		// Only add the remaining flags when `telemetry.internalTesting` is enabled
 		if (!internalTesting) {
