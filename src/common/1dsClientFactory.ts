@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/1ds-core-js";
+import type { AppInsightsCore, IExtendedConfiguration, IPerfManager } from "@microsoft/1ds-core-js";
 import type { IChannelConfiguration, IXHROverride, PostChannel } from "@microsoft/1ds-post-js";
 import type * as vscode from "vscode";
 import type { BaseTelemetryClient } from "./baseTelemetrySender";
@@ -20,6 +20,19 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
 	const postPlugin = await import(/* webpackMode: "eager" */ "@microsoft/1ds-post-js");
 	const appInsightsCore = new oneDs.AppInsightsCore();
 	const collectorChannelPlugin: PostChannel = new postPlugin.PostChannel();
+
+	// Dummy perf manager to fix memory leaks
+	const perfManager: IPerfManager = {
+		create: function (_src, _payload, _isAsync) {
+			return null;
+		},
+		fire: function (_perfEvent) {
+		},
+		setCtx: function (_key, _value) {
+		},
+		getCtx: function (_key) {
+		}
+	};
 	// Configure the app insights core to send to collector++ and disable logging of debug info
 	const coreConfig: IExtendedConfiguration = {
 		instrumentationKey: key,
@@ -28,6 +41,9 @@ const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IX
 		loggingLevelConsole: 0,
 		disableCookiesUsage: true,
 		disableDbgExt: true,
+		createPerfMgr: () => {
+			return perfManager;
+		},
 		disableInstrumentationKeyValidation: true,
 		channels: [[
 			collectorChannelPlugin
