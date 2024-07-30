@@ -54,10 +54,10 @@ function getXHROverride() {
 }
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(key: string, replacementOptions?: ReplacementOption[]) {
-		let clientFactory = (key: string) => appInsightsClientFactory(key, vscode.env.machineId, getXHROverride(), replacementOptions);
-		// If key is usable by 1DS use the 1DS SDk
-		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
+	constructor(connectionString: string, replacementOptions?: ReplacementOption[]) {
+		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, getXHROverride(), replacementOptions);
+		// If connection string is usable by 1DS use the 1DS SDk
+		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, getXHROverride());
 		}
 
@@ -67,8 +67,8 @@ export default class TelemetryReporter extends BaseTelemetryReporter {
 			architecture: os.arch(),
 		};
 
-		const sender = new BaseTelemetrySender(key, clientFactory,);
-		if (key && key.indexOf("AIF-") === 0) {
+		const sender = new BaseTelemetrySender(connectionString, clientFactory,);
+		if (connectionString && connectionString.indexOf("AIF-") === 0) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
 		super(sender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });

@@ -11,7 +11,7 @@ import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";
 
-export const appInsightsClientFactory = async (key: string, machineId: string, xhrOverride?: IXHROverride, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
+export const appInsightsClientFactory = async (connectionString: string, machineId: string, xhrOverride?: IXHROverride, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const basicAISDK = await import/* webpackMode: "eager" */("@microsoft/applicationinsights-web-basic");
@@ -26,7 +26,7 @@ export const appInsightsClientFactory = async (key: string, machineId: string, x
 		}
 
 		appInsightsClient = new basicAISDK.ApplicationInsights({
-			instrumentationKey: key,
+			connectionString: connectionString,
 			disableAjaxTracking: true,
 			disableExceptionTracking: true,
 			disableFetchTracking: true,
