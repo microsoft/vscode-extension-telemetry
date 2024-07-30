@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
-import type { IXHROverride, IConfiguration } from "@microsoft/applicationinsights-core-js";
+import type { IChannelConfiguration } from "@microsoft/1ds-post-js";
 import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
+import type { IConfiguration, IXHROverride } from "@microsoft/applicationinsights-core-js";
+import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";
-import type { IChannelConfiguration } from "@microsoft/1ds-post-js";
 
-export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROverride, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
+export const appInsightsClientFactory = async (key: string, machineId: string, xhrOverride?: IXHROverride, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const basicAISDK = await import/* webpackMode: "eager" */("@microsoft/applicationinsights-web-basic");
@@ -37,6 +37,7 @@ export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROv
 			disableInstrumentationKeyValidation: true,
 			extensionConfig,
 		});
+
 	} catch (e) {
 		return Promise.reject(e);
 	}
@@ -51,6 +52,7 @@ export const appInsightsClientFactory = async (key: string, xhrOverride?: IXHROv
 				name: eventName,
 				data: properties,
 				baseType: "EventData",
+				ext: { user: { id: machineId, authenticatedId: machineId } },
 				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
 			});
 		},
