@@ -2,15 +2,15 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import type { IPayloadData, IXHROverride } from "@microsoft/1ds-post-js";
+import * as https from "https";
 import * as os from "os";
 import * as vscode from "vscode";
-import * as https from "https";
+import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
+import { appInsightsClientFactory } from "../common/appInsightsClientFactory";
 import { BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetrySender } from "../common/baseTelemetrySender";
 import { TelemetryUtil } from "../common/util";
-import type { IXHROverride, IPayloadData } from "@microsoft/1ds-post-js";
-import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { appInsightsClientFactory } from "../common/appInsightsClientFactory";
 
 /**
  * Create a replacement for the XHTMLRequest object utilizing nodes HTTP module.
@@ -55,7 +55,7 @@ function getXHROverride() {
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(key: string, replacementOptions?: ReplacementOption[]) {
-		let clientFactory = (key: string) => appInsightsClientFactory(key, getXHROverride(), replacementOptions);
+		let clientFactory = (key: string) => appInsightsClientFactory(key, vscode.env.machineId, getXHROverride(), replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(key)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, getXHROverride());
