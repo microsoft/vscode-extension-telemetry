@@ -28,7 +28,7 @@ export class TelemetryUtil {
 	}
 
 	/**
-	 * Given a key checks if it is a valid 1DS key
+	 * Given a key / connection string checks if it is a valid 1DS key
 	 * @param key The key to check if it's a valid 1DS key
 	 */
 	public static shouldUseOneDataSystemSDK(key: string): boolean {

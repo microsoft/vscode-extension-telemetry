@@ -3,11 +3,12 @@ This module provides a consistent way for extensions to report telemetry
 over Application Insights. The module respects the user's decision about whether or
 not to send telemetry data. See [telemetry extension guidelines](https://code.visualstudio.com/api/extension-guides/telemetry) for more information on using telemetry in your extension.
 
-Follow [guide to set up Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) in Azure and get your key. Don't worry about hardcoding it, it is not sensitive.
+Follow [guide to set up Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/create-workspace-resource) in Azure and get your connection string. Don't worry about hardcoding it, it is not sensitive.
 
 # Install
 With npm:
 `npm install @vscode/extension-telemetry`
+
 With yarn:
 `yarn add @vscode/extension-telemetry`
 
@@ -18,15 +19,15 @@ With yarn:
 import * as vscode from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 
-// the application insights key (also known as instrumentation key)
-const key = '<your key>';
+// the connection string
+const connectionString = '<your connection string>';
 
 // telemetry reporter
 let reporter;
 
 function activate(context: vscode.ExtensionContext) {
    // create telemetry reporter on extension activation
-   reporter = new TelemetryReporter(key);
+   reporter = new TelemetryReporter(connectionString);
    // ensure it gets properly disposed. Upon disposal the events will be flushed
    context.subscriptions.push(reporter);
 }

@@ -28,10 +28,10 @@ export interface ReplacementOption {
 
 export default class TelemetryReporter {
 	/**
-	 * @param key The app insights key
+	 * @param connectionString The app insights connection string
 	 * @param replacementOptions A list of replacement options for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
 	 */
-	constructor(key: string, replacementOptions?: ReplacementOption[]);
+	constructor(connectionString: string, replacementOptions?: ReplacementOption[]);
 
 	/**
 	 * A string representation of the current level of telemetry being collected
