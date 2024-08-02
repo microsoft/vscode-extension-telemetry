@@ -52,7 +52,7 @@ export const appInsightsClientFactory = async (connectionString: string, machine
 				name: eventName,
 				data: properties,
 				baseType: "EventData",
-				ext: { user: { id: machineId, authenticatedId: machineId } },
+				ext: { user: { id: machineId, authId: machineId } },
 				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
 			});
 		},
