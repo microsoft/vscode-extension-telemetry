@@ -55,7 +55,7 @@ function getXHROverride() {
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(connectionString: string, replacementOptions?: ReplacementOption[]) {
-		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, getXHROverride(), replacementOptions);
+		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, getXHROverride(), replacementOptions);
 		// If connection string is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, getXHROverride());

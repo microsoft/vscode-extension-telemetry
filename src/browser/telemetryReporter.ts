@@ -22,7 +22,7 @@ function getBrowserRelease(navigator: Navigator): string {
 
 export default class TelemetryReporter extends BaseTelemetryReporter {
 	constructor(connectionString: string, replacementOptions?: ReplacementOption[]) {
-		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, undefined, replacementOptions);
+		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, undefined, replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode);
