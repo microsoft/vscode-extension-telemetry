@@ -25,8 +25,15 @@ export const appInsightsClientFactory = async (connectionString: string, machine
 			extensionConfig[BreezeChannelIdentifier] = channelConfig;
 		}
 
+		let instrumentationKey: string | undefined;
+		if (!connectionString.startsWith("InstrumentationKey=")) {
+			instrumentationKey = connectionString;
+		}
+
+		const authConfig = instrumentationKey ? { instrumentationKey } : { connectionString };
+
 		appInsightsClient = new basicAISDK.ApplicationInsights({
-			connectionString: connectionString,
+			...authConfig,
 			disableAjaxTracking: true,
 			disableExceptionTracking: true,
 			disableFetchTracking: true,
