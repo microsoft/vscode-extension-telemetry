@@ -1,0 +1,18 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		// Must include DOM to make the node type "URL" known about
+		"lib": [
+			"ES2015",
+			"DOM"
+		],
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"outDir": "../../dist/node-esm",
+	},
+	"include": [
+		".",
+		"../common",
+		"../../vscode.proposed.telemetryLogger.d.ts"
+	]
+}
