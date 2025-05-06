@@ -7,6 +7,7 @@
   },
   "main": "./dist/node/node/telemetryReporter.js",
   "browser": "./dist/browser/browser/telemetryReporter.js",
+  "module": "./dist/node-esm/node/telemetryReporter.js",
   "types": "./dist/telemetryReporter.d.ts",
   "sideEffects": false,
   "license": "MIT",
@@ -17,7 +18,7 @@
     "prepack": "node injectVersion.js",
     "build": "npm run compile",
     "test": "tsc -p test/tsconfig.json && mocha dist/test/*",
-    "compile": "tsc -p src/browser/tsconfig.json && tsc -p src/node/tsconfig.json"
+    "compile": "tsc -p src/browser/tsconfig.json && tsc -p src/node/tsconfig.json && tsc -p src/node/tsconfig.esm.json"
   },
   "dependencies": {
     "@microsoft/1ds-core-js": "^4.3.4",
