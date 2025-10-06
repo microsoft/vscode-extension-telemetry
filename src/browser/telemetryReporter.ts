@@ -21,7 +21,7 @@ function getBrowserRelease(navigator: Navigator): string {
 }
 
 export class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(connectionString: string, replacementOptions?: ReplacementOption[]) {
+	constructor(connectionString: string, replacementOptions?: ReplacementOption[], initializationOptions?: vscode.TelemetryLoggerOptions) {
 		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, undefined, replacementOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
@@ -39,6 +39,14 @@ export class TelemetryReporter extends BaseTelemetryReporter {
 		if (connectionString && (connectionString.indexOf("AIF") === 0)) {
 			throw new Error("AIF keys are no longer supported. Please switch to 1DS keys for 1st party extensions");
 		}
-		super(sender, vscode, { additionalCommonProperties: TelemetryUtil.getAdditionalCommonProperties(osShim) });
+
+		const initializationOpts = {
+			...initializationOptions,
+			additionalCommonProperties: initializationOptions?.additionalCommonProperties ?
+				{ ...initializationOptions.additionalCommonProperties, ...TelemetryUtil.getAdditionalCommonProperties(osShim) }
+				: TelemetryUtil.getAdditionalCommonProperties(osShim)
+		};
+
+		super(sender, vscode, initializationOpts);
 	}
 }

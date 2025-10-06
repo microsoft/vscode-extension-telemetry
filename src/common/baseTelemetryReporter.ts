@@ -169,7 +169,7 @@ export class BaseTelemetryReporter {
 	 * @param measurements The measurements (numeric values) to send with the event
 	 */
 	public sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		this.internalSendTelemetryErrorEvent(eventName, properties, measurements,false);
+		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, false);
 	}
 
 	/**

@@ -30,8 +30,9 @@ export class TelemetryReporter {
 	/**
 	 * @param connectionString The app insights connection string
 	 * @param replacementOptions A list of replacement options for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
+	 * @param initializationOptions Options for configuring the telemetry reporter, including additional common properties to be sent with each event.
 	 */
-	constructor(connectionString: string, replacementOptions?: ReplacementOption[]);
+	constructor(connectionString: string, replacementOptions?: ReplacementOption[], initializationOptions?: import("vscode").TelemetryLoggerOptions);
 
 	/**
 	 * A string representation of the current level of telemetry being collected
