@@ -11,6 +11,11 @@ const baseUtil = fs.readFileSync('./dist/node/common/util.js', 'utf8');
 const newBaseUtil = baseUtil.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
 fs.writeFileSync('./dist/node/common/util.js', newBaseUtil);
 
+// Reads dist/node-esm/common/util.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
+const baseUtilEsm = fs.readFileSync('./dist/node-esm/common/util.js', 'utf8');
+const newBaseUtilEsm = baseUtilEsm.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
+fs.writeFileSync('./dist/node-esm/common/util.js', newBaseUtilEsm);
+
 // Reads dist/browser/common/util.js and replaces PACKAGE_JSON_VERSION with the number from the package.json
 const baseUtilBrowser = fs.readFileSync('./dist/browser/common/util.js', 'utf8');
 const newBaseUtilBrowser = baseUtilBrowser.replace(/PACKAGE_JSON_VERSION/g, packageJson.version);
