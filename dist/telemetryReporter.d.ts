@@ -26,13 +26,26 @@ export interface ReplacementOption {
 	replacementString?: string;
 }
 
+/**
+ * A custom fetcher function that can be used to send telemetry data.
+ * Compatible with the Node.js fetch API signature.
+ * @param url The URL to send the request to
+ * @param init The request initialization options including method, headers, and body
+ * @returns A promise that resolves to a Response object
+ */
+export type CustomFetcher = (
+	url: string,
+	init?: { method: "POST"; headers?: Record<string, string>; body?: string }
+) => Promise<{text: () => Promise<string>; status: number; headers: Iterable<[string, string]>}>;
+
 export class TelemetryReporter {
 	/**
 	 * @param connectionString The app insights connection string
 	 * @param replacementOptions A list of replacement options for the app insights client. This allows the sender to filter out any sensitive or unnecessary information from the telemetry server.
 	 * @param initializationOptions Options for configuring the telemetry reporter, including additional common properties to be sent with each event.
+	 * @param customFetcher An optional custom fetcher function to use for sending telemetry data. If not provided, the default HTTPS module will be used. Compatible with Node.js fetch API.
 	 */
-	constructor(connectionString: string, replacementOptions?: ReplacementOption[], initializationOptions?: import("vscode").TelemetryLoggerOptions);
+	constructor(connectionString: string, replacementOptions?: ReplacementOption[], initializationOptions?: import("vscode").TelemetryLoggerOptions, customFetcher?: CustomFetcher);
 
 	/**
 	 * A string representation of the current level of telemetry being collected
