@@ -7,10 +7,13 @@ import * as https from "https";
 import * as os from "os";
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { appInsightsClientFactory } from "../common/appInsightsClientFactory";
+import { AppInsightsClientOptions, appInsightsClientFactory } from "../common/appInsightsClientFactory";
 import { BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetrySender } from "../common/baseTelemetrySender";
 import { TelemetryUtil } from "../common/util";
+
+// Re-export AppInsightsClientOptions for consumers
+export type { AppInsightsClientOptions } from "../common/appInsightsClientFactory";
 
 /**
  * A custom fetcher function that can be used to send telemetry data.
@@ -98,10 +101,11 @@ export class TelemetryReporter extends BaseTelemetryReporter {
 		connectionString: string,
 		replacementOptions?: ReplacementOption[],
 		initializationOptions?: vscode.TelemetryLoggerOptions,
-		customFetcher?: CustomFetcher
+		customFetcher?: CustomFetcher,
+		appInsightsOptions?: AppInsightsClientOptions
 	) {
 		const xhrOverride = customFetcher ? createXHROverrideFromFetcher(customFetcher) : getDefaultXHROverride();
-		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, xhrOverride, replacementOptions);
+		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, xhrOverride, replacementOptions, appInsightsOptions);
 		// If connection string is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode, xhrOverride);

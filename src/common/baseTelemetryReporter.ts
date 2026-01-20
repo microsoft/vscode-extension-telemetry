@@ -8,7 +8,14 @@ import { ILazyTelemetrySender } from "./baseTelemetrySender";
 
 export interface SenderData {
 	properties?: TelemetryEventProperties,
-	measurements?: TelemetryEventMeasurements
+	measurements?: TelemetryEventMeasurements,
+	/**
+	 * Optional tag overrides for this specific event.
+	 * These override client-level tagOverrides set in AppInsightsClientOptions.
+	 * Commonly used for dynamic tracking IDs that change per event.
+	 * Example: { 'ai.user.id': dynamicTrackingId }
+	 */
+	tagOverrides?: Record<string, string>
 }
 
 /**
@@ -34,6 +41,11 @@ export class BaseTelemetryReporter {
 	private readonly _onDidChangeTelemetryLevel = new this.vscodeAPI.EventEmitter<"all" | "error" | "crash" | "off">();
 	public readonly onDidChangeTelemetryLevel = this._onDidChangeTelemetryLevel.event;
 	private readonly telemetryLogger: vscode.TelemetryLogger;
+	/**
+	 * Context tags that are applied to all telemetry events.
+	 * Similar to client.context.tags in the full Application Insights SDK.
+	 */
+	private readonly contextTags: Record<string, string> = {};
 
 	constructor(
 		private telemetrySender: ILazyTelemetrySender,
@@ -77,20 +89,27 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties of the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures
+	 * @param tagOverrides Optional per-event tag overrides
 	 * @param dangerous Whether or not to ignore telemetry level
 	 */
 	private internalSendTelemetryEvent(
 		eventName: string,
 		properties: TelemetryEventProperties | undefined,
 		measurements: TelemetryEventMeasurements | undefined,
+		tagOverrides: Record<string, string> | undefined,
 		dangerous: boolean
 	): void {
+		// Merge context tags with per-event tag overrides
+		// Per-event overrides take precedence over context tags
+		const effectiveTagOverrides = Object.keys(this.contextTags).length > 0 || tagOverrides
+			? { ...this.contextTags, ...tagOverrides }
+			: undefined;
+
 		// If it's dangerous we skip going through the logger as the logger checks opt-in status, etc.
 		if (dangerous) {
-			this.telemetrySender.sendEventData(eventName, { properties, measurements });
+			this.telemetrySender.sendEventData(eventName, { properties, measurements, tagOverrides: effectiveTagOverrides });
 		} else {
-			this.telemetryLogger.logUsage(eventName, { properties, measurements });
+			this.telemetryLogger.logUsage(eventName, { properties, measurements, tagOverrides: effectiveTagOverrides });
 		}
 	}
 
@@ -100,9 +119,10 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
 	 */
-	public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		this.internalSendTelemetryEvent(eventName, properties, measurements, false);
+	public sendTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
+		this.internalSendTelemetryEvent(eventName, properties, measurements, tagOverrides, false);
 	}
 
 
@@ -112,8 +132,9 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The set of properties to add to the event in the form of a string key value pair
 	 * @param measurements The set of measurements to add to the event in the form of a string key  number value pair
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
 	 */
-	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
+	public sendRawTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
 		const modifiedProperties = { ...properties };
 		for (const propertyKey of Object.keys(modifiedProperties ?? {})) {
 			const propertyValue = modifiedProperties[propertyKey];
@@ -123,7 +144,7 @@ export class BaseTelemetryReporter {
 			}
 		}
 
-		this.sendTelemetryEvent(eventName, modifiedProperties, measurements);
+		this.sendTelemetryEvent(eventName, modifiedProperties, measurements, tagOverrides);
 
 	}
 
@@ -133,12 +154,12 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures, defaults to true
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
 	 */
-	public sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
+	public sendDangerousTelemetryEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
 		// Since telemetry is probably off when sending dangerously, we must start the sender
 		this.telemetrySender.instantiateSender();
-		this.internalSendTelemetryEvent(eventName, properties, measurements, true);
+		this.internalSendTelemetryEvent(eventName, properties, measurements, tagOverrides, true);
 	}
 
 	/**
@@ -146,19 +167,26 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties of the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to sanitize to the properties and measures
+	 * @param tagOverrides Optional per-event tag overrides
 	 * @param dangerous Whether or not to ignore telemetry level
 	 */
 	private internalSendTelemetryErrorEvent(
 		eventName: string,
 		properties: TelemetryEventProperties | undefined,
 		measurements: TelemetryEventMeasurements | undefined,
+		tagOverrides: Record<string, string> | undefined,
 		dangerous: boolean
 	): void {
+		// Merge context tags with per-event tag overrides
+		// Per-event overrides take precedence over context tags
+		const effectiveTagOverrides = Object.keys(this.contextTags).length > 0 || tagOverrides
+			? { ...this.contextTags, ...tagOverrides }
+			: undefined;
+
 		if (dangerous) {
-			this.telemetrySender.sendEventData(eventName, { properties, measurements });
+			this.telemetrySender.sendEventData(eventName, { properties, measurements, tagOverrides: effectiveTagOverrides });
 		} else {
-			this.telemetryLogger.logError(eventName, { properties, measurements });
+			this.telemetryLogger.logError(eventName, { properties, measurements, tagOverrides: effectiveTagOverrides });
 		}
 	}
 
@@ -167,9 +195,10 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
 	 */
-	public sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
-		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, false);
+	public sendTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
+		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, tagOverrides, false);
 	}
 
 	/**
@@ -178,12 +207,31 @@ export class BaseTelemetryReporter {
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
-	 * @param sanitize Whether or not to run the properties and measures through sanitiziation, defaults to true
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
 	 */
-	public sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements): void {
+	public sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
 		// Since telemetry is probably off when sending dangerously, we must start the sender
 		this.telemetrySender.instantiateSender();
-		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, true);
+		this.internalSendTelemetryErrorEvent(eventName, properties, measurements, tagOverrides, true);
+	}
+
+	/**
+	 * Sets a context tag that will be included in all telemetry events.
+	 * Similar to client.context.tags[key] = value in the full Application Insights SDK.
+	 * @param key The tag key (e.g., 'ai.cloud.roleInstance', 'ai.session.id')
+	 * @param value The tag value
+	 */
+	public setContextTag(key: string, value: string): void {
+		this.contextTags[key] = value;
+	}
+
+	/**
+	 * Gets a context tag value.
+	 * @param key The tag key
+	 * @returns The tag value, or undefined if not set
+	 */
+	public getContextTag(key: string): string | undefined {
+		return this.contextTags[key];
 	}
 
 	/**
