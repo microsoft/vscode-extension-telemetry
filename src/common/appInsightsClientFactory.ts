@@ -14,6 +14,43 @@ import { TelemetryUtil } from "./util";
 const TELEMETRY_DEBUG_ENABLED = true;
 // =====================================
 
+interface AppInsightsConfig {
+	instrumentationKey?: string;
+	connectionString?: string;
+	disableAjaxTracking: boolean;
+	disableExceptionTracking: boolean;
+	disableFetchTracking: boolean;
+	disableCorrelationHeaders: boolean;
+	disableCookiesUsage: boolean;
+	autoTrackPageVisitTime: boolean;
+	emitLineDelimitedJson: boolean;
+	disableInstrumentationKeyValidation: boolean;
+	endpointUrl?: string;
+	extensionConfig?: {
+		AppInsightsChannelPlugin?: ChannelPluginConfig;
+	};
+}
+
+interface ChannelPluginConfig {
+	alwaysUseXhrOverride: boolean;
+	httpXHROverride: IXHROverride;
+}
+
+interface TelemetryExtension {
+	user: {
+		id: string;
+		authId: string;
+	};
+	app: {
+		sesId: string;
+	};
+	cloud: {
+		roleInstance?: string;
+		role?: string;
+	};
+	[key: string]: unknown;
+}
+
 export interface AppInsightsClientOptions {
 	/** Custom endpoint URL for telemetry ingestion */
 	endpointUrl?: string;
@@ -47,7 +84,7 @@ export const appInsightsClientFactory = async (
 		const authConfig = instrumentationKey ? { instrumentationKey } : { connectionString };
 
 		// Build the configuration for web-basic SDK
-		const config: any = {
+		const config: AppInsightsConfig = {
 			...authConfig,
 			disableAjaxTracking: true,
 			disableExceptionTracking: true,
@@ -70,7 +107,7 @@ export const appInsightsClientFactory = async (
 			// This may require additional configuration or may not work as expected
 			config.extensionConfig = config.extensionConfig || {};
 			// The actual channel identifier varies, this is a best-effort approach
-			const channelConfig: any = {
+			const channelConfig: ChannelPluginConfig = {
 				alwaysUseXhrOverride: true,
 				httpXHROverride: xhrOverride
 			};
@@ -117,7 +154,7 @@ export const appInsightsClientFactory = async (
 			// Use session ID from override if provided, otherwise use the one passed to factory
 			const sessionIdValue = effectiveTagOverrides?.['ai.session.id'] ?? sessionId;
 			
-			const ext: any = { 
+			const ext: TelemetryExtension = { 
 				user: userTags, 
 				app: { sesId: sessionIdValue },
 				cloud: {}
