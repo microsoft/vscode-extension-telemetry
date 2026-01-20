@@ -5,14 +5,10 @@
 
 import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
+import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";
-
-// === TELEMETRY TESTING SETTINGS ===
-// Set to true for testing, false for production
-const TELEMETRY_DEBUG_ENABLED = true;
-// =====================================
 
 interface AppInsightsConfig {
 	instrumentationKey?: string;
@@ -103,16 +99,12 @@ export const appInsightsClientFactory = async (
 
 		// Configure XHR override if provided (for Node.js environments)
 		if (xhrOverride) {
-			// Note: web-basic SDK has limited support for XHR overrides
-			// This may require additional configuration or may not work as expected
 			config.extensionConfig = config.extensionConfig || {};
-			// The actual channel identifier varies, this is a best-effort approach
 			const channelConfig: ChannelPluginConfig = {
 				alwaysUseXhrOverride: true,
 				httpXHROverride: xhrOverride
 			};
-			// Try common channel identifiers
-			config.extensionConfig["AppInsightsChannelPlugin"] = channelConfig;
+			config.extensionConfig[BreezeChannelIdentifier] = channelConfig;
 		}
 
 		appInsightsClient = new basicAISDK.ApplicationInsights(config);
@@ -128,23 +120,13 @@ export const appInsightsClientFactory = async (
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
 			
-			// Merge client-level and event-level tag overrides
-			// Event-level overrides take precedence over client-level
+			// Merge tag overrides with proper priority (object spread: later = higher priority)
+			// Priority order: constructor (lowest) < context < per-event (highest)
+			// Note: data?.tagOverrides already contains merged contextTags + perEventTags from baseTelemetryReporter
 			const effectiveTagOverrides = {
-				...options?.tagOverrides,      // Client-level (static)
-				...data?.tagOverrides           // Event-level (dynamic) - takes precedence
+				...options?.tagOverrides,      // 1. Constructor level (lowest priority)
+				...data?.tagOverrides           // 2. Context + Per-event (highest priority) - already merged
 			};
-			
-			// === DEBUG LOGGING ===
-			if (TELEMETRY_DEBUG_ENABLED) {
-				console.log('[TELEMETRY DEBUG - NEW IMPLEMENTATION]', {
-					eventName,
-					properties,
-					effectiveTagOverrides,
-					endpointUrl: options?.endpointUrl,
-					commonProperties: options?.commonProperties
-				});
-			}
 			
 			// Apply user ID override if present
 			const userTags = effectiveTagOverrides?.['ai.user.id'] 

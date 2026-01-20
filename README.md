@@ -44,11 +44,29 @@ reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'n
 
 ## Sending Errors as Events
 
-Use this method for sending error telemetry as traditional events to App Insights. This method will automatically drop error properties in certain environments for first party extensions. The last parameter is an optional list of case-sensitive properties that should be dropped. If no array is passed, we will drop all properties but still send the event.
+Use this method for sending error telemetry as traditional events to App Insights. 
+
+**Note:** To filter out sensitive properties (e.g., stack traces), use `replacementOptions` in the constructor rather than passing properties to drop as a parameter (that parameter was removed in v0.6).
 
 ```javascript
-// send an error event any time after activation
-reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some string', 'stackProp': 'some user stack trace' }, { 'numericMeasure': 123 }, [ 'stackProp' ]);
+// Configure property filtering in the constructor
+import TelemetryReporter from '@vscode/extension-telemetry';
+
+const reporter = new TelemetryReporter(
+   connectionString,
+   [
+      // Remove or redact sensitive properties
+      { lookup: /stackProp/, replacementString: '[REDACTED]' },
+      { lookup: /sensitiveData/ }  // Remove entirely if no replacementString
+   ]
+);
+
+// Send error event (properties are automatically filtered based on replacementOptions)
+reporter.sendTelemetryErrorEvent(
+   'sampleErrorEvent',
+   { 'stringProp': 'some string', 'stackProp': 'some user stack trace' },
+   { 'numericMeasure': 123 }
+);
 ```
 
 # Advanced Features (v1.3.0+)
@@ -113,8 +131,7 @@ reporter.sendTelemetryErrorEvent(
    'errorEvent',
    { 'error': error.message },
    { 'errorCount': 1 },
-   { 'ai.user.id': trackingId },  // Per-event tag override
-   [ 'stackProp' ]  // Properties to drop
+   { 'ai.user.id': trackingId }  // Per-event tag override (4th parameter)
 );
 ```
 

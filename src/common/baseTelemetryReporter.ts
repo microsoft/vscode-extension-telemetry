@@ -101,7 +101,9 @@ export class BaseTelemetryReporter {
 	): void {
 		// Merge context tags with per-event tag overrides
 		// Per-event overrides take precedence over context tags
-		const effectiveTagOverrides = Object.keys(this.contextTags).length > 0 || tagOverrides
+		const hasContextTags = Object.keys(this.contextTags).length > 0;
+		const hasTagOverrides = tagOverrides && Object.keys(tagOverrides).length > 0;
+		const effectiveTagOverrides = (hasContextTags || hasTagOverrides)
 			? { ...this.contextTags, ...tagOverrides }
 			: undefined;
 
@@ -179,7 +181,9 @@ export class BaseTelemetryReporter {
 	): void {
 		// Merge context tags with per-event tag overrides
 		// Per-event overrides take precedence over context tags
-		const effectiveTagOverrides = Object.keys(this.contextTags).length > 0 || tagOverrides
+		const hasContextTags = Object.keys(this.contextTags).length > 0;
+		const hasTagOverrides = tagOverrides && Object.keys(tagOverrides).length > 0;
+		const effectiveTagOverrides = (hasContextTags || hasTagOverrides)
 			? { ...this.contextTags, ...tagOverrides }
 			: undefined;
 
@@ -203,7 +207,7 @@ export class BaseTelemetryReporter {
 
 	/**
 	 * **DANGEROUS** Given an event name, some properties, and measurements sends a telemetry error event without checking telemetry setting
-	 * Do not use unless in a controlled environment i.e. sending telmetry from a CI pipeline or testing during development
+	 * Do not use unless in a controlled environment i.e. sending telemetry from a CI pipeline or testing during development
 	 * @param eventName The name of the event
 	 * @param properties The properties to send with the event
 	 * @param measurements The measurements (numeric values) to send with the event
