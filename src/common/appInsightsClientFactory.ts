@@ -32,21 +32,6 @@ interface ChannelPluginConfig {
 	httpXHROverride: IXHROverride;
 }
 
-interface TelemetryExtension {
-	user: {
-		id: string;
-		authId: string;
-	};
-	app: {
-		sesId: string;
-	};
-	cloud: {
-		roleInstance?: string;
-		role?: string;
-	};
-	[key: string]: unknown;
-}
-
 export interface AppInsightsClientOptions {
 	/** Custom endpoint URL for telemetry ingestion */
 	endpointUrl?: string;
@@ -115,59 +100,36 @@ export const appInsightsClientFactory = async (
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: SenderData) => {
+			// Merge common properties, event properties, and measurements
 			const properties = { ...options?.commonProperties, ...data?.properties, ...data?.measurements };
+			
+			// DEBUG: Log merged properties to verify commonProperties are included
+			console.log('🟣 [VSCODE-TELEMETRY LIB] appInsightsClientFactory.logEvent called');
+			console.log('🟣 [VSCODE-TELEMETRY LIB] Event name:', eventName);
+			console.log('🟣 [VSCODE-TELEMETRY LIB] Common properties:', options?.commonProperties);
+			console.log('🟣 [VSCODE-TELEMETRY LIB] Event properties:', data?.properties);
+			console.log('🟣 [VSCODE-TELEMETRY LIB] Merged properties (after commonProperties):', properties);
+			console.log('🟣 [VSCODE-TELEMETRY LIB] telemetry_implementation =', properties['telemetry_implementation']);
+			
 			if (replacementOptions?.length) {
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
 			
-			// Merge tag overrides with proper priority (object spread: later = higher priority)
-			// Priority order: constructor (lowest) < context < per-event (highest)
+			// Merge tag overrides: constructor-level < context < per-event (highest priority)
 			// Note: data?.tagOverrides already contains merged contextTags + perEventTags from baseTelemetryReporter
-			const effectiveTagOverrides = {
-				...options?.tagOverrides,      // 1. Constructor level (lowest priority)
-				...data?.tagOverrides           // 2. Context + Per-event (highest priority) - already merged
+			const tagOverrides = {
+				...options?.tagOverrides,      // Constructor level (lowest priority)
+				...data?.tagOverrides           // Context + Per-event (highest priority)
 			};
 			
-			// Apply user ID override if present
-			const userTags = effectiveTagOverrides?.['ai.user.id'] 
-				? { id: effectiveTagOverrides['ai.user.id'], authId: effectiveTagOverrides['ai.user.id'] }
-				: { id: machineId, authId: machineId };
-			
-			// Use session ID from override if provided, otherwise use the one passed to factory
-			const sessionIdValue = effectiveTagOverrides?.['ai.session.id'] ?? sessionId;
-			
-			const ext: TelemetryExtension = { 
-				user: userTags, 
-				app: { sesId: sessionIdValue },
-				cloud: {}
-			};
-			
-			// Map Application Insights tag names to Web Basic SDK ext structure
-			if (effectiveTagOverrides) {
-				for (const [key, value] of Object.entries(effectiveTagOverrides)) {
-					if (key === 'ai.user.id' || key === 'ai.session.id') {
-						// Already handled above
-						continue;
-					} else if (key === 'ai.cloud.roleInstance') {
-						// Map to cloud structure
-						ext.cloud.roleInstance = value;
-					} else if (key === 'ai.cloud.role') {
-						ext.cloud.role = value;
-					} else if (key.startsWith('ai.')) {
-						// For other ai.* tags, preserve the full key name for compatibility
-						ext[key] = value;
-					} else {
-						// Non-AI tags go directly
-						ext[key] = value;
-					}
-				}
-			}
+			// Merge tag overrides into properties - the SDK handles ai.* tags automatically
+			const finalProperties = { ...properties, ...tagOverrides };
 			
 			appInsightsClient?.track({
 				name: eventName,
-				data: properties,
+				data: finalProperties,
 				baseType: "EventData",
-				ext,
+				ext: { user: { id: machineId, authId: machineId }, app: { sesId: sessionId } },
 				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
 			});
 		},
