@@ -46,7 +46,7 @@ reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'n
 
 Use this method for sending error telemetry as traditional events to App Insights. 
 
-**Note:** To filter out sensitive properties (e.g., stack traces), use `replacementOptions` in the constructor rather than passing properties to drop as a parameter (that parameter was removed in v0.6).
+**Note:** To filter out sensitive properties (e.g., stack traces), use `replacementOptions` in the constructor rather than passing properties to drop as a parameter.
 
 ```javascript
 // Configure property filtering in the constructor
@@ -78,6 +78,7 @@ Route telemetry to non-Azure endpoints (e.g., GitHub telemetry) and configure co
 ```javascript
 import TelemetryReporter from '@vscode/extension-telemetry';
 import * as os from 'os';
+import * as vscode from 'vscode';
 
 const reporter = new TelemetryReporter(
    connectionString,
@@ -98,7 +99,7 @@ const reporter = new TelemetryReporter(
       // Static tag overrides - applied to all events (RECOMMENDED for static tags)
       tagOverrides: {
          'ai.cloud.roleInstance': 'REDACTED',
-         'ai.session.id': sessionId,
+         'ai.session.id': vscode.env.sessionId,
          'ai.cloud.role': 'my-service'
       }
    }

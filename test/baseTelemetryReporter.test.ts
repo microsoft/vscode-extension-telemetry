@@ -2,43 +2,11 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { appInsightsClientFactory, AppInsightsClientOptions } from "../src/common/appInsightsClientFactory";
 import * as sinon from "sinon";
 import assert from "assert";
 
 describe("AppInsights client factory - new features test suite", () => {
-	let mockAppInsights: {
-		ApplicationInsights: sinon.SinonStub;
-		mockClient: {
-			track: sinon.SinonSpy;
-			flush: sinon.SinonSpy;
-			unload: sinon.SinonSpy;
-		};
-	};
-
-	beforeEach(async () => {
-		// Create mock Application Insights client
-		mockAppInsights = {
-			mockClient: {
-				track: sinon.spy(),
-				flush: sinon.spy(),
-				unload: sinon.stub().callsArg(1), // Calls the callback
-			},
-			ApplicationInsights: sinon.stub().callsFake(function(this: unknown, config: unknown) {
-				//@ts-ignore
-				this.track = mockAppInsights.mockClient.track;
-				//@ts-ignore
-				this.flush = mockAppInsights.mockClient.flush;
-				//@ts-ignore
-				this.unload = mockAppInsights.mockClient.unload;
-				//@ts-ignore
-				this.config = config;
-				return this;
-			})
-		};
-	});
-
 	afterEach(() => {
 		sinon.restore();
 	});
@@ -97,22 +65,19 @@ describe("AppInsights client factory - new features test suite", () => {
 				options
 			);
 
-			// Spy on the track method after creation
-			const trackSpy = sinon.spy(client, "logEvent");
-
-			// Send event with per-event tag overrides
+			// Send event with per-event tag overrides - should not throw
 			const perEventTags = {
 				"ai.cloud.roleInstance": "per-event-instance", // Override constructor
 				"tag2": "from-per-event"
 			};
 
-			client.logEvent("testEvent", {
-				properties: { prop: "value" },
-				tagOverrides: perEventTags
+			assert.doesNotThrow(() => {
+				client.logEvent("testEvent", {
+					properties: { prop: "value" },
+					tagOverrides: perEventTags
+				});
 			});
-
-			// Verify logEvent was called
-			assert.strictEqual(trackSpy.callCount, 1);
+			// Note: Tag merging (constructor + per-event) happens internally in logEvent
 		});
 
 		it("Should handle undefined tag overrides at all levels", async () => {
@@ -122,13 +87,17 @@ describe("AppInsights client factory - new features test suite", () => {
 				"session-456"
 			);
 
-			const trackSpy = sinon.spy(client, "logEvent");
+			const logEventSpy = sinon.spy(client, "logEvent");
 
 			client.logEvent("testEvent", {
 				properties: { prop: "value" }
 			});
 
-			assert.strictEqual(trackSpy.callCount, 1);
+			assert.strictEqual(logEventSpy.callCount, 1);
+			const callArgs = logEventSpy.getCall(0).args;
+			assert.strictEqual(callArgs[0], "testEvent");
+			assert.deepStrictEqual(callArgs[1]?.properties, { prop: "value" });
+			assert.strictEqual(callArgs[1]?.tagOverrides, undefined);
 		});
 
 		it("Should treat empty tag override object {} same as undefined", async () => {
@@ -138,14 +107,18 @@ describe("AppInsights client factory - new features test suite", () => {
 				"session-456"
 			);
 
-			const trackSpy = sinon.spy(client, "logEvent");
+			const logEventSpy = sinon.spy(client, "logEvent");
 
 			client.logEvent("testEvent", {
 				properties: { prop: "value" },
 				tagOverrides: {} // Empty object
 			});
 
-			assert.strictEqual(trackSpy.callCount, 1);
+			assert.strictEqual(logEventSpy.callCount, 1);
+			const callArgs = logEventSpy.getCall(0).args;
+			assert.strictEqual(callArgs[0], "testEvent");
+			assert.deepStrictEqual(callArgs[1]?.properties, { prop: "value" });
+			assert.deepStrictEqual(callArgs[1]?.tagOverrides, {});
 		});
 	});
 
@@ -168,13 +141,12 @@ describe("AppInsights client factory - new features test suite", () => {
 				options
 			);
 
-			const trackSpy = sinon.spy(client, "logEvent");
-
-			client.logEvent("testEvent", {
-				properties: { eventProp: "value" }
+			assert.doesNotThrow(() => {
+				client.logEvent("testEvent", {
+					properties: { eventProp: "value" }
+				});
 			});
-
-			assert.strictEqual(trackSpy.callCount, 1);
+			// Note: Common properties are merged inside the logEvent implementation
 		});
 	});
 
@@ -195,14 +167,13 @@ describe("AppInsights client factory - new features test suite", () => {
 				options
 			);
 
-			const trackSpy = sinon.spy(client, "logEvent");
-
-			client.logEvent("testEvent", {
-				properties: { prop: "test" },
-				tagOverrides: { "trackingId": "event-123" }
+			assert.doesNotThrow(() => {
+				client.logEvent("testEvent", {
+					properties: { prop: "test" },
+					tagOverrides: { "trackingId": "event-123" }
+				});
 			});
-
-			assert.strictEqual(trackSpy.callCount, 1);
+			// Note: All properties and tags are merged internally
 		});
 	});
 

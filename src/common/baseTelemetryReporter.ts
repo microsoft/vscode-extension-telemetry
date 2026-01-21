@@ -74,6 +74,20 @@ export class BaseTelemetryReporter {
 		this._onDidChangeTelemetryLevel.fire(this.telemetryLevel);
 	}
 
+	/**
+	 * Merges context tags with per-event tag overrides.
+	 * Per-event overrides take precedence over context tags.
+	 * @param tagOverrides Optional per-event tag overrides
+	 * @returns Merged tag overrides, or undefined if no tags are present
+	 */
+	private mergeTagOverrides(tagOverrides: Record<string, string> | undefined): Record<string, string> | undefined {
+		const hasContextTags = Object.keys(this.contextTags).length > 0;
+		const hasTagOverrides = tagOverrides && Object.keys(tagOverrides).length > 0;
+		return (hasContextTags || hasTagOverrides)
+			? { ...this.contextTags, ...tagOverrides }
+			: undefined;
+	}
+
 	public get telemetryLevel(): "all" | "error" | "crash" | "off" {
 		if (this.errorOptIn && this.userOptIn) {
 			return "all";
@@ -99,13 +113,7 @@ export class BaseTelemetryReporter {
 		tagOverrides: Record<string, string> | undefined,
 		dangerous: boolean
 	): void {
-		// Merge context tags with per-event tag overrides
-		// Per-event overrides take precedence over context tags
-		const hasContextTags = Object.keys(this.contextTags).length > 0;
-		const hasTagOverrides = tagOverrides && Object.keys(tagOverrides).length > 0;
-		const effectiveTagOverrides = (hasContextTags || hasTagOverrides)
-			? { ...this.contextTags, ...tagOverrides }
-			: undefined;
+		const effectiveTagOverrides = this.mergeTagOverrides(tagOverrides);
 
 		// If it's dangerous we skip going through the logger as the logger checks opt-in status, etc.
 		if (dangerous) {
@@ -179,13 +187,7 @@ export class BaseTelemetryReporter {
 		tagOverrides: Record<string, string> | undefined,
 		dangerous: boolean
 	): void {
-		// Merge context tags with per-event tag overrides
-		// Per-event overrides take precedence over context tags
-		const hasContextTags = Object.keys(this.contextTags).length > 0;
-		const hasTagOverrides = tagOverrides && Object.keys(tagOverrides).length > 0;
-		const effectiveTagOverrides = (hasContextTags || hasTagOverrides)
-			? { ...this.contextTags, ...tagOverrides }
-			: undefined;
+		const effectiveTagOverrides = this.mergeTagOverrides(tagOverrides);
 
 		if (dangerous) {
 			this.telemetrySender.sendEventData(eventName, { properties, measurements, tagOverrides: effectiveTagOverrides });

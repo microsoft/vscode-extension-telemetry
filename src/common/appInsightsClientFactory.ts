@@ -23,7 +23,7 @@ interface AppInsightsConfig {
 	disableInstrumentationKeyValidation: boolean;
 	endpointUrl?: string;
 	extensionConfig?: {
-		AppInsightsChannelPlugin?: ChannelPluginConfig;
+		[key: string]: ChannelPluginConfig;
 	};
 }
 
@@ -103,27 +103,21 @@ export const appInsightsClientFactory = async (
 			// Merge common properties, event properties, and measurements
 			const properties = { ...options?.commonProperties, ...data?.properties, ...data?.measurements };
 			
-			// DEBUG: Log merged properties to verify commonProperties are included
-			console.log('🟣 [VSCODE-TELEMETRY LIB] appInsightsClientFactory.logEvent called');
-			console.log('🟣 [VSCODE-TELEMETRY LIB] Event name:', eventName);
-			console.log('🟣 [VSCODE-TELEMETRY LIB] Common properties:', options?.commonProperties);
-			console.log('🟣 [VSCODE-TELEMETRY LIB] Event properties:', data?.properties);
-			console.log('🟣 [VSCODE-TELEMETRY LIB] Merged properties (after commonProperties):', properties);
-			console.log('🟣 [VSCODE-TELEMETRY LIB] telemetry_implementation =', properties['telemetry_implementation']);
-			
 			if (replacementOptions?.length) {
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
 			
 			// Merge tag overrides: constructor-level < context < per-event (highest priority)
 			// Note: data?.tagOverrides already contains merged contextTags + perEventTags from baseTelemetryReporter
-			const tagOverrides = {
-				...options?.tagOverrides,      // Constructor level (lowest priority)
-				...data?.tagOverrides           // Context + Per-event (highest priority)
-			};
+			// Create the merged object if at least one source has values
+			const hasConstructorTags = options?.tagOverrides && Object.keys(options.tagOverrides).length > 0;
+			const hasEventTags = data?.tagOverrides && Object.keys(data.tagOverrides).length > 0;
+			const tagOverrides = (hasConstructorTags || hasEventTags)
+				? { ...options?.tagOverrides, ...data?.tagOverrides }
+				: undefined;
 			
-			// Merge tag overrides into properties - the SDK handles ai.* tags automatically
-			const finalProperties = { ...properties, ...tagOverrides };
+			// Merge tag overrides into properties if present - the SDK handles ai.* tags automatically
+			const finalProperties = tagOverrides ? { ...properties, ...tagOverrides } : properties;
 			
 			appInsightsClient?.track({
 				name: eventName,
