@@ -3,27 +3,59 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { IChannelConfiguration } from "@microsoft/1ds-post-js";
-import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
-import type { IConfiguration, IXHROverride } from "@microsoft/applicationinsights-core-js";
+import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
+import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";
 
-export const appInsightsClientFactory = async (connectionString: string, machineId: string, sessionId: string, xhrOverride?: IXHROverride, replacementOptions?: ReplacementOption[]): Promise<BaseTelemetryClient> => {
+interface AppInsightsConfig {
+	instrumentationKey?: string;
+	connectionString?: string;
+	disableAjaxTracking: boolean;
+	disableExceptionTracking: boolean;
+	disableFetchTracking: boolean;
+	disableCorrelationHeaders: boolean;
+	disableCookiesUsage: boolean;
+	autoTrackPageVisitTime: boolean;
+	emitLineDelimitedJson: boolean;
+	disableInstrumentationKeyValidation: boolean;
+	endpointUrl?: string;
+	extensionConfig?: {
+		[key: string]: ChannelPluginConfig;
+	};
+}
+
+interface ChannelPluginConfig {
+	alwaysUseXhrOverride: boolean;
+	httpXHROverride: IXHROverride;
+}
+
+export interface AppInsightsClientOptions {
+	/** Custom endpoint URL for telemetry ingestion */
+	endpointUrl?: string;
+	/** Common properties to be added to all telemetry events */
+	commonProperties?: Record<string, string>;
+	/** 
+	 * Tag overrides to be applied at the client level (static, for all events).
+	 * For dynamic per-event tag overrides, use SenderData.tagOverrides instead.
+	 * Event-level overrides take precedence over client-level overrides.
+	 */
+	tagOverrides?: Record<string, string>;
+}
+
+export const appInsightsClientFactory = async (
+	connectionString: string, 
+	machineId: string, 
+	sessionId: string, 
+	xhrOverride?: IXHROverride, 
+	replacementOptions?: ReplacementOption[],
+	options?: AppInsightsClientOptions
+): Promise<BaseTelemetryClient> => {
 	let appInsightsClient: ApplicationInsights | undefined;
 	try {
 		const basicAISDK = await import/* webpackMode: "eager" */("@microsoft/applicationinsights-web-basic");
-		const extensionConfig: IConfiguration["extensionConfig"] = {};
-		if (xhrOverride) {
-			// Configure the channel to use a XHR Request override since it's not available in node
-			const channelConfig: IChannelConfiguration = {
-				alwaysUseXhrOverride: true,
-				httpXHROverride: xhrOverride
-			};
-			extensionConfig[BreezeChannelIdentifier] = channelConfig;
-		}
 
 		let instrumentationKey: string | undefined;
 		if (!connectionString.startsWith("InstrumentationKey=")) {
@@ -32,7 +64,8 @@ export const appInsightsClientFactory = async (connectionString: string, machine
 
 		const authConfig = instrumentationKey ? { instrumentationKey } : { connectionString };
 
-		appInsightsClient = new basicAISDK.ApplicationInsights({
+		// Build the configuration for web-basic SDK
+		const config: AppInsightsConfig = {
 			...authConfig,
 			disableAjaxTracking: true,
 			disableExceptionTracking: true,
@@ -42,8 +75,24 @@ export const appInsightsClientFactory = async (connectionString: string, machine
 			autoTrackPageVisitTime: false,
 			emitLineDelimitedJson: false,
 			disableInstrumentationKeyValidation: true,
-			extensionConfig,
-		});
+		};
+
+		// Set custom endpoint URL at root level (web-basic SDK reads from here)
+		if (options?.endpointUrl) {
+			config.endpointUrl = options.endpointUrl;
+		}
+
+		// Configure XHR override if provided (for Node.js environments)
+		if (xhrOverride) {
+			config.extensionConfig = config.extensionConfig || {};
+			const channelConfig: ChannelPluginConfig = {
+				alwaysUseXhrOverride: true,
+				httpXHROverride: xhrOverride
+			};
+			config.extensionConfig[BreezeChannelIdentifier] = channelConfig;
+		}
+
+		appInsightsClient = new basicAISDK.ApplicationInsights(config);
 
 	} catch (e) {
 		return Promise.reject(e);
@@ -51,13 +100,28 @@ export const appInsightsClientFactory = async (connectionString: string, machine
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: SenderData) => {
-			const properties = { ...data?.properties, ...data?.measurements };
+			// Merge common properties, event properties, and measurements
+			const properties = { ...options?.commonProperties, ...data?.properties, ...data?.measurements };
+			
 			if (replacementOptions?.length) {
 				TelemetryUtil.applyReplacements(properties, replacementOptions);
 			}
+			
+			// Merge tag overrides: constructor-level < context < per-event (highest priority)
+			// Note: data?.tagOverrides already contains merged contextTags + perEventTags from baseTelemetryReporter
+			// Create the merged object if at least one source has values
+			const hasConstructorTags = options?.tagOverrides && Object.keys(options.tagOverrides).length > 0;
+			const hasEventTags = data?.tagOverrides && Object.keys(data.tagOverrides).length > 0;
+			const tagOverrides = (hasConstructorTags || hasEventTags)
+				? { ...options?.tagOverrides, ...data?.tagOverrides }
+				: undefined;
+			
+			// Merge tag overrides into properties if present - the SDK handles ai.* tags automatically
+			const finalProperties = tagOverrides ? { ...properties, ...tagOverrides } : properties;
+			
 			appInsightsClient?.track({
 				name: eventName,
-				data: properties,
+				data: finalProperties,
 				baseType: "EventData",
 				ext: { user: { id: machineId, authId: machineId }, app: { sesId: sessionId } },
 				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }

@@ -4,10 +4,13 @@
 
 import * as vscode from "vscode";
 import { oneDataSystemClientFactory } from "../common/1dsClientFactory";
-import { appInsightsClientFactory } from "../common/appInsightsClientFactory";
+import { AppInsightsClientOptions, appInsightsClientFactory } from "../common/appInsightsClientFactory";
 import { BaseTelemetryReporter, ReplacementOption } from "../common/baseTelemetryReporter";
 import { BaseTelemetrySender } from "../common/baseTelemetrySender";
 import { TelemetryUtil } from "../common/util";
+
+// Re-export AppInsightsClientOptions for consumers
+export type { AppInsightsClientOptions } from "../common/appInsightsClientFactory";
 
 function getBrowserRelease(navigator: Navigator): string {
 	if (navigator.userAgentData) {
@@ -21,8 +24,13 @@ function getBrowserRelease(navigator: Navigator): string {
 }
 
 export class TelemetryReporter extends BaseTelemetryReporter {
-	constructor(connectionString: string, replacementOptions?: ReplacementOption[], initializationOptions?: vscode.TelemetryLoggerOptions) {
-		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, undefined, replacementOptions);
+	constructor(
+		connectionString: string, 
+		replacementOptions?: ReplacementOption[], 
+		initializationOptions?: vscode.TelemetryLoggerOptions,
+		appInsightsOptions?: AppInsightsClientOptions
+	) {
+		let clientFactory = (connectionString: string) => appInsightsClientFactory(connectionString, vscode.env.machineId, vscode.env.sessionId, undefined, replacementOptions, appInsightsOptions);
 		// If key is usable by 1DS use the 1DS SDk
 		if (TelemetryUtil.shouldUseOneDataSystemSDK(connectionString)) {
 			clientFactory = (key: string) => oneDataSystemClientFactory(key, vscode);

@@ -44,12 +44,130 @@ reporter.sendTelemetryEvent('sampleEvent', { 'stringProp': 'some string' }, { 'n
 
 ## Sending Errors as Events
 
-Use this method for sending error telemetry as traditional events to App Insights. This method will automatically drop error properties in certain environments for first party extensions. The last parameter is an optional list of case-sensitive properties that should be dropped. If no array is passed, we will drop all properties but still send the event.
+Use this method for sending error telemetry as traditional events to App Insights. 
+
+**Note:** To filter out sensitive properties (e.g., stack traces), use `replacementOptions` in the constructor rather than passing properties to drop as a parameter.
 
 ```javascript
-// send an error event any time after activation
-reporter.sendTelemetryErrorEvent('sampleErrorEvent', { 'stringProp': 'some string', 'stackProp': 'some user stack trace' }, { 'numericMeasure': 123 }, [ 'stackProp' ]);
+// Configure property filtering in the constructor
+import TelemetryReporter from '@vscode/extension-telemetry';
+
+const reporter = new TelemetryReporter(
+   connectionString,
+   [
+      // Remove or redact sensitive properties
+      { lookup: /stackProp/, replacementString: '[REDACTED]' },
+      { lookup: /sensitiveData/ }  // Remove entirely if no replacementString
+   ]
+);
+
+// Send error event (properties are automatically filtered based on replacementOptions)
+reporter.sendTelemetryErrorEvent(
+   'sampleErrorEvent',
+   { 'stringProp': 'some string', 'stackProp': 'some user stack trace' },
+   { 'numericMeasure': 123 }
+);
 ```
+
+# Advanced Features (v1.3.0+)
+
+## Custom Endpoints and Configuration
+
+Route telemetry to non-Azure endpoints (e.g., GitHub telemetry) and configure common properties and static tags:
+
+```javascript
+import TelemetryReporter from '@vscode/extension-telemetry';
+import * as os from 'os';
+import * as vscode from 'vscode';
+
+const reporter = new TelemetryReporter(
+   connectionString,
+   undefined,  // replacementOptions
+   undefined,  // initializationOptions
+   undefined,  // customFetch
+   {
+      // Custom endpoint URL - route to GitHub, Azure Gov, or other services
+      endpointUrl: 'https://copilot-telemetry.githubusercontent.com/telemetry',
+      
+      // Common properties - automatically added to all events
+      commonProperties: {
+         'common_os': os.platform(),
+         'common_arch': os.arch(),
+         'custom_property': 'value'
+      },
+      
+      // Static tag overrides - applied to all events (RECOMMENDED for static tags)
+      tagOverrides: {
+         'ai.cloud.roleInstance': 'REDACTED',
+         'ai.session.id': vscode.env.sessionId,
+         'ai.cloud.role': 'my-service'
+      }
+   }
+);
+```
+
+**When to use constructor options:**
+- ✅ All values are known at reporter construction time
+- ✅ Values don't change during the reporter's lifetime
+- ✅ **This is the recommended approach for most use cases**
+
+## Per-Event Tag Overrides
+
+For dynamic tags that change per event (e.g., user tracking IDs from authentication tokens):
+
+```javascript
+// Get dynamic tracking ID that changes per event
+const trackingId = getTrackingIdFromToken();
+
+// Send event with per-event tag override using the 4th parameter
+reporter.sendTelemetryEvent(
+   'userAction',
+   { 'action': 'click' },
+   { 'duration': 123 },
+   { 'ai.user.id': trackingId }  // Overrides user ID for this event only
+);
+
+// Error events also support per-event tag overrides
+reporter.sendTelemetryErrorEvent(
+   'errorEvent',
+   { 'error': error.message },
+   { 'errorCount': 1 },
+   { 'ai.user.id': trackingId }  // Per-event tag override (4th parameter)
+);
+```
+
+**Tag Merging Priority** (lowest to highest):
+1. Constructor `tagOverrides` (static, set at initialization)
+2. Context tags via `setContextTag()` (can be set after construction)
+3. **Per-event `tagOverrides`** (highest priority, dynamic per event)
+
+## Runtime Tag Management (Advanced)
+
+For edge cases where tags are not available at construction or need to change at runtime:
+
+```javascript
+const reporter = new TelemetryReporter(connectionString);
+
+// Set context tag after construction (e.g., after async initialization)
+authService.getSession().then(session => {
+   reporter.setContextTag('ai.session.id', session.id);
+});
+
+// Update tag at runtime (e.g., user switches accounts)
+reporter.setContextTag('ai.user.id', 'user1');
+// ... later ...
+reporter.setContextTag('ai.user.id', 'user2');
+
+// Read back a context tag value
+const sessionId = reporter.getContextTag('ai.session.id');
+```
+
+**When to use `setContextTag()`:**
+- ⚠️ Tags are not available when the reporter is constructed
+- ⚠️ Tags need to change at runtime (e.g., user account switching)
+- ⚠️ You need to read tag values back later
+
+**Note:** For most use cases, prefer constructor `tagOverrides` over `setContextTag()` for better immutability and clarity.
 
 # Common Properties
 - **Extension Name** `common.extname` - The extension name
