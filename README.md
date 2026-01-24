@@ -69,7 +69,7 @@ reporter.sendTelemetryErrorEvent(
 );
 ```
 
-# Advanced Features (v1.3.0+)
+# Advanced Features (v1.4.0+)
 
 ## Custom Endpoints and Configuration
 
