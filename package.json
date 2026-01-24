@@ -1,7 +1,7 @@
 {
   "name": "@vscode/extension-telemetry",
   "description": "A module for Visual Studio Code extensions to report consistent telemetry.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": {
     "name": "Microsoft Corporation"
   },
