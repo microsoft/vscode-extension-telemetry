@@ -97,34 +97,64 @@ export const appInsightsClientFactory = async (
 	} catch (e) {
 		return Promise.reject(e);
 	}
+
+	// Helper to merge properties, apply replacements, and merge tag overrides
+	const prepareEventData = (data?: SenderData, includeMeasurements = false) => {
+		// Merge common properties with event properties (and optionally measurements)
+		const properties = includeMeasurements
+			? { ...options?.commonProperties, ...data?.properties, ...data?.measurements }
+			: { ...options?.commonProperties, ...data?.properties };
+
+		if (replacementOptions?.length) {
+			TelemetryUtil.applyReplacements(properties, replacementOptions);
+		}
+
+		// Merge tag overrides: constructor-level < context < per-event (highest priority)
+		const hasConstructorTags = options?.tagOverrides && Object.keys(options.tagOverrides).length > 0;
+		const hasEventTags = data?.tagOverrides && Object.keys(data.tagOverrides).length > 0;
+		const tagOverrides = (hasConstructorTags || hasEventTags)
+			? { ...options?.tagOverrides, ...data?.tagOverrides }
+			: undefined;
+
+		const finalProperties = tagOverrides ? { ...properties, ...tagOverrides } : properties;
+
+		return { finalProperties };
+	};
+
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: SenderData) => {
-			// Merge common properties, event properties, and measurements
-			const properties = { ...options?.commonProperties, ...data?.properties, ...data?.measurements };
-			
-			if (replacementOptions?.length) {
-				TelemetryUtil.applyReplacements(properties, replacementOptions);
-			}
-			
-			// Merge tag overrides: constructor-level < context < per-event (highest priority)
-			// Note: data?.tagOverrides already contains merged contextTags + perEventTags from baseTelemetryReporter
-			// Create the merged object if at least one source has values
-			const hasConstructorTags = options?.tagOverrides && Object.keys(options.tagOverrides).length > 0;
-			const hasEventTags = data?.tagOverrides && Object.keys(data.tagOverrides).length > 0;
-			const tagOverrides = (hasConstructorTags || hasEventTags)
-				? { ...options?.tagOverrides, ...data?.tagOverrides }
-				: undefined;
-			
-			// Merge tag overrides into properties if present - the SDK handles ai.* tags automatically
-			const finalProperties = tagOverrides ? { ...properties, ...tagOverrides } : properties;
-			
+			const { finalProperties } = prepareEventData(data, true);
+
 			appInsightsClient?.track({
 				name: eventName,
 				data: finalProperties,
 				baseType: "EventData",
 				ext: { user: { id: machineId, authId: machineId }, app: { sesId: sessionId } },
-				baseData: { name: eventName, properties: data?.properties, measurements: data?.measurements }
+				baseData: { name: eventName, properties: finalProperties, measurements: data?.measurements }
+			});
+		},
+		logException: (exception: Error, data?: SenderData) => {
+			const { finalProperties } = prepareEventData(data, false);
+
+			// This structure matches trackException in the full Application Insights Node.js SDK.
+			// Using baseType: "ExceptionData" sends to the exceptions table (not events table).
+			appInsightsClient?.track({
+				name: exception.name,
+				data: finalProperties,
+				baseType: "ExceptionData",
+				ext: { user: { id: machineId, authId: machineId }, app: { sesId: sessionId } },
+				baseData: {
+					exceptions: [{
+						typeName: exception.name,
+						message: exception.message,
+						hasFullStack: !!exception.stack,
+						stack: exception.stack,
+						parsedStack: []
+					}],
+					properties: finalProperties,
+					measurements: data?.measurements
+				}
 			});
 		},
 		flush: async () => {

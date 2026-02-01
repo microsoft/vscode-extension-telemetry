@@ -151,6 +151,16 @@ export class TelemetryReporter {
 	sendDangerousTelemetryErrorEvent(eventName: string, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void;
 
 	/**
+	 * **DANGEROUS** Sends an exception to the Application Insights exceptions table without checking telemetry setting.
+	 * Do not use unless in a controlled environment i.e. sending telemetry from a CI pipeline or testing during development.
+	 * @param exception The exception to send
+	 * @param properties The properties to send with the exception
+	 * @param measurements The measurements (numeric values) to send with the exception
+	 * @param tagOverrides Optional per-event tag overrides (e.g., dynamic tracking IDs). Takes precedence over context tags.
+	 */
+	sendDangerousTelemetryException(exception: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void;
+
+	/**
 	 * Disposes of the telemetry reporter. This flushes the remaining events and disposes of the telemetry client.
 	 */
 	dispose(): Promise<any>;

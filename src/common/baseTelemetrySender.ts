@@ -7,6 +7,7 @@ import { SenderData } from "./baseTelemetryReporter";
 
 export interface BaseTelemetryClient {
 	logEvent(eventName: string, data?: SenderData): void;
+	logException?(exception: Error, data?: SenderData): void;
 	flush(): Promise<void>;
 	dispose(): Promise<void>;
 }
@@ -72,14 +73,21 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 			}
 			return;
 		}
-		const errorData = { stack: exception.stack, message: exception.message, name: exception.name };
-		if (data) {
-			const errorProperties = data.properties || data;
-			data.properties = { ...errorProperties, ...errorData };
+		// Use logException if available (App Insights), otherwise fall back to event
+		if (this._telemetryClient.logException) {
+			this._telemetryClient.logException(exception, data as SenderData);
 		} else {
-			data = { properties: errorData };
+			// Fallback for clients without exception support (e.g., 1DS)
+			const errorData = { stack: exception.stack, message: exception.message, name: exception.name };
+			const senderData = data as SenderData | undefined;
+			const errorProperties = senderData?.properties ?? {};
+			const fallbackData: SenderData = {
+				properties: { ...errorProperties, ...errorData },
+				measurements: senderData?.measurements,
+				tagOverrides: senderData?.tagOverrides
+			};
+			this._telemetryClient.logEvent("unhandlederror", fallbackData);
 		}
-		this._telemetryClient.logEvent("unhandlederror", data);
 	}
 
 	/**
