@@ -80,7 +80,8 @@ export class BaseTelemetrySender implements ILazyTelemetrySender {
 			// Fallback for clients without exception support (e.g., 1DS)
 			const errorData = { stack: exception.stack, message: exception.message, name: exception.name };
 			const senderData = data as SenderData | undefined;
-			const errorProperties = senderData?.properties ?? {};
+			// Handle both SenderData format (with properties field) and flat format
+			const errorProperties = senderData?.properties ?? (data as Record<string, any> | undefined) ?? {};
 			const fallbackData: SenderData = {
 				properties: { ...errorProperties, ...errorData },
 				measurements: senderData?.measurements,
