@@ -137,8 +137,7 @@ export const appInsightsClientFactory = async (
 		logException: (exception: Error, data?: SenderData) => {
 			const { finalProperties } = prepareEventData(data, false);
 
-			// This structure matches trackException in the full Application Insights Node.js SDK.
-			// Using baseType: "ExceptionData" sends to the exceptions table (not events table).
+			// This structure matches trackException in the full Application Insights Node.js SDK.			
 			appInsightsClient?.track({
 				name: exception.name,
 				data: finalProperties,
