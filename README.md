@@ -86,7 +86,7 @@ const reporter = new TelemetryReporter(
    undefined,  // initializationOptions
    undefined,  // customFetch
    {
-      // Custom endpoint URL - route to GitHub, Azure , or other services
+      // Custom endpoint URL - route to GitHub, Azure, or other services
       endpointUrl: 'https://<somename>-telemetry.githubusercontent.com/telemetry',
       
       // Common properties - automatically added to all events

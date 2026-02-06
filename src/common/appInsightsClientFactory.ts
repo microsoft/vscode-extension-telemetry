@@ -99,11 +99,9 @@ export const appInsightsClientFactory = async (
 	}
 
 	// Helper to merge properties, apply replacements, and merge tag overrides
-	const prepareEventData = (data?: SenderData, includeMeasurements = false) => {
-		// Merge common properties with event properties (and optionally measurements)
-		const properties = includeMeasurements
-			? { ...options?.commonProperties, ...data?.properties, ...data?.measurements }
-			: { ...options?.commonProperties, ...data?.properties };
+	const prepareEventData = (data?: SenderData) => {
+		// Merge common properties with event properties
+		const properties = { ...options?.commonProperties, ...data?.properties };
 
 		if (replacementOptions?.length) {
 			TelemetryUtil.applyReplacements(properties, replacementOptions);
@@ -124,7 +122,7 @@ export const appInsightsClientFactory = async (
 	// Sets the appinsights client into a standardized form
 	const telemetryClient: BaseTelemetryClient = {
 		logEvent: (eventName: string, data?: SenderData) => {
-			const { finalProperties } = prepareEventData(data, true);
+			const { finalProperties } = prepareEventData(data);
 
 			appInsightsClient?.track({
 				name: eventName,
@@ -135,7 +133,7 @@ export const appInsightsClientFactory = async (
 			});
 		},
 		logException: (exception: Error, data?: SenderData) => {
-			const { finalProperties } = prepareEventData(data, false);
+			const { finalProperties } = prepareEventData(data);
 
 			// This structure matches trackException in the full Application Insights Node.js SDK.			
 			appInsightsClient?.track({
