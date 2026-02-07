@@ -69,7 +69,7 @@ reporter.sendTelemetryErrorEvent(
 );
 ```
 
-# Advanced Features (v1.4.0+)
+# Advanced Features (v1.5.0+)
 
 ## Custom Endpoints and Configuration
 
@@ -86,8 +86,8 @@ const reporter = new TelemetryReporter(
    undefined,  // initializationOptions
    undefined,  // customFetch
    {
-      // Custom endpoint URL - route to GitHub, Azure Gov, or other services
-      endpointUrl: 'https://copilot-telemetry.githubusercontent.com/telemetry',
+      // Custom endpoint URL - route to GitHub, Azure, or other services
+      endpointUrl: 'https://<somename>-telemetry.githubusercontent.com/telemetry',
       
       // Common properties - automatically added to all events
       commonProperties: {
@@ -168,6 +168,43 @@ const sessionId = reporter.getContextTag('ai.session.id');
 - ⚠️ You need to read tag values back later
 
 **Note:** For most use cases, prefer constructor `tagOverrides` over `setContextTag()` for better immutability and clarity.
+
+## Dangerous Methods (Bypass Telemetry Settings)
+
+These methods send telemetry **without checking the user's telemetry settings**. Only use them in controlled environments such as CI pipelines or during development testing.
+
+```javascript
+// Send event without checking telemetry setting
+reporter.sendDangerousTelemetryEvent(
+   'ciPipelineEvent',
+   { 'build': 'success' },
+   { 'duration': 1234 },
+   { 'ai.user.id': trackingId }  // Optional tag overrides
+);
+
+// Send error event without checking telemetry setting
+reporter.sendDangerousTelemetryErrorEvent(
+   'ciErrorEvent',
+   { 'error': 'build failed' },
+   { 'errorCount': 1 },
+   { 'ai.user.id': trackingId }  // Optional tag overrides
+);
+
+// Send exception directly to Application Insights exceptions table
+// without checking telemetry setting
+try {
+   riskyOperation();
+} catch (error) {
+   reporter.sendDangerousTelemetryException(
+      error,
+      { 'context': 'ci-pipeline' },
+      { 'retryCount': 3 },
+      { 'ai.user.id': trackingId }  // Optional tag overrides
+   );
+}
+```
+
+⚠️ **Warning:** These methods bypass the user's telemetry opt-in preference. Only use them when you have explicit consent or in non-user-facing scenarios (e.g., automated testing, CI/CD pipelines).
 
 # Common Properties
 - **Extension Name** `common.extname` - The extension name

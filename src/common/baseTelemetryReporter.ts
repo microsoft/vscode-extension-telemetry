@@ -222,6 +222,21 @@ export class BaseTelemetryReporter {
 	}
 
 	/**
+	 * **DANGEROUS** Sends an exception to the Application Insights exceptions table without checking telemetry setting.
+	 * Do not use unless in a controlled environment i.e. sending telemetry from a CI pipeline or testing during development.
+	 * @param exception The exception to send
+	 * @param properties The properties to send with the exception
+	 * @param measurements The measurements (numeric values) to send with the exception
+	 * @param tagOverrides Optional per-event tag overrides (e.g., { 'ai.user.id': dynamicTrackingId })
+	 */
+	public sendDangerousTelemetryException(exception: Error, properties?: TelemetryEventProperties, measurements?: TelemetryEventMeasurements, tagOverrides?: Record<string, string>): void {
+		// Since telemetry is probably off when sending dangerously, we must start the sender
+		this.telemetrySender.instantiateSender();
+		const effectiveTagOverrides = this.mergeTagOverrides(tagOverrides);
+		this.telemetrySender.sendErrorData(exception, { properties, measurements, tagOverrides: effectiveTagOverrides });
+	}
+
+	/**
 	 * Sets a context tag that will be included in all telemetry events.
 	 * Similar to client.context.tags[key] = value in the full Application Insights SDK.
 	 * @param key The tag key (e.g., 'ai.cloud.roleInstance', 'ai.session.id')
