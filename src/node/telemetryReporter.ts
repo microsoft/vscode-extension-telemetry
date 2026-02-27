@@ -77,8 +77,13 @@ function createXHROverrideFromFetcher(fetcher: CustomFetcher): IXHROverride {
 	const xhrOverride: IXHROverride = {
 		sendPOST: (payload: IPayloadData, oncomplete) => {
 			const dataString = typeof payload.data === "string" ? payload.data : Buffer.from(payload.data).toString();
+			const headers: Record<string, string> = { ...payload.headers };
+			// if the content-type header isn't already set, default it to application/json
+			if (!Object.keys(headers).some(k => k.toLowerCase() === "content-type")) {
+				headers["Content-Type"] = "application/json";
+			}
 
-			fetcher(payload.urlString, { method: "POST", headers: payload.headers, body: dataString })
+			fetcher(payload.urlString, { method: "POST", headers, body: dataString })
 				.then(async (response) => {
 					const responseHeaders: Record<string, string> = {};
 					for (const [key, value] of response.headers) {
