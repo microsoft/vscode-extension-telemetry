@@ -5,7 +5,6 @@
 
 import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
-import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";
@@ -37,7 +36,7 @@ export interface AppInsightsClientOptions {
 	endpointUrl?: string;
 	/** Common properties to be added to all telemetry events */
 	commonProperties?: Record<string, string>;
-	/** 
+	/**
 	 * Tag overrides to be applied at the client level (static, for all events).
 	 * For dynamic per-event tag overrides, use SenderData.tagOverrides instead.
 	 * Event-level overrides take precedence over client-level overrides.
@@ -46,10 +45,10 @@ export interface AppInsightsClientOptions {
 }
 
 export const appInsightsClientFactory = async (
-	connectionString: string, 
-	machineId: string, 
-	sessionId: string, 
-	xhrOverride?: IXHROverride, 
+	connectionString: string,
+	machineId: string,
+	sessionId: string,
+	xhrOverride?: IXHROverride,
 	replacementOptions?: ReplacementOption[],
 	options?: AppInsightsClientOptions
 ): Promise<BaseTelemetryClient> => {
@@ -89,7 +88,7 @@ export const appInsightsClientFactory = async (
 				alwaysUseXhrOverride: true,
 				httpXHROverride: xhrOverride
 			};
-			config.extensionConfig[BreezeChannelIdentifier] = channelConfig;
+			config.extensionConfig["AppInsightsChannelPlugin"] = channelConfig;
 		}
 
 		appInsightsClient = new basicAISDK.ApplicationInsights(config);
@@ -135,7 +134,7 @@ export const appInsightsClientFactory = async (
 		logException: (exception: Error, data?: SenderData) => {
 			const { finalProperties } = prepareEventData(data);
 
-			// This structure matches trackException in the full Application Insights Node.js SDK.			
+			// This structure matches trackException in the full Application Insights Node.js SDK.
 			appInsightsClient?.track({
 				name: exception.name,
 				data: finalProperties,
