@@ -22,7 +22,6 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^4.4.2",
     "@microsoft/1ds-post-js": "^4.4.2",
     "@microsoft/applicationinsights-core-js": "^3.4.2",
     "@microsoft/applicationinsights-web-basic": "^3.4.2"
