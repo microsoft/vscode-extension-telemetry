@@ -40,7 +40,8 @@
     "user-agent-data-types": "^0.4.2"
   },
   "overrides": {
-    "serialize-javascript": "7.0.5"
+    "serialize-javascript": "7.0.5",
+    "@microsoft/applicationinsights-core-js": "$@microsoft/applicationinsights-core-js"
   },
   "repository": {
     "type": "git",
