@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
+import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-core-js";
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
 
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
@@ -89,7 +90,7 @@ export const appInsightsClientFactory = async (
 				alwaysUseXhrOverride: true,
 				httpXHROverride: xhrOverride
 			};
-			config.extensionConfig["AppInsightsChannelPlugin"] = channelConfig;
+			config.extensionConfig[BreezeChannelIdentifier] = channelConfig;
 		}
 
 		appInsightsClient = new basicAISDK.ApplicationInsights(config);
