@@ -22,8 +22,8 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^4.4.1",
-    "@microsoft/1ds-post-js": "^4.4.1",
+    "@microsoft/1ds-core-js": "^4.4.2",
+    "@microsoft/1ds-post-js": "^4.4.2",
     "@microsoft/applicationinsights-core-js": "^3.4.2",
     "@microsoft/applicationinsights-web-basic": "^3.4.2"
   },
@@ -40,8 +40,7 @@
     "user-agent-data-types": "^0.4.2"
   },
   "overrides": {
-    "serialize-javascript": "7.0.5",
-    "@microsoft/applicationinsights-core-js": "$@microsoft/applicationinsights-core-js"
+    "serialize-javascript": "7.0.5"
   },
   "repository": {
     "type": "git",
