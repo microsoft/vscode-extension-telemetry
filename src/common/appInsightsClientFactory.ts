@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { IXHROverride } from "@microsoft/applicationinsights-core-js";
+import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-core-js";
 import type { ApplicationInsights } from "@microsoft/applicationinsights-web-basic";
-import { BreezeChannelIdentifier } from "@microsoft/applicationinsights-common";
+
 import { ReplacementOption, SenderData } from "./baseTelemetryReporter";
 import { BaseTelemetryClient } from "./baseTelemetrySender";
 import { TelemetryUtil } from "./util";

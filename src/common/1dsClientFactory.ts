@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/1ds-core-js";
+import type { AppInsightsCore, IExtendedConfiguration } from "@microsoft/applicationinsights-core-js";
 import type { IChannelConfiguration, IXHROverride, PostChannel } from "@microsoft/1ds-post-js";
 import type * as vscode from "vscode";
 import type { BaseTelemetryClient } from "./baseTelemetrySender";
@@ -16,7 +16,7 @@ import { SenderData } from "./baseTelemetryReporter";
  * @returns The AI core object
  */
 const getAICore = async (key: string, vscodeAPI: typeof vscode, xhrOverride?: IXHROverride): Promise<AppInsightsCore> => {
-	const oneDs = await import(/* webpackMode: "eager" */ "@microsoft/1ds-core-js");
+	const oneDs = await import(/* webpackMode: "eager" */ "@microsoft/applicationinsights-core-js");
 	const postPlugin = await import(/* webpackMode: "eager" */ "@microsoft/1ds-post-js");
 	const appInsightsCore = new oneDs.AppInsightsCore();
 	const collectorChannelPlugin: PostChannel = new postPlugin.PostChannel();
